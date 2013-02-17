@@ -1,0 +1,7 @@
+screen -t SCRT bash
+screen -t EMCS bash
+screen -t LCL1 bash
+screen -t LCL2 bash
+screen -t REM1 bash
+screen -t REM2 bash
+screen -t REM3 bash
