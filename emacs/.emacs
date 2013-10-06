@@ -1,59 +1,67 @@
-(setenv "WRK" "~/")
+;; ELPA packages
+(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                         ("marmalade" . "http://marmalade-repo.org/packages/")
+                         ("melpa" . "http://melpa.milkbox.net/packages/")))
 
+
+;; Tabs and others
 (setq set-fill-column 80)
 (custom-set-variables
-  ;; custom-set-variables was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(c-basic-offset 4)
  '(c-echo-syntactic-information-p t)
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
  '(column-number-mode t)
- '(compile-command "cd $WRK/; make -j8")
- '(iswitchb-mode t)
+ '(compile-command "cd $WRK/cypress; make -j8 DMSETUP=true")
+ '(global-hl-line-mode t)
+ '(ido-mode t nil (ido))
+ '(inhibit-startup-screen t)
  '(load-home-init-file t t)
+ '(muse-project-alist (quote (("StorvisorPlanner" ("~/storvisorplans" :default "index" :major-mode planner-mode :visit-link planner-visit-link)))))
  '(show-paren-mode t)
  '(standard-indent 3)
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
- '(which-function-mode t)
- '(muse-project-alist (quote (("Planner" ("~/devplans" :default "index" :major-mode planner-mode :visit-link planner-visit-link)))))
-)
+ '(which-function-mode t))
 
 ;; No tabs
 (setq-default indent-tabs-mode nil)
 (setq scroll-step 1)
-;;(global-hl-line-mode 0)
-;;3C(set-face-background 'hl-line "gray")
-
 (setq-default show-trailing-whitespace t)
-
-
+;; enforce 80 column rule
+(require 'whitespace)
+(setq whitespace-style '(face empty tabs lines-tail whitespace))
+(global-whitespace-mode t)
 ;; dynamic abbrevation completion must be case sensitive
 (setq dabbrev-case-fold-search nil)
-
-;; setup cscope
-;;(require 'xcscope)
-;;(setq cscope-do-not-update-database t)
-;;(load-file "/usr/local/share/emacs/site-lisp/xcscope.el")
+(setenv "WRK" "/storvisor/work")
 
 
-;; full filename in path
-;;  (when (and
-;;         (not window-system)
-;;         (or
-;;          (string= (getenv "TERM") "screen-bce")
-;;          (string= (getenv "TERM") "dumb")
-;;          (string-match "^xterm" (getenv "TERM"))))
-;;    (require 'xterm-title)
-;;    (xterm-title-mode 1))
-;; (setq frame-title-format
-;;      '("%S" (buffer-file-name "%f"
-;;                   (dired-directory dired-directory "%b"))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helper defuns          ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun toggle-show-trailing-whitespace ()
+  "Toggle show-trailing-whitespace between t and nil"
+  (interactive)
+  (setq show-trailing-whitespace (not show-trailing-whitespace)))
 
-;; windmove window putty keys
+(defun tags-create (dir-name)
+     "Create tags file."
+     (interactive "DDirectory: ")
+     (eshell-command
+      (format "find %s -type f -name \"*.hpp\" -o -name \"*.cpp\" -o -name \"*.[ch]\" | xargs etags -f %s/TAGS" dir-name dir-name))
+     (eshell-command
+      (format "cd %s; gtags -i -q" dir-name))
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Keyboard Dance         ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-key input-decode-map "\e\eOA" [(meta up)])
 (define-key input-decode-map "\e\eOB" [(meta down)])
 (define-key input-decode-map "\e\eOC" [(meta right)])
@@ -62,7 +70,6 @@
 (global-set-key [(meta down)] 'windmove-down)
 (global-set-key [(meta right)] 'windmove-right)
 (global-set-key [(meta left)] 'windmove-left)
-
 
 ;; windmove gnome terminal keys
 (defvar real-keyboard-keys
@@ -88,56 +95,49 @@ and their terminal equivalents.")
 (global-set-key (key "M-<right>") 'windmove-right)        ; move to right window
 (global-set-key (key "M-<up>") 'windmove-up)              ; move to upper window
 (global-set-key (key "M-<down>") 'windmove-down)          ; move to downer window
-
-(defun tags-create (dir-name)
-     "Create tags file."
-     (interactive "DDirectory: ")
-     (eshell-command
-      (format "find %s -type f -name \"*.[ch]\" | xargs etags -f %s/TAGS" dir-name dir-name)))
-
-
-;;(load-file "$WRK/work/cedet-1.1/common/cedet.el")
-
-
-;; enforce 80 column rule
-(require 'whitespace)
-(setq whitespace-style '(face empty tabs lines-tail trailing))
-(global-whitespace-mode t)
-
-;; latex
-;;(load "auctex.el" nil t t)
-;;(setq TeX-auto-save t)
-;;(setq TeX-parse-self t)
-
-;; GIT
+(global-set-key (key "C-<left>") 'backward-word)          ; move forward word
+(global-set-key (key "C-<right>") 'forward-word)          ; move backward word
+(global-set-key (key "C-<up>") 'backward-paragraph)       ; move forward word
+(global-set-key (key "C-<down>") 'forward-paragraph)      ; move backward word
+(global-set-key (kbd "<find>") 'beginning-of-line)        ; beginning of line
+(define-key global-map [select] 'end-of-line)             ; end of line
 
 ;; backspace issues, toggle to resolve backspace issue
 (normal-erase-is-backspace-mode 0)
 
 
+;;;;;;;;;;;;;;;;;;;
+;; Coloring      ;;
+;;;;;;;;;;;;;;;;;;;
 ;; ediff
 (custom-set-faces
-  ;; custom-set-faces was added by Custom.
-  ;; If you edit it by hand, you could mess it up, so be careful.
-  ;; Your init file should contain only one such instance.
-  ;; If there is more than one, they won't work right.
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
  '(ediff-current-diff-A ((((class color)) (:background "blue" :foreground "white"))))
  '(ediff-current-diff-B ((((class color)) (:background "blue" :foreground "white" :weight bold))))
  '(ediff-current-diff-C ((((class color)) (:background "yellow3" :foreground "black" :weight bold))))
  '(ediff-even-diff-Ancestor ((((class color)) (:background "light grey" :foreground "black" :weight bold))))
  '(ediff-even-diff-C ((((class color)) (:background "light grey" :foreground "black" :weight bold))))
  '(ediff-fine-diff-B ((((class color)) (:background "cyan3" :foreground "black"))))
- '(ediff-fine-diff-C ((((class color)) (:background "Turquoise" :foreground "black" :weight bold)))))
+ '(ediff-fine-diff-C ((((class color)) (:background "Turquoise" :foreground "black" :weight bold))))
+ '(hl-line ((t (:weight extra-bold)))))
 
+
+
+;;;;;;;;;;;;;;;;;;;
+;; Emacs Tools   ;;
+;;;;;;;;;;;;;;;;;;;
 ;;planner
-(setq planner-project "Planner")
+(setq planner-project "StorvisorPlanner")
      (setq muse-project-alist
-           '(("Planner"
-             ("~/devplans"   ;; Or wherever you want your planner files to be
+           '(("StorvisorPlanner"
+             ("~/storvisorplans"   ;; Or wherever you want your planner files to be
              :default "index"
              :major-mode planner-mode
              :visit-link planner-visit-link))))
-;;(require 'planner)
+(require 'planner)
 
 
 ;; email
@@ -149,11 +149,13 @@ and their terminal equivalents.")
       smtpmail-smtp-service 587
       smtpmail-auth-credentials '(("smtp.gmail.com"
                                    587
-                                   "yourname@gmail.com"
+                                   "faraz@storvisor.com"
                                    nil)))
 
 
-;; templates
+;;;;;;;;;;;;;;;;;;
+;; templates    ;;
+;;;;;;;;;;;;;;;;;;
 (defun insert-function-header ()
   "Insert a c function header"
   (interactive)
@@ -175,32 +177,92 @@ and their terminal equivalents.")
 
 )
 
-(defun insert-file-header ()
-  "Insert a c function header"
-  (interactive)
-  (insert
-"/*
- * fileName.x --
- *
- *      Short Description
- *      Bugs: fshaikh@cs.cmu.edu
- */")
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Code Auto Complete and browsing  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(require 'xcscope)
+(setq cscope-do-not-update-database t)
+
+;; python completions
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:setup-keys t)                      ; optional
+(setq jedi:complete-on-dot t)                 ; optional
+
+(add-hook 'ansi-term-mode-hook '(lambda ()
+      (setq term-buffer-maximum-size 0)
+      (setq-default show-trailing-whitespace f)
+))
+
+(require 'auto-complete-config)
+(ac-config-default)
+(global-auto-complete-mode t)
+
+(add-hook 'c-mode-hook '(lambda ()
+      ;;(gtags-mode t)
+      (auto-complete-mode t)
+))
+
+(require 'auto-complete)
+(add-hook 'c++-mode-hook 'c-mode-common-hook '(lambda ()
+          ;; ac-omni-completion-sources is made buffer local so
+          ;; you need to add it to a mode hook to activate on
+          ;; whatever buffer you want to use it with.  This
+          ;; example uses C mode (as you probably surmised).
+          ;; auto-complete.el expects ac-omni-completion-sources to be
+          ;; a list of cons cells where each cell's car is a regex
+          ;; that describes the syntactical bits you want AutoComplete
+          ;; to be aware of. The cdr of each cell is the source that will
+          ;; supply the completion data.  The following tells autocomplete
+          ;; to begin completion when you type in a . or a ->
+          (add-to-list 'ac-omni-completion-sources
+                       (cons "\\." '(ac-source-gtags)))
+          (add-to-list 'ac-omni-completion-sources
+                       (cons "->" '(ac-source-gtags)))
+          ;; ac-sources was also made buffer local in new versions of
+          ;; autocomplete.  In my case, I want AutoComplete to use
+          ;; semantic and yasnippet (order matters, if reversed snippets
+          ;; will appear before semantic tag completions).
+          (setq ac-sources '(ac-source-semantic ac-source-yasnippet))
+  ))
+(put 'erase-buffer 'disabled nil)
+
+;;clang AC
+(defcustom mycustom-system-include-paths
+           '("./include/"
+            "/opt/local/include"
+            "/usr/include"
+            "/usr/include/c++/4.7"
+            "/usr/include/c++/4.7/x86_64-linux-gnu"
+            "/usr/include/c++/4.7/backward"
+            "/usr/lib/gcc/x86_64-linux-gnu/4.7/include"
+            "/usr/local/include"
+            "/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed"
+            "/usr/include/x86_64-linux-gnu"
+            "/usr/include"
+           )
+  "This is a list of include paths that are used by the clang auto completion."
+  :group 'mycustom
+  :type '(repeat directory)
+  )
+
+(require 'auto-complete-config)
+(ac-config-default)
+(require 'auto-complete-clang)
+(setq clang-completion-suppress-error 't)
+(setq ac-clang-flags
+      (mapcar (lambda (item)(concat "-I" item))
+              (append
+               mycustom-system-include-paths
+               )
+              )
+      )
+(add-to-list 'ac-clang-flags " -std=c++11")
+
+(defun my-ac-clang-mode-common-hook()
+  (define-key c-mode-base-map (kbd "M-/") 'ac-complete-clang)
 )
 
-(defun insert-gpl-licence ()
-  "Insert a c function header"
-  (interactive)
-  (insert
-"/*  This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/> */")
-)
+(add-hook 'c-mode-common-hook 'my-ac-clang-mode-common-hook)
