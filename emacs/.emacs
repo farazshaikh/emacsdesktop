@@ -149,7 +149,7 @@ and their terminal equivalents.")
       smtpmail-smtp-service 587
       smtpmail-auth-credentials '(("smtp.gmail.com"
                                    587
-                                   "faraz@storvisor.com"
+                                   "user@gmail.com"
                                    nil)))
 
 
