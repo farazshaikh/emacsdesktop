@@ -2,6 +2,65 @@
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")))
+;;elget
+(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+(unless (require 'el-get nil t)
+  (url-retrieve
+   "https://raw.github.com/dimitri/el-get/master/el-get-install.el"
+   (lambda (s)
+     (end-of-buffer)
+     (eval-print-last-sexp))))
+
+
+;; el-get
+(unless (require 'el-get nil t)
+  (setq el-get-install-branch "master")
+  (with-current-buffer
+      (url-retrieve-synchronously
+       "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
+    (end-of-buffer)
+    (eval-print-last-sexp))
+  (el-get-emacswiki-refresh el-get-recipe-path-emacswiki t))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Auto install packages if not installed ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; list the packages you want
+(setq package-list '(auto-complete
+                     auto-complete-auctex
+                     auto-complete-c-headers
+                     auto-complete-chunk
+                     auto-complete-clang
+                     auto-complete-clang-async
+                     auto-complete-etags
+                     auto-complete-exuberant-ctags
+                     auto-complete-nxml
+                     jedi
+                     elpy
+                     go-autocomplete
+                     go-direx
+                     go-eldoc
+                     go-errcheck
+                     go-mode
+                     go-play
+                     go-projectile
+                     go-snippets
+                     go-stacktracer
+                     golint
+                     go-eldoc
+                     google-c-style))
+
+; activate all the packages (in particular autoloads)
+(package-initialize)
+
+; fetch the list of packages available 
+(unless package-archive-contents
+  (package-refresh-contents))
+
+; install the missing packages
+(dolist (package package-list)
+  (unless (package-installed-p package)
+    (package-install package)))
 
 
 ;; Tabs and others
@@ -16,12 +75,13 @@
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
  '(column-number-mode t)
- '(compile-command "cd $WRK/cypress; make -j8 DMSETUP=true")
+ ;;'(compile-command "cd $WRK/cypress; make -j8 DMSETUP=true")
+ '(compile-command "cd $WRK/source/server; source ../../devsetup/go/setenv.sh; go get ./src/excubito/...; go test ./src/excubito/...;  go install ./...")
  '(global-hl-line-mode t)
  '(ido-mode t nil (ido))
  '(inhibit-startup-screen t)
  '(load-home-init-file t t)
- '(muse-project-alist (quote (("StorvisorPlanner" ("~/storvisorplans" :default "index" :major-mode planner-mode :visit-link planner-visit-link)))))
+ '(python-python-command "/usr/bin/ipython")
  '(show-paren-mode t)
  '(standard-indent 3)
  '(transient-mark-mode t)
@@ -38,7 +98,66 @@
 (global-whitespace-mode t)
 ;; dynamic abbrevation completion must be case sensitive
 (setq dabbrev-case-fold-search nil)
-(setenv "WRK" "/storvisor/work")
+(setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
+
+;; Workaround auto complete and whitespace show YELLOW/RED boxes
+;; https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
+(defun my:force-modes (rule-mode &rest modes)
+    "switch on/off several modes depending of state of
+    the controlling minor mode
+  "
+    (let ((rule-state (if rule-mode 1 -1)
+                      ))
+      (mapcar (lambda (k) (funcall k rule-state)) modes)
+      )
+    )
+
+(require 'whitespace)
+(defvar my:prev-whitespace-mode nil)
+(make-variable-buffer-local 'my:prev-whitespace-mode)
+(defvar my:prev-whitespace-pushed nil)
+(make-variable-buffer-local 'my:prev-whitespace-pushed)
+
+(defun my:push-whitespace (&rest skip)
+  (if my:prev-whitespace-pushed () (progn
+                                     (setq my:prev-whitespace-mode whitespace-mode)
+                                     (setq my:prev-whitespace-pushed t)
+                                     (my:force-modes nil 'whitespace-mode)
+                                     ))
+  )
+
+(defun my:pop-whitespace (&rest skip)
+  (if my:prev-whitespace-pushed (progn
+                                  (setq my:prev-whitespace-pushed nil)
+                                  (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
+                                  ))
+  )
+
+(require 'popup)
+(advice-add 'popup-draw :before #'my:push-whitespace)
+(advice-add 'popup-delete :after #'my:pop-whitespace)
+;; End workaround auto complete and whitespace
+
+(defun compileloop ()
+  (interactive)
+  (setq compilation-scroll-output t)
+  (setq compilation-finish-function
+        (lambda (buffer msg) (compile-internal compile-command "No more errors")))
+  (compile-internal compile-command "No more errors.")
+  ;;(compile compile-command)
+  ;;(shell-command "/bin/bash /home/faraz-local-home/compile-loop.sh &")
+  ;;(shell-command "ls")
+)
+
+(defun compile2 ()
+  (interactive)
+  (setq compilation-scroll-output t)
+  (setq compilation-finish-function
+        (lambda (buffer msg)))
+  (compile compile-command)
+  ;;(shell-command "/bin/bash /home/faraz-local-home/compile-loop.sh &")
+  ;;(shell-command "ls")
+)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -122,22 +241,14 @@ and their terminal equivalents.")
  '(ediff-even-diff-C ((((class color)) (:background "light grey" :foreground "black" :weight bold))))
  '(ediff-fine-diff-B ((((class color)) (:background "cyan3" :foreground "black"))))
  '(ediff-fine-diff-C ((((class color)) (:background "Turquoise" :foreground "black" :weight bold))))
- '(hl-line ((t (:weight extra-bold)))))
+ '(hl-line ((t (:weight extra-bold))))
+ '(mode-line-inactive ((t (:background "black" :foreground "white")))))
 
 
 
 ;;;;;;;;;;;;;;;;;;;
 ;; Emacs Tools   ;;
 ;;;;;;;;;;;;;;;;;;;
-;;planner
-(setq planner-project "StorvisorPlanner")
-     (setq muse-project-alist
-           '(("StorvisorPlanner"
-             ("~/storvisorplans"   ;; Or wherever you want your planner files to be
-             :default "index"
-             :major-mode planner-mode
-             :visit-link planner-visit-link))))
-(require 'planner)
 
 
 ;; email
@@ -149,19 +260,27 @@ and their terminal equivalents.")
       smtpmail-smtp-service 587
       smtpmail-auth-credentials '(("smtp.gmail.com"
                                    587
-                                   "user@gmail.com"
+                                   "faraz@email.com"
                                    nil)))
+
+(defun copy-rectangle-as-kill ()
+    (interactive)
+    (save-excursion
+    (kill-rectangle (mark) (point))
+    (exchange-point-and-mark)
+    (yank-rectangle)))
+
 
 
 ;;;;;;;;;;;;;;;;;;
 ;; templates    ;;
 ;;;;;;;;;;;;;;;;;;
-(defun insert-function-header ()
+(defun insert-function-header(functionname)
   "Insert a c function header"
-  (interactive)
-  (insert
+  (interactive "sEnter Function Name:")
+  (insert (format
 "/*
- *  .n
+ *  %s
  *
  *
  *
@@ -173,18 +292,19 @@ and their terminal equivalents.")
  *
  *  Side Effects:
  *      None
- */")
+ */
 
+%s() {
+}
+
+" functionname functionname))
 )
-
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Code Auto Complete and browsing  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(require 'xcscope)
-(setq cscope-do-not-update-database t)
+;; (require 'xcscope)
+;; (setq cscope-do-not-update-database t)
 
 ;; python completions
 (add-hook 'python-mode-hook 'jedi:setup)
@@ -203,6 +323,11 @@ and their terminal equivalents.")
 (add-hook 'c-mode-hook '(lambda ()
       ;;(gtags-mode t)
       (auto-complete-mode t)
+      (flyspell-prog-mode)
+))
+
+(add-hook 'compilation-mode '(lamda ()
+      (next-error-follow-minor-mode t)
 ))
 
 (require 'auto-complete)
@@ -229,7 +354,9 @@ and their terminal equivalents.")
   ))
 (put 'erase-buffer 'disabled nil)
 
-;;clang AC
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; System includes       ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defcustom mycustom-system-include-paths
            '("./include/"
             "/opt/local/include"
@@ -243,26 +370,131 @@ and their terminal equivalents.")
             "/usr/include/x86_64-linux-gnu"
             "/usr/include"
            )
-  "This is a list of include paths that are used by the clang auto completion."
+  "system list of include paths that are used by the clang auto completion."
   :group 'mycustom
   :type '(repeat directory)
   )
 
-(require 'auto-complete-config)
-(ac-config-default)
-(require 'auto-complete-clang)
-(setq clang-completion-suppress-error 't)
-(setq ac-clang-flags
+(setq projectPath2 (getenv "WRK"))
+(defcustom project-include-paths
+           '("./"
+             "./include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+             "/work//include/"
+           )
+  "project list of include paths that are used by the clang auto completion."
+  :group 'mycustom
+  :type '(repeat directory)
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Clang includes        ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq clangincludes project-include-paths)
+(setq clangincludes (append clangincludes mycustom-system-include-paths))
+(defcustom clangincludes clangincludes
+  "This is a list of include paths that are used by the clang auto completion."
+  :group 'mycustom
+  :type '(repeat directory)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Clang completionSync  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (require 'auto-complete-config)
+;; (ac-config-default)
+;; (require 'auto-complete-clang)
+;; (setq clang-completion-suppress-error 't)
+;; (setq ac-clang-flags
+;;       (mapcar (lambda (item)(concat "-I" item))
+;;               (append
+;;                clangincludes
+;;                )
+;;               )
+;;       )
+;; ;;(add-to-list 'ac-clang-flags " -std=c++11")
+;; (defun my-ac-clang-mode-common-hook()
+;;   (define-key c-mode-base-map (kbd "M-/") 'ac-complete-clang)
+;; )
+;; (add-hook 'c-mode-common-hook 'my-ac-clang-mode-common-hook)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Clang completionAsync ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(add-to-list 'load-path "~/.emacs.d/")
+(require 'auto-complete-clang-async)
+(setq ac-clang-cflags
       (mapcar (lambda (item)(concat "-I" item))
               (append
-               mycustom-system-include-paths
+               clangincludes
                )
               )
       )
-(add-to-list 'ac-clang-flags " -std=c++11")
-
-(defun my-ac-clang-mode-common-hook()
-  (define-key c-mode-base-map (kbd "M-/") 'ac-complete-clang)
+;;(add-to-list 'ac-clang-cflags " -std=c++11")
+(defun ac-cc-mode-setup ()
+  (setq ac-clang-complete-executable "~/.emacs.d/clang-complete")
+  (setq ac-sources '(ac-source-clang-async))
+  (ac-clang-launch-completion-process)
 )
 
-(add-hook 'c-mode-common-hook 'my-ac-clang-mode-common-hook)
+;; go mode setup
+;; setup AC via gocode
+(require 'go-autocomplete)
+(require 'auto-complete-config)
+(defconst _goroot "/home/farazl/excubito_workspace/scratch/go/golang/go"  "golanguage root")
+(defun ac-go-mode-setup()
+  ;;(setenv "PATH" (concat (getenv "PATH") ":" (concat _goroot "/bin")))
+  (local-set-key (kbd "M-.") 'godef-jump)
+)
+
+(setenv "GOPATH" (getenv "WRK"))
+(defun go-set-gopath(_gopath)
+  (interactive "Set Go PATH:")
+  (setenv "GOPATH" _gopath)
+  )
+
+(require 'go-eldoc)
+(add-hook 'go-mode-hook 'go-eldoc-setup)
+
+
+
+
+(defun ac-js-mode-setup()
+  (tern-mode t)
+  (add-to-list 'ac-modes 'js3-mode)
+  (global-auto-complete-mode t)
+)
+
+(defun my-ac-config ()
+  (add-hook 'c-mode-common-hook 'ac-cc-mode-setup)
+  (add-hook 'auto-complete-mode-hook 'ac-common-setup)
+  (add-hook 'js3-mode-hook 'ac-js-mode-setup)
+  (add-hook 'go-mode-hook 'ac-go-mode-setup)
+  (global-auto-complete-mode t)
+)
+
+(eval-after-load 'tern
+  '(progn
+     (require 'tern-auto-complete)
+     (tern-ac-setup)))
+
+(my-ac-config)
+(put 'downcase-region 'disabled nil)
