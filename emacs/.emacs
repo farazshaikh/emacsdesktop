@@ -1,4 +1,9 @@
-;; ELPA packages
+;;; No point in supporting multiple version, there is way to much work needed for that
+(if (version< emacs-version  "24.4")
+ (error "Script depends on emacs version being greater than 24.4")
+ (message "Version greater or equal to 24.4"))
+
+; ELPA packages
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")))
