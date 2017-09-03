@@ -1,0 +1,36 @@
+#Install easy-rsa
+sudo apt-get install easy-rsa
+make-cadir ca
+source ./vars
+cd ./ca
+./clean-all
+./build-dh
+
+#Build CA
+./build-ca
+
+#Build server
+./build-key-server server
+
+#Verify server
+openssl rsa -noout -modulus -in ./server.key
+openssl req -noout -modulus -in ./server.csr
+openssl x509 -noout -modulus -in ./server.crt
+
+#verify signed by server
+openssl verify -verbose -CAfile ./ca.crt ./server.crt
+
+#Start server
+
+
+
+
+#Build client
+./build-key client
+openssl verify -verbose -CAfile ./ca.crt ./client.crt
+openssl rsa -noout -modulus -in ./client.key
+openssl req -noout -modulus -in ./client.csr
+openssl x509 -noout -modulus -in ./client.crt
+
+#check connection to server
+openssl s_client -connect 127.0.0.1:5696  -cert ./ca/keys/client.crt -key ./ca/keys/client.key
