@@ -3,10 +3,20 @@
  (error "Script depends on emacs version being greater than 24.4")
  (message "Version greater or equal to 24.4"))
 
-; ELPA packages
+
+;; Python setting copied from
+;; https://realpython.com/blog/python/emacs-the-best-python-editor/
+;; install elpy from elpy repo
+;; install jedi (python part, emacs part, epc part)
+;; fly-check and not fly-make
+;; follow elpy-config
+;; autopep8 will need to installed via pip
+
+;; ELPA packages
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")))
+                         ("melpa" . "http://melpa.milkbox.net/packages/")
+			 ("elpy" . "http://jorgenschaefer.github.io/packages/")))
 ;;elget
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 (unless (require 'el-get nil t)
@@ -43,6 +53,7 @@
                      jedi
                      elpy
                      go-autocomplete
+                     spacemacs-theme
                      go-direx
                      go-eldoc
                      go-errcheck
@@ -53,7 +64,9 @@
                      go-stacktracer
                      golint
                      go-eldoc
-                     google-c-style))
+                     google-c-style
+                     flycheck
+		     py-autopep8))
 
 ; activate all the packages (in particular autoloads)
 (package-initialize)
@@ -80,8 +93,11 @@
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
  '(column-number-mode t)
- ;;'(compile-command "cd $WRK/cypress; make -j8 DMSETUP=true")
- '(compile-command "cd $WRK/source/server; source ../../devsetup/go/setenv.sh; go get ./src/excubito/...; go test ./src/excubito/...;  go install ./...")
+ '(compile-command
+   "cd $WRK/source/server; source ../../devsetup/go/setenv.sh; go get ./src/excubito/...; go test ./src/excubito/...;  go install ./...")
+ '(custom-safe-themes
+   (quote
+    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
  '(global-hl-line-mode t)
  '(ido-mode t nil (ido))
  '(inhibit-startup-screen t)
@@ -92,6 +108,10 @@
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
  '(which-function-mode t))
+
+;; theme
+(load-theme 'spacemacs-dark)
+(setq inhibit-startup-message t) ;; hide the startup message
 
 ;; No tabs
 (setq-default indent-tabs-mode nil)
@@ -312,9 +332,23 @@ and their terminal equivalents.")
 ;; (setq cscope-do-not-update-database t)
 
 ;; python completions
+(elpy-enable)
+(elpy-use-ipython)
+(add-hook 'python-mode-hook 'elpy-mode)
 (add-hook 'python-mode-hook 'jedi:setup)
+(setq elpy-rpc-backend "jedi")
 (setq jedi:setup-keys t)                      ; optional
 (setq jedi:complete-on-dot t)                 ; optional
+
+;; use flycheck not flymake with elpy
+(when (require 'flycheck nil t)
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  (add-hook 'elpy-mode-hook 'flycheck-mode))
+;; enable autopep8 formatting on save
+(require 'py-autopep8)
+(add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+
+
 
 (add-hook 'ansi-term-mode-hook '(lambda ()
       (setq term-buffer-maximum-size 0)
@@ -444,7 +478,7 @@ and their terminal equivalents.")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Clang completionAsync ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(add-to-list 'load-path "~/.emacs.d/")
+;;(add-to-list 'load-path "~/.emacs.d/")
 (require 'auto-complete-clang-async)
 (setq ac-clang-cflags
       (mapcar (lambda (item)(concat "-I" item))
