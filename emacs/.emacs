@@ -333,6 +333,7 @@ and their terminal equivalents.")
 
 ;; python completions
 (elpy-enable)
+(setq elpy-rpc-python-command "python3")
 (elpy-use-ipython)
 (add-hook 'python-mode-hook 'elpy-mode)
 (add-hook 'python-mode-hook 'jedi:setup)
@@ -369,46 +370,50 @@ and their terminal equivalents.")
       (next-error-follow-minor-mode t)
 ))
 
+(defun dotArrowHooks ()
+  ;; ac-omni-completion-sources is made buffer local so
+  ;; you need to add it to a mode hook to activate on
+  ;; whatever buffer you want to use it with.  This
+  ;; example uses C mode (as you probably surmised).
+  ;; auto-complete.el expects ac-omni-completion-sources to be
+  ;; a list of cons cells where each cell's car is a regex
+  ;; that describes the syntactical bits you want AutoComplete
+  ;; to be aware of. The cdr of each cell is the source that will
+  ;; supply the completion data.  The following tells autocomplete
+  ;; to begin completion when you type in a . or a ->
+  (add-to-list 'ac-omni-completion-sources
+               (cons "\\." '(ac-source-gtags)))
+  (add-to-list 'ac-omni-completion-sources
+               (cons "->" '(ac-source-gtags)))
+  ;; ac-sources was also made buffer local in new versions of
+  ;; autocomplete.  In my case, I want AutoComplete to use
+  ;; semantic and yasnippet (order matters, if reversed snippets
+  ;; will appear before semantic tag completions).
+  (setq ac-sources
+        (append
+         '(ac-source-semantic ac-source-yasnippet ac-source-clang-async)
+         ac-sources))
+  )
+
 (require 'auto-complete)
-(add-hook 'c++-mode-hook 'c-mode-common-hook '(lambda ()
-          ;; ac-omni-completion-sources is made buffer local so
-          ;; you need to add it to a mode hook to activate on
-          ;; whatever buffer you want to use it with.  This
-          ;; example uses C mode (as you probably surmised).
-          ;; auto-complete.el expects ac-omni-completion-sources to be
-          ;; a list of cons cells where each cell's car is a regex
-          ;; that describes the syntactical bits you want AutoComplete
-          ;; to be aware of. The cdr of each cell is the source that will
-          ;; supply the completion data.  The following tells autocomplete
-          ;; to begin completion when you type in a . or a ->
-          (add-to-list 'ac-omni-completion-sources
-                       (cons "\\." '(ac-source-gtags)))
-          (add-to-list 'ac-omni-completion-sources
-                       (cons "->" '(ac-source-gtags)))
-          ;; ac-sources was also made buffer local in new versions of
-          ;; autocomplete.  In my case, I want AutoComplete to use
-          ;; semantic and yasnippet (order matters, if reversed snippets
-          ;; will appear before semantic tag completions).
-          (setq ac-sources '(ac-source-semantic ac-source-yasnippet))
-  ))
+(add-hook 'c++-mode-hook 'dotArrowHooks)
+(add-hook 'c-mode-hook 'dotArrowHooks)
 (put 'erase-buffer 'disabled nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; System includes       ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defcustom mycustom-system-include-paths
-           '("./include/"
-            "/opt/local/include"
-            "/usr/include"
-            "/usr/include/c++/4.7"
-            "/usr/include/c++/4.7/x86_64-linux-gnu"
-            "/usr/include/c++/4.7/backward"
-            "/usr/lib/gcc/x86_64-linux-gnu/4.7/include"
-            "/usr/local/include"
-            "/usr/lib/gcc/x86_64-linux-gnu/4.7/include-fixed"
-            "/usr/include/x86_64-linux-gnu"
-            "/usr/include"
-           )
+  '(
+    "/usr/include/c++/5"
+    "/usr/include/x86_64-linux-gnu/c++/5"
+    "/usr/include/c++/5/backward"
+    "/usr/lib/gcc/x86_64-linux-gnu/5/include"
+    "/usr/local/include"
+    "/usr/lib/gcc/x86_64-linux-gnu/5/include-fixed"
+    "/usr/include/x86_64-linux-gnu"
+    "/usr/include"
+    )
   "system list of include paths that are used by the clang auto completion."
   :group 'mycustom
   :type '(repeat directory)
@@ -418,24 +423,6 @@ and their terminal equivalents.")
 (defcustom project-include-paths
            '("./"
              "./include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
-             "/work//include/"
              "/work//include/"
            )
   "project list of include paths that are used by the clang auto completion."
@@ -480,17 +467,16 @@ and their terminal equivalents.")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;(add-to-list 'load-path "~/.emacs.d/")
 (require 'auto-complete-clang-async)
-(setq ac-clang-cflags
+(defun ac-cc-mode-setup ()
+  ;;(add-to-list 'ac-clang-cflags " -std=c++11")
+  (setq ac-clang-cflags
       (mapcar (lambda (item)(concat "-I" item))
               (append
                clangincludes
                )
               )
       )
-;;(add-to-list 'ac-clang-cflags " -std=c++11")
-(defun ac-cc-mode-setup ()
   (setq ac-clang-complete-executable "~/.emacs.d/clang-complete")
-  (setq ac-sources '(ac-source-clang-async))
   (ac-clang-launch-completion-process)
 )
 
