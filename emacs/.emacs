@@ -109,6 +109,9 @@
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
  '(which-function-mode t))
 
+;; compilation output
+(setq compilation-scroll-output 'first-error)
+
 ;; theme
 (load-theme 'spacemacs-dark)
 (setq inhibit-startup-message t) ;; hide the startup message
@@ -523,3 +526,11 @@ and their terminal equivalents.")
 
 (my-ac-config)
 (put 'downcase-region 'disabled nil)
+
+(setq ring-bell-function
+      (lambda ()
+        (let ((orig-fg (face-foreground 'mode-line)))
+         (set-face-foreground 'mode-line "#F2804F")
+          (run-with-idle-timer 0.1 nil
+                               (lambda (fg) (set-face-foreground 'mode-line fg))
+                               orig-fg))))
