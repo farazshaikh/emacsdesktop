@@ -1,22 +1,36 @@
-;;; No point in supporting multiple version, there is way to much work needed for that
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; No point in supporting multiple version, there is way to much work needed for that ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (if (version< emacs-version  "24.4")
  (error "Script depends on emacs version being greater than 24.4")
  (message "Version greater or equal to 24.4"))
 
 
-;; Python setting copied from
-;; https://realpython.com/blog/python/emacs-the-best-python-editor/
-;; install elpy from elpy repo
-;; install jedi (python part, emacs part, epc part)
-;; fly-check and not fly-make
-;; follow elpy-config
-;; autopep8 will need to installed via pip
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ;; Package Managment system Initialization ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(package-initialize)
 
-;; ELPA packages
+;; check up and set installation mode.
+(defvar frinstallation nil "are we installing fremacs")
+(when (or (member "-frinstall" command-line-args)
+          (eq package-archive-contents nil))
+  (progn
+    (setq frinstallation t)
+    (message "emacs in running in installation mode")))
+
+;; eat up the command line args in the end
+(defun frinstall-fn (switch)
+  (message "emacs running in frinstall mode")
+  (setq frinstallation t)
+  )
+(add-to-list 'command-switch-alist '("-frinstall" . frinstall-fn))
+
+;; install packages
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
                          ("melpa" . "http://melpa.milkbox.net/packages/")
-			 ("elpy" . "http://jorgenschaefer.github.io/packages/")))
+                         ("elpy" . "http://jorgenschaefer.github.io/packages/")))
 ;;elget
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 (unless (require 'el-get nil t)
@@ -27,22 +41,14 @@
      (eval-print-last-sexp))))
 
 
-;; el-get
-(unless (require 'el-get nil t)
-  (setq el-get-install-branch "master")
-  (with-current-buffer
-      (url-retrieve-synchronously
-       "https://raw.github.com/dimitri/el-get/master/el-get-install.el")
-    (end-of-buffer)
-    (eval-print-last-sexp))
-  (el-get-emacswiki-refresh el-get-recipe-path-emacswiki t))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Auto install packages if not installed ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; list the packages you want
-(setq package-list '(auto-complete
-                     auto-complete-auctex
+;; list the packages you want
+;; basically all the packages needs for auto-complete of common languages C/C++/Python/JS
+;; Auto-complete used to be my preferred package for completions - Now moving to Company
+(setq package-list '(;; Auto complete and IT's backends
+                     auto-complete
                      auto-complete-c-headers
                      auto-complete-chunk
                      auto-complete-clang
@@ -50,8 +56,28 @@
                      auto-complete-etags
                      auto-complete-exuberant-ctags
                      auto-complete-nxml
+
+                     ;; COMPANY & ITS BACKENDS
+                     company
+                     company-c-headers
+                     company-cmake
+                     company-irony
+                     company-irony-c-headers
+                     company-go
+                     company-jedi
+
+                     ;; Completion engines
+                     irony
+                     irony-eldoc
                      jedi
                      elpy
+                     ggtags
+
+                     ;; Snippets
+                     yasnippet-classic-snippets
+                     yasnippet-snippets
+
+                     ;; go goodies
                      go-autocomplete
                      spacemacs-theme
                      go-direx
@@ -64,25 +90,43 @@
                      go-stacktracer
                      golint
                      go-eldoc
+
+                     ;; flycheck
                      google-c-style
                      flycheck
-		     py-autopep8))
+                     flycheck-irony
+                     py-autopep8
 
-; activate all the packages (in particular autoloads)
-(package-initialize)
-
-; fetch the list of packages available 
-(unless package-archive-contents
-  (package-refresh-contents))
-
-; install the missing packages
-(dolist (package package-list)
-  (unless (package-installed-p package)
-    (package-install package)))
+                     ;; UI
+                     spacemacs-theme))
 
 
-;; Tabs and others
-(setq set-fill-column 80)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; install the missing packages ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(when
+    (eq frinstallation t)
+  (progn (message "refreshing package list")
+         (package-refresh-contents)
+         ;; required for irony mode
+         (shell-command "apt install cmake libclang-dev")
+         (dolist (package package-list)
+           (unless (package-installed-p package)
+             (package-install package)))
+	 (irony-install-server)
+         )
+  )
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; Required packages ;;
+;;;;;;;;;;;;;;;;;;;;;;;
+(require 'whitespace)
+(setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Setup common variables across packages ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -93,43 +137,61 @@
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
  '(column-number-mode t)
+ '(company-tooltip-align-annotations t)
+ '(compilation-scroll-output (quote first-error))
  '(compile-command
-   "cd $WRK/source/server; source ../../devsetup/go/setenv.sh; go get ./src/excubito/...; go test ./src/excubito/...;  go install ./...")
+   "cd $WRK/source/server; source ../../devsetup/go/setenv.sh;     go get ./src/excubito/...; go test ./src/excubito/...;
+    go install ./...")
  '(custom-safe-themes
    (quote
     ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
+ '(dabbrev-case-fold-search nil)
  '(global-hl-line-mode t)
+ '(global-whitespace-mode t)
  '(ido-mode t nil (ido))
+ '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
  '(load-home-init-file t t)
+ '(package-selected-packages
+   (quote
+    (yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
+ '(ring-bell-function
+   (lambda nil
+     (let
+         ((orig-fg
+           (face-foreground
+            (quote mode-line))))
+       (set-face-foreground
+        (quote mode-line)
+        "#F2804F")
+       (run-with-idle-timer 0.1 nil
+                            (lambda
+                              (fg)
+                              (set-face-foreground
+                               (quote mode-line)
+                               fg))
+                            orig-fg))))
+ '(scroll-step 1)
+ '(set-fill-column 80)
  '(show-paren-mode t)
+ '(show-trailing-whitespace t)
  '(standard-indent 3)
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
- '(which-function-mode t))
-
-;; compilation output
-(setq compilation-scroll-output 'first-error)
+ '(which-function-mode t)
+ '(whitespace-style (quote (face empty tabs lines-tail whitespace))))
 
 ;; theme
-(load-theme 'spacemacs-dark)
-(setq inhibit-startup-message t) ;; hide the startup message
-
-;; No tabs
-(setq-default indent-tabs-mode nil)
-(setq scroll-step 1)
-(setq-default show-trailing-whitespace t)
-;; enforce 80 column rule
-(require 'whitespace)
-(setq whitespace-style '(face empty tabs lines-tail whitespace))
-(global-whitespace-mode t)
-;; dynamic abbrevation completion must be case sensitive
-(setq dabbrev-case-fold-search nil)
+;;(load-theme 'spacemacs-dark)
 (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
 
-;; Workaround auto complete and whitespace show YELLOW/RED boxes
-;; https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Workaround auto complete and whitespace show YELLOW/RED boxes								     ;;
+;; https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun my:force-modes (rule-mode &rest modes)
     "switch on/off several modes depending of state of
     the controlling minor mode
@@ -166,6 +228,11 @@
 (advice-add 'popup-delete :after #'my:pop-whitespace)
 ;; End workaround auto complete and whitespace
 
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helper/Utility functions ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun compileloop ()
   (interactive)
   (setq compilation-scroll-output t)
@@ -176,6 +243,7 @@
   ;;(shell-command "/bin/bash /home/faraz-local-home/compile-loop.sh &")
   ;;(shell-command "ls")
 )
+
 
 (defun compile2 ()
   (interactive)
@@ -188,9 +256,6 @@
 )
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Helper defuns          ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun toggle-show-trailing-whitespace ()
   "Toggle show-trailing-whitespace between t and nil"
   (interactive)
@@ -205,10 +270,18 @@
       (format "cd %s; gtags -i -q" dir-name))
 )
 
+(defun copy-rectangle-as-kill ()
+    (interactive)
+    (save-excursion
+    (kill-rectangle (mark) (point))
+    (exchange-point-and-mark)
+    (yank-rectangle)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Keyboard Dance         ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; KeyBoard Mappings ;;
+;;;;;;;;;;;;;;;;;;;;;;;
 (define-key input-decode-map "\e\eOA" [(meta up)])
 (define-key input-decode-map "\e\eOB" [(meta down)])
 (define-key input-decode-map "\e\eOC" [(meta right)])
@@ -262,6 +335,15 @@ and their terminal equivalents.")
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(company-echo-common ((t (:foreground "firebrick"))))
+ '(company-preview-common ((t (:inherit company-preview :foreground "navy"))))
+ '(company-scrollbar-bg ((t (:background "gray"))))
+ '(company-scrollbar-fg ((t (:background "dark blue"))))
+ '(company-template-field ((t (:background "dark blue" :foreground "white"))))
+ '(company-tooltip ((t (:background "gray" :foreground "black"))))
+ '(company-tooltip-annotation ((t (:foreground "black"))))
+ '(company-tooltip-common ((t (:foreground "black" :slant italic))))
+ '(company-tooltip-selection ((t (:background "blue"))))
  '(ediff-current-diff-A ((((class color)) (:background "blue" :foreground "white"))))
  '(ediff-current-diff-B ((((class color)) (:background "blue" :foreground "white" :weight bold))))
  '(ediff-current-diff-C ((((class color)) (:background "yellow3" :foreground "black" :weight bold))))
@@ -291,17 +373,9 @@ and their terminal equivalents.")
                                    "faraz@email.com"
                                    nil)))
 
-(defun copy-rectangle-as-kill ()
-    (interactive)
-    (save-excursion
-    (kill-rectangle (mark) (point))
-    (exchange-point-and-mark)
-    (yank-rectangle)))
-
-
 
 ;;;;;;;;;;;;;;;;;;
-;; templates    ;;
+;; YASnippets   ;;
 ;;;;;;;;;;;;;;;;;;
 (defun insert-function-header(functionname)
   "Insert a c function header"
@@ -328,16 +402,16 @@ and their terminal equivalents.")
 " functionname functionname))
 )
 
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Code Auto Complete and browsing  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (require 'xcscope)
-;; (setq cscope-do-not-update-database t)
 
-;; python completions
+;;;;;;;;;;;;;;;
+;;    python ;;
+;;;;;;;;;;;;;;;
 (elpy-enable)
 (setq elpy-rpc-python-command "python3")
-(elpy-use-ipython)
 (add-hook 'python-mode-hook 'elpy-mode)
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq elpy-rpc-backend "jedi")
@@ -353,59 +427,33 @@ and their terminal equivalents.")
 (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
 
 
-
+;;;;;;;;;;;;;;;;;;;
+;; terminal mode ;;
+;;;;;;;;;;;;;;;;;;;
 (add-hook 'ansi-term-mode-hook '(lambda ()
       (setq term-buffer-maximum-size 0)
       (setq-default show-trailing-whitespace f)
 ))
 
+
+;;;;;;;;;;;
+;; C C++ ;;
+;;;;;;;;;;;
+(require 'auto-complete)
 (require 'auto-complete-config)
-(ac-config-default)
-(global-auto-complete-mode t)
+(require 'auto-complete-clang-async)
 
-(add-hook 'c-mode-hook '(lambda ()
-      ;;(gtags-mode t)
-      (auto-complete-mode t)
-      (flyspell-prog-mode)
-))
+(require 'company)
+(require 'company-c-headers)
+(require 'company-irony)
 
+(require 'flycheck-irony)
+(require 'ggtags)
 (add-hook 'compilation-mode '(lamda ()
       (next-error-follow-minor-mode t)
-))
+      ))
 
-(defun dotArrowHooks ()
-  ;; ac-omni-completion-sources is made buffer local so
-  ;; you need to add it to a mode hook to activate on
-  ;; whatever buffer you want to use it with.  This
-  ;; example uses C mode (as you probably surmised).
-  ;; auto-complete.el expects ac-omni-completion-sources to be
-  ;; a list of cons cells where each cell's car is a regex
-  ;; that describes the syntactical bits you want AutoComplete
-  ;; to be aware of. The cdr of each cell is the source that will
-  ;; supply the completion data.  The following tells autocomplete
-  ;; to begin completion when you type in a . or a ->
-  (add-to-list 'ac-omni-completion-sources
-               (cons "\\." '(ac-source-gtags)))
-  (add-to-list 'ac-omni-completion-sources
-               (cons "->" '(ac-source-gtags)))
-  ;; ac-sources was also made buffer local in new versions of
-  ;; autocomplete.  In my case, I want AutoComplete to use
-  ;; semantic and yasnippet (order matters, if reversed snippets
-  ;; will appear before semantic tag completions).
-  (setq ac-sources
-        (append
-         '(ac-source-semantic ac-source-yasnippet ac-source-clang-async)
-         ac-sources))
-  )
-
-(require 'auto-complete)
-(add-hook 'c++-mode-hook 'dotArrowHooks)
-(add-hook 'c-mode-hook 'dotArrowHooks)
-(put 'erase-buffer 'disabled nil)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; System includes       ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defcustom mycustom-system-include-paths
   '(
     "/usr/include/c++/5"
@@ -433,9 +481,7 @@ and their terminal equivalents.")
   :type '(repeat directory)
   )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Clang includes        ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (setq clangincludes project-include-paths)
 (setq clangincludes (append clangincludes mycustom-system-include-paths))
 (defcustom clangincludes clangincludes
@@ -444,33 +490,47 @@ and their terminal equivalents.")
   :type '(repeat directory)
 )
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Clang completionSync  ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (require 'auto-complete-config)
-;; (ac-config-default)
-;; (require 'auto-complete-clang)
-;; (setq clang-completion-suppress-error 't)
-;; (setq ac-clang-flags
-;;       (mapcar (lambda (item)(concat "-I" item))
-;;               (append
-;;                clangincludes
-;;                )
-;;               )
-;;       )
-;; ;;(add-to-list 'ac-clang-flags " -std=c++11")
-;; (defun my-ac-clang-mode-common-hook()
-;;   (define-key c-mode-base-map (kbd "M-/") 'ac-complete-clang)
-;; )
-;; (add-hook 'c-mode-common-hook 'my-ac-clang-mode-common-hook)
+
+(setq ccppCompletions "ironycompany")
+;;(setq ccppCompletions "clangac")
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Clang completionAsync ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;(add-to-list 'load-path "~/.emacs.d/")
-(require 'auto-complete-clang-async)
-(defun ac-cc-mode-setup ()
+
+;; IRONY and company based c/c++ completions
+(defun irony--check-expansion ()
+  (save-excursion (if (looking-at "\\_>") t
+                    (backward-char 1)
+                    (if (looking-at "\\.") t
+                      (backward-char 1)
+                      (if (looking-at "->") t nil)))))
+(defun irony--indent-or-complete ()
+  "Indent or Complete" (interactive)
+  (cond ((and (not (use-region-p)) (irony--check-expansion))
+         (message "complete") (company-complete-common))
+        (t (message "indent") (call-interactively 'c-indent-line-or-region))))
+(defun irony-mode-keys () "Modify keymaps used by `irony-mode'."
+       (local-set-key (kbd "TAB") 'irony--indent-or-complete)
+       (local-set-key [tab] 'irony--indent-or-complete))
+
+(defun ccppIronySetup ()
+  (ggtags-mode)
+  (flyspell-prog-mode)
+  (yas-minor-mode)
+
+  (company-mode t)
+  (irony-mode t)
+  (irony-cdb-autosetup-compile-options)
+  (eval-after-load 'flycheck '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+  (add-hook 'irony-mode-hook 'irony-eldoc)
+  (irony-mode-keys)
+)
+
+(defun ccppClangAsyncSetup ()
+  (ggtags-mode t)
+  (flyspell-prog-mode)
+  (yas-minor-mode)
+  (auto-complete-mode t)
+
   ;;(add-to-list 'ac-clang-cflags " -std=c++11")
   (setq ac-clang-cflags
       (mapcar (lambda (item)(concat "-I" item))
@@ -481,10 +541,82 @@ and their terminal equivalents.")
       )
   (setq ac-clang-complete-executable "~/.emacs.d/clang-complete")
   (ac-clang-launch-completion-process)
-)
 
-;; go mode setup
-;; setup AC via gocode
+  ;; ac-omni-completion-sources is made buffer local so
+  ;; you need to add it to a mode hook to activate on
+  ;; whatever buffer you want to use it with.  This
+  ;; example uses C mode (as you probably surmised).
+  ;; auto-complete.el expects ac-omni-completion-sources to be
+  ;; a list of cons cells where each cell's car is a regex
+  ;; that describes the syntactical bits you want AutoComplete
+  ;; to be aware of. The cdr of each cell is the source that will
+  ;; supply the completion data.  The following tells autocomplete
+  ;; to begin completion when you type in a . or a ->
+  (add-to-list 'ac-omni-completion-sources
+               (cons "\\." '(ac-source-gtags)))
+  (add-to-list 'ac-omni-completion-sources
+               (cons "->" '(ac-source-gtags)))
+  ;; ac-sources was also made buffer local in new versions of
+  ;; autocomplete.  In my case, I want AutoComplete to use
+  ;; semantic and yasnippet (order matters, if reversed snippets
+  ;; will appear before semantic tag completions).
+  (setq ac-sources
+        (append
+         '(ac-source-semantic ac-source-yasnippet ac-source-clang-async)
+         ac-sources))
+  )
+
+(if (string= ccppCompletions "ironycompany")
+    (progn (add-hook 'c++-mode-hook 'ccppIronySetup)
+           (add-hook 'c-mode-hook 'ccppIronySetup)
+           (message "using irony company for c/c++ completions"))
+  (progn
+    (ac-config-default)
+    (global-auto-complete-mode t)
+    (add-hook 'c++-mode-hook 'ccppClangAsyncSetup)
+    (add-hook 'c-mode-hook 'ccppClangAsyncSetup)
+    (add-hook 'auto-complete-mode-hook 'ac-common-setup)
+    (message "using clang-async autocomplete for c/c++ completions")))
+
+
+
+
+
+
+
+
+
+
+(put 'erase-buffer 'disabled nil)
+
+
+;;(add-to-list 'load-path "~/.emacs.d/")
+;; (require 'auto-complete-clang-async)
+;; (defun ac-cc-mode-setup ()
+;;   ;;(add-to-list 'ac-clang-cflags " -std=c++11")
+;;   (setq ac-clang-cflags
+;;       (mapcar (lambda (item)(concat "-I" item))
+;;               (append
+;;                clangincludes
+;;                )
+;;               )
+;;       )
+;;   (setq ac-clang-complete-executable "~/.emacs.d/clang-complete")
+;;   (ac-clang-launch-completion-process)
+;;   )
+
+
+(eval-after-load 'tern
+  '(progn
+     (require 'tern-auto-complete)
+     (tern-ac-setup)))
+
+
+
+
+;;;;;;;;;;;;;
+;; GO LANG ;;
+;;;;;;;;;;;;;
 (require 'go-autocomplete)
 (require 'auto-complete-config)
 (defconst _goroot "/home/farazl/excubito_workspace/scratch/go/golang/go"  "golanguage root")
@@ -500,37 +632,22 @@ and their terminal equivalents.")
   )
 
 (require 'go-eldoc)
+(add-hook 'go-mode-hook 'ac-go-mode-setup)
 (add-hook 'go-mode-hook 'go-eldoc-setup)
+(add-hook 'go-mode-hook 'ac-go-mode-setup)
 
 
-
-
-(defun ac-js-mode-setup()
+;;;;;;;;;;;;;;;;
+;; JavaScript ;;
+;;;;;;;;;;;;;;;;
+(defun js-mode-setup()
   (tern-mode t)
   (add-to-list 'ac-modes 'js3-mode)
   (global-auto-complete-mode t)
 )
+(add-hook 'js3-mode-hook 'ac-js-mode-setup)
+(add-hook 'js3-mode-hook 'js-mode-setup)
 
-(defun my-ac-config ()
-  (add-hook 'c-mode-common-hook 'ac-cc-mode-setup)
-  (add-hook 'auto-complete-mode-hook 'ac-common-setup)
-  (add-hook 'js3-mode-hook 'ac-js-mode-setup)
-  (add-hook 'go-mode-hook 'ac-go-mode-setup)
-  (global-auto-complete-mode t)
-)
 
-(eval-after-load 'tern
-  '(progn
-     (require 'tern-auto-complete)
-     (tern-ac-setup)))
-
-(my-ac-config)
 (put 'downcase-region 'disabled nil)
 
-(setq ring-bell-function
-      (lambda ()
-        (let ((orig-fg (face-foreground 'mode-line)))
-         (set-face-foreground 'mode-line "#F2804F")
-          (run-with-idle-timer 0.1 nil
-                               (lambda (fg) (set-face-foreground 'mode-line fg))
-                               orig-fg))))
