@@ -1,4 +1,19 @@
-/* print a N x N array in spiral fashion */
+/* print a N x N array in spiral fashion
+ * fshaikh@cs.cmu.edu
+ *
+ *  NO ACTUAL MARTIX IS STORED IN MEMORY.
+ *  Instead output is derived from the location of the element calculated as
+`*  row * MAX_COLS + col
+*
+ * ./a.out 4
+ *  0   1   2   3
+ *  4   5   6   7
+ *  8   9  10  11
+ * 12  13  14  15
+ *
+ * sprial0 is:   5   6  10   9
+ * sprial1 is:   8   4   0   1   2   3   7  11  15  14  13  12 
+*/
 #include <iostream>
 #include <cstdlib>
 #include <iomanip>
