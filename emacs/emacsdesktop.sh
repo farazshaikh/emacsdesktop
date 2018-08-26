@@ -1,4 +1,4 @@
 #!/bin/bash
-killall emacs
-emacs25 -q -l /usr/share/xsessions/emacswm.el -rv --daemon
+killall emacs25
+emacs25 -rv --daemon -f exwm-enable
 emacsclient.emacs25 -a '' -c

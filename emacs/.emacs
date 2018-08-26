@@ -811,7 +811,7 @@ and their terminal equivalents.")
 
 ;; You can hide the minibuffer and echo area when they're not used, by
 ;; uncommenting the following line.
-(setq exwm-workspace-minibuffer-position 'top)
+;; (setq exwm-workspace-minibuffer-position 'top)
 
 
 
@@ -855,7 +855,6 @@ and their terminal equivalents.")
 
           ))
 
-  (exwm-input-set-key (kbd "M-w") 'delete-other-windows)
   (exwm-input-set-key (kbd "M-<left>") 'windmove-left)
   (exwm-input-set-key (kbd "M-<down>") 'windmove-down)
   (exwm-input-set-key (kbd "M-<up>") 'windmove-up)
