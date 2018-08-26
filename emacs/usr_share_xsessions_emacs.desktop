@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=EmacsDesktop
 Comment=EmacsDesktop
-Exec=/home/spdk/emacsdesktop.sh
+Exec=~/emacsdesktop.sh
 TryExec=emacs
 Type=Application
 X-LightDM-DesktopName=EmacsDesktop
