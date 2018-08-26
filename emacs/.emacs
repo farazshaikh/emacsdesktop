@@ -97,6 +97,11 @@
                      flycheck-irony
                      py-autopep8
 
+		     ;; emacs goodies
+		     free-keys
+                     ido-vertical-mode
+                     ag
+
                      ;; UI
                      spacemacs-theme))
 
@@ -113,7 +118,9 @@
          (dolist (package package-list)
            (unless (package-installed-p package)
              (package-install package)))
-	 (irony-install-server)
+	 ;;(require 'irony)
+	 ;;(irony-mode t)
+	 ;;(irony-install-server)
          )
   )
 
@@ -121,7 +128,6 @@
 ;; Required packages ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 (require 'whitespace)
-(setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -140,21 +146,22 @@
  '(company-tooltip-align-annotations t)
  '(compilation-scroll-output (quote first-error))
  '(compile-command
-   "cd $WRK/source/server; source ../../devsetup/go/setenv.sh;     go get ./src/excubito/...; go test ./src/excubito/...;
-    go install ./...")
+   "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
  '(custom-safe-themes
    (quote
-    ("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
+    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
  '(dabbrev-case-fold-search nil)
  '(global-hl-line-mode t)
  '(global-whitespace-mode t)
  '(ido-mode t nil (ido))
+ '(ido-vertical-define-keys (quote C-n-and-C-p-only))
+ '(ido-vertical-mode 1)
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (exwm smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -164,7 +171,7 @@
             (quote mode-line))))
        (set-face-foreground
         (quote mode-line)
-        "#F2804F")
+        "#6495ED")
        (run-with-idle-timer 0.1 nil
                             (lambda
                               (fg)
@@ -185,6 +192,7 @@
 ;; theme
 ;;(load-theme 'spacemacs-dark)
 (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
+(setenv "WRK" "/storvisor/work/cypress")
 
 
 
@@ -324,6 +332,8 @@ and their terminal equivalents.")
 
 ;; backspace issues, toggle to resolve backspace issue
 (normal-erase-is-backspace-mode 0)
+(global-set-key (kbd "C-F") 'rgrep)
+(global-set-key (kbd "C-f") 'ag)
 
 
 ;;;;;;;;;;;;;;;;;;;
@@ -373,6 +383,9 @@ and their terminal equivalents.")
                                    "faraz@email.com"
                                    nil)))
 
+(setq ido-enable-flex-matching t)
+(setq ido-everywhere t)
+(ido-mode 1)
 
 ;;;;;;;;;;;;;;;;;;
 ;; YASnippets   ;;
