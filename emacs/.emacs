@@ -10,6 +10,8 @@
 ;; ;; Package Managment system Initialization ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (package-initialize)
+(setq inverse-video t)
+
 
 ;; check up and set installation mode.
 (defvar frinstallation nil "are we installing fremacs")
@@ -101,6 +103,8 @@
 		     free-keys
                      ido-vertical-mode
                      ag
+                     exwm
+                     dmenu
 
                      ;; UI
                      spacemacs-theme))
@@ -158,10 +162,11 @@
  '(ido-vertical-mode 1)
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
+ '(inverse-video t)
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (exwm smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -187,7 +192,8 @@
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
  '(which-function-mode t)
- '(whitespace-style (quote (face empty tabs lines-tail whitespace))))
+ '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
+ '(winner-mode t))
 
 ;; theme
 ;;(load-theme 'spacemacs-dark)
@@ -284,56 +290,6 @@
     (kill-rectangle (mark) (point))
     (exchange-point-and-mark)
     (yank-rectangle)))
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;
-;; KeyBoard Mappings ;;
-;;;;;;;;;;;;;;;;;;;;;;;
-(define-key input-decode-map "\e\eOA" [(meta up)])
-(define-key input-decode-map "\e\eOB" [(meta down)])
-(define-key input-decode-map "\e\eOC" [(meta right)])
-(define-key input-decode-map "\e\eOD" [(meta left)])
-(global-set-key [(meta up)] 'windmove-up)
-(global-set-key [(meta down)] 'windmove-down)
-(global-set-key [(meta right)] 'windmove-right)
-(global-set-key [(meta left)] 'windmove-left)
-
-;; windmove gnome terminal keys
-(defvar real-keyboard-keys
-  '(("M-<up>"        . "\M-[1;3A")
-    ("M-<down>"      . "\M-[1;3B")
-    ("M-<right>"     . "\M-[1;3C")
-    ("M-<left>"      . "\M-[1;3D")
-    ("C-<return>"    . "\C-j")
-    ("C-<delete>"    . "\M-[3;5~")
-    ("C-<up>"        . "\M-[1;5A")
-    ("C-<down>"      . "\M-[1;5B")
-    ("C-<right>"     . "\M-[1;5C")
-    ("C-<left>"      . "\M-[1;5D"))
-  "An assoc list of pretty key strings
-and their terminal equivalents.")
-
-(defun key (desc)
-  (or (and window-system (read-kbd-macro desc))
-      (or (cdr (assoc desc real-keyboard-keys))
-          (read-kbd-macro desc))))
-
-(global-set-key (key "M-<left>") 'windmove-left)          ; move to left windnow
-(global-set-key (key "M-<right>") 'windmove-right)        ; move to right window
-(global-set-key (key "M-<up>") 'windmove-up)              ; move to upper window
-(global-set-key (key "M-<down>") 'windmove-down)          ; move to downer window
-(global-set-key (key "C-<left>") 'backward-word)          ; move forward word
-(global-set-key (key "C-<right>") 'forward-word)          ; move backward word
-(global-set-key (key "C-<up>") 'backward-paragraph)       ; move forward word
-(global-set-key (key "C-<down>") 'forward-paragraph)      ; move backward word
-(global-set-key (kbd "<find>") 'beginning-of-line)        ; beginning of line
-(define-key global-map [select] 'end-of-line)             ; end of line
-
-;; backspace issues, toggle to resolve backspace issue
-(normal-erase-is-backspace-mode 0)
-(global-set-key (kbd "C-F") 'rgrep)
-(global-set-key (kbd "C-f") 'ag)
 
 
 ;;;;;;;;;;;;;;;;;;;
@@ -664,3 +620,255 @@ and their terminal equivalents.")
 
 (put 'downcase-region 'disabled nil)
 
+
+
+
+
+
+;;;;;;;;;;;;;;;
+;; EXWM      ;;
+;;;;;;;;;;;;;;;
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(fringe-mode 1)
+
+
+
+;; Turn on `display-time-mode' if you don't use an external bar.
+(setq display-time-default-load-average nil)
+(display-time-mode t)
+
+
+
+;; Load EXWM.
+(require 'exwm)
+
+;; Fix problems with Ido (if you use it).
+(require 'exwm-config)
+(exwm-config-ido)
+
+(defun run-prog
+  (shell-command "google-chrome --incognito")
+)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; KeyBoard Mappings ;;
+;; put this after    ;;
+;; exwm init so that ;;
+;; super becomes     ;;
+;; accessible        ;;
+;;;;;;;;;;;;;;;;;;;;;;;
+(define-key input-decode-map "\e\eOA" [(meta up)])
+(define-key input-decode-map "\e\eOB" [(meta down)])
+(define-key input-decode-map "\e\eOC" [(meta right)])
+(define-key input-decode-map "\e\eOD" [(meta left)])
+(global-set-key [(meta up)] 'windmove-up)
+(global-set-key [(meta down)] 'windmove-down)
+(global-set-key [(meta right)] 'windmove-right)
+(global-set-key [(meta left)] 'windmove-left)
+
+;; windmove gnome terminal keys
+(defvar real-keyboard-keys
+  '(("M-<up>"        . "\M-[1;3A")
+    ("M-<down>"      . "\M-[1;3B")
+    ("M-<right>"     . "\M-[1;3C")
+    ("M-<left>"      . "\M-[1;3D")
+    ("C-<return>"    . "\C-j")
+    ("C-<delete>"    . "\M-[3;5~")
+    ("C-<up>"        . "\M-[1;5A")
+    ("C-<down>"      . "\M-[1;5B")
+    ("C-<right>"     . "\M-[1;5C")
+    ("C-<left>"      . "\M-[1;5D"))
+  "An assoc list of pretty key strings
+and their terminal equivalents.")
+
+(defun key (desc)
+  (or (and window-system (read-kbd-macro desc))
+      (or (cdr (assoc desc real-keyboard-keys))
+          (read-kbd-macro desc))))
+
+(global-set-key (key "M-<left>") 'windmove-left)          ; move to left windnow
+(global-set-key (key "M-<right>") 'windmove-right)        ; move to right window
+(global-set-key (key "M-<up>") 'windmove-up)              ; move to upper window
+(global-set-key (key "M-<down>") 'windmove-down)          ; move to downer window
+(global-set-key (key "C-<left>") 'backward-word)          ; move forward word
+(global-set-key (key "C-<right>") 'forward-word)          ; move backward word
+(global-set-key (key "C-<up>") 'backward-paragraph)       ; move forward word
+(global-set-key (key "C-<down>") 'forward-paragraph)      ; move backward word
+(global-set-key (kbd "<find>") 'beginning-of-line)        ; beginning of line
+(define-key global-map [select] 'end-of-line)             ; end of line
+(global-set-key (kbd "M-<tab>") 'next-buffer)                    ; control-tab
+(global-set-key (kbd "M-<iso-lefttab>") 'previous-buffer)        ; control-shift-tab
+
+
+;; backspace issues, toggle to resolve backspace issue
+(normal-erase-is-backspace-mode 0)
+(global-set-key (kbd "C-F") 'rgrep)
+(global-set-key (kbd "C-f") 'ag)
+
+
+
+
+;; All buffers created in EXWM mode are named "*EXWM*". You may want to
+;; change it in `exwm-update-class-hook' and `exwm-update-title-hook', which
+;; are run when a new X window class name or title is available.  Here's
+;; some advice on this topic:
+;; + Always use `exwm-workspace-rename-buffer` to avoid naming conflict.
+;; + For applications with multiple windows (e.g. GIMP), the class names of
+;    all windows are probably the same.  Using window titles for them makes
+;;   more sense.
+;; In the following example, we use class names for all windows expect for
+;; Java applications and GIMP.
+(add-hook 'exwm-update-class-hook
+          (lambda ()
+            (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                        (string= "gimp" exwm-instance-name))
+              (exwm-workspace-rename-buffer exwm-class-name))))
+(add-hook 'exwm-update-title-hook
+          (lambda ()
+            (when (or (not exwm-instance-name)
+                      (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                      (string= "gimp" exwm-instance-name))
+              (exwm-workspace-rename-buffer exwm-title))))
+
+;; ;; Set global EXWM key bindings
+;; (exwm-input-set-key (kbd "M-r") #'exwm-restart)
+;; (exwm-input-set-key (kbd "M-w") #'exwm-workspace-switch)
+;; (exwm-input-set-key (kbd "M-d") 'dmenu)
+;; (exwm-input-set-key (kbd "M-t") #'exwm-floating-toggle-floating)
+;; (exwm-input-set-key (kbd "M-s") #'exwm-workspace-switch-to-buffer)
+;; (exwm-input-set-key (kbd "M-f") #'exwm-layout-toggle-fullscreen)
+
+;; Global keybindings can be defined with `exwm-input-global-keys'.
+;; Here are a few examples:
+(setq exwm-input-global-keys
+      `(
+        ;; Bind "s-r" to exit char-mode and fullscreen mode.
+        ([?\s-c] . (lambda ()
+                     (interactive)
+                     (start-process-shell-command "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal")))
+
+        ([?\s-g] . (lambda ()
+                     (interactive)
+                     (start-process-shell-command "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito")))
+
+        ;; Bind "s-r" to exit char-mode and fullscreen mode.
+        ([?\s-d] . dmenu)
+        ;; Bind "s-r" to exit char-mode and fullscreen mode.
+        ([?\s-r] . exwm-reset)
+        ;; Bind "s-w" to switch workspace interactively.
+        ([?\s-w] . exwm-workspace-switch)
+        ;; Bind "s-0" to "s-9" to switch to a workspace by its index.
+        ,@(mapcar (lambda (i)
+                    `(,(kbd (format "s-%d" i)) .
+                      (lambda ()
+                        (interactive)
+                        (exwm-workspace-switch-create ,i))))
+                  (number-sequence 0 9))
+        ;; Bind "s-&" to launch applications ('M-&' also works if the output
+        ;; buffer does not bother you).
+        ([?\s-&] . (lambda (command)
+		     (interactive (list (read-shell-command "$ ")))
+		     (start-process-shell-command command nil command)))
+        ;; Bind "s-<f2>" to "slock", a simple X display locker.
+        ([s-f2] . (lambda ()
+		    (interactive)
+		    (start-process "" nil "/usr/bin/slock")))))
+
+;; To add a key binding only available in line-mode, simply define it in
+;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.
+(define-key exwm-mode-map [?\C-q] #'exwm-input-send-next-key)
+
+;; The following example demonstrates how to use simulation keys to mimic
+;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
+;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
+;; and DEST is what EXWM actually sends to application.  Note that both SRC
+;; and DEST should be key sequences (vector or string).
+(setq exwm-input-simulation-keys
+      '(
+        ;; movement
+        ([?\C-b] . [left])
+        ([?\M-b] . [C-left])
+        ([?\C-f] . [right])
+        ([?\M-f] . [C-right])
+        ([?\C-p] . [up])
+        ([?\C-n] . [down])
+        ([?\C-a] . [home])
+        ([?\C-e] . [end])
+        ([?\M-v] . [prior])
+        ([?\C-v] . [next])
+        ([?\C-d] . [delete])
+        ([?\C-k] . [S-end delete])
+        ;; cut/paste.
+        ([?\C-w] . [?\C-x])
+        ([?\M-w] . [?\C-c])
+        ([?\C-y] . [?\C-v])
+        ;; search
+        ([?\C-s] . [?\C-f])))
+
+;; You can hide the minibuffer and echo area when they're not used, by
+;; uncommenting the following line.
+(setq exwm-workspace-minibuffer-position 'top)
+
+
+
+
+;; Do not forget to enable EXWM. It will start by itself when things are
+;; ready.  You can put it _anywhere_ in your configuration.
+(exwm-enable)
+(require 'exwm-systemtray)
+(exwm-systemtray-enable)
+
+
+;; i3 like window mgmt
+(defun i3WindowMgmtKeys ()
+  (interactive)
+
+  (setq exwm-input-global-keys
+        `(
+          ([?\s-c] . (lambda ()
+                       (interactive)
+                       (start-process-shell-command
+                        "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal")))
+          ([?\s-g] . (lambda ()
+                       (interactive)
+                       (start-process-shell-command
+                        "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito")))
+          ([?\s-d] . dmenu)
+          ([?\s-r] . exwm-reset)
+          ([?\s-w] . exwm-workspace-switch)
+          ,@(mapcar (lambda (i)
+                      `(,(kbd (format "s-%d" i)) .
+                        (lambda ()
+                          (interactive)
+                          (exwm-workspace-switch-create ,i))))
+                    (number-sequence 0 9))
+          ([?\s-&] . (lambda (command)
+                       (interactive (list (read-shell-command "$ ")))
+                       (start-process-shell-command command nil command)))
+          ([s-f2] . (lambda ()
+                      (interactive)
+                      (start-process "" nil "/usr/bin/slock")))
+
+          ))
+
+  (exwm-input-set-key (kbd "M-w") 'delete-other-windows)
+  (exwm-input-set-key (kbd "M-<left>") 'windmove-left)
+  (exwm-input-set-key (kbd "M-<down>") 'windmove-down)
+  (exwm-input-set-key (kbd "M-<up>") 'windmove-up)
+  (exwm-input-set-key (kbd "M-<right>") 'windmove-right)
+  (exwm-input-set-key (kbd "M-S-<right>") 'enlarge-window-horizontally)
+  (exwm-input-set-key (kbd "M-S-<left>") 'shrink-window-horizontally)
+  (exwm-input-set-key (kbd "M-S-<up>") 'enlarge-window)
+  (exwm-input-set-key (kbd "M-S-<down>") 'shrink-window)
+  (exwm-input-set-key (kbd "M-z") 'winner-undo)
+  (exwm-input-set-key (kbd "M-<tab>") 'next-buffer)            ; control-shift-tab
+  (exwm-input-set-key (kbd "M-<iso-lefttab>") 'previous-buffer)    ; control-shift-tab
+
+  ;; (global-set-key (key "<M-z>") 'winner-undo)
+)
+
+(i3WindowMgmtKeys)
