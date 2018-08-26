@@ -3,8 +3,6 @@ alias ssho='ssh -o "StrictHostKeyChecking no"'
 alias ff="find . -name"
 alias ffg="find . -type f | xargs grep -nH "
 alias pssh='parallel-ssh -i -t0 -h ~/.vmcluster $@'
-alias ffstorfscore="find . -name *core*  | xargs file | grep -e \"/storfs \" -e \'storfs\' | cut -f 1 -d \" \"| sed 's/:$//'"
-alias ffstorfs="find . -name storfs -type f"
 
 export GIT_PS1_SHOWDIRTYSTATE=true
 export GIT_PS1_SHOWSTASHSTATE=true
@@ -61,10 +59,10 @@ cdbug () {
         echo $targDir
         if [ -d $targDir ]; then
            mkdir -p $tmpBugDir/$bugNum
-	   echo "Copy bugs from $targDir to $tmpBugDir/$bugNum"
-           cp ${targDir}* $tmpBugDir/$bugNum/                                                                                                   
+           echo "Copy bugs from $targDir to $tmpBugDir/$bugNum"
+           cp ${targDir}* $tmpBugDir/$bugNum/
            cd $tmpBugDir/$bugNum
-	   untarall
+           untarall
            break
         fi
         zeroDir=$zeroDir"/0"
@@ -72,12 +70,12 @@ cdbug () {
 }
 
 prune() {
-	if [ $# -eq 0 ]
-	  then
-	   echo "No arguments supplied, Example prune start end file"
+        if [ $# -eq 0 ]
+          then
+           echo "No arguments supplied, Example prune start end file"
           else
            sed -n '/$1/,/$2/p' $3
-	fi 
+        fi
 }
 
 runtillfail () {
@@ -85,16 +83,13 @@ runtillfail () {
      while $command; do :; done
 }
 
-source ~/vBlockOnUCS
-source ~/stcommands.sh
 export PYTHONSTARTUP=~/.pythonrc
-source ~/.bash_aliases
 
 # dynamic title for screen
 case "$TERM" in
     screen*)
-	 export PS1=$PS1'\[\033k\033\\\]\$ '
-	 ;;
+         export PS1=$PS1'\[\033k\033\\\]\$ '
+         ;;
     *)
-         export PS1=$PS1'\$ '	
+         export PS1=$PS1'\$ '
 esac
