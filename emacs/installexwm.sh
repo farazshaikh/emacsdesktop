@@ -15,12 +15,12 @@ installTime=`date | sed -e "s/ /_/g"`
 echo ${installTime}
 
 sudo apt-get install emacs25 -y
-sudo agt-get install suckless-tools -y
+sudo apt-get install suckless-tools -y
 
-mkdir -p /usr/share/faraz/
+sudo mkdir -p /usr/share/faraz/
 cd /usr/share/faraz/
 git clone http://github.com/farazshaikh/Misc
-chmod -R 0777 ./Misc
+sudo chmod -R 0777 ./Misc
 cd ./Misc/
 git config core.fileMode false
 
