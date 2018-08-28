@@ -99,12 +99,13 @@
                      flycheck-irony
                      py-autopep8
 
-		     ;; emacs goodies
-		     free-keys
+                     ;; emacs goodies
+                     free-keys
                      ido-vertical-mode
                      ag
                      exwm
                      dmenu
+                     iflipb
 
                      ;; UI
                      spacemacs-theme))
@@ -155,6 +156,7 @@
    (quote
     ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
  '(dabbrev-case-fold-search nil)
+ '(dmenu-prompt-string "Run App: ")
  '(global-hl-line-mode t)
  '(global-whitespace-mode t)
  '(ido-mode t nil (ido))
@@ -184,6 +186,7 @@
                                (quote mode-line)
                                fg))
                             orig-fg))))
+ '(savehist-mode 1)
  '(scroll-step 1)
  '(set-fill-column 80)
  '(show-paren-mode t)
@@ -700,8 +703,6 @@ and their terminal equivalents.")
 (global-set-key (key "C-<down>") 'forward-paragraph)      ; move backward word
 (global-set-key (kbd "<find>") 'beginning-of-line)        ; beginning of line
 (define-key global-map [select] 'end-of-line)             ; end of line
-(global-set-key (kbd "M-<tab>") 'next-buffer)                    ; control-tab
-(global-set-key (kbd "M-<iso-lefttab>") 'previous-buffer)        ; control-shift-tab
 
 
 ;; backspace issues, toggle to resolve backspace issue
@@ -823,6 +824,32 @@ and their terminal equivalents.")
 (exwm-systemtray-enable)
 
 
+(defun GetToBrowser()
+  (interactive)
+(if (eq (get-buffer "Google-chrome") nil)
+    (progn
+      (message "Opening google chrome browser")
+      (start-process-shell-command
+        "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito"))
+  (progn
+    (message "Google Chrome browser")
+    (switch-to-buffer "Google-chrome"))
+  ))
+
+
+(defun GetToTerminal()
+  (interactive)
+(if (eq (get-buffer "Gnome-terminal") nil)
+    (progn
+      (message "Opening terminal")
+      (start-process-shell-command
+        "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal"))
+  (progn
+    (message "terminal")
+    (switch-to-buffer "Gnome-terminal"))
+  ))
+
+
 ;; i3 like window mgmt
 (defun i3WindowMgmtKeys ()
   (interactive)
@@ -830,13 +857,10 @@ and their terminal equivalents.")
   (setq exwm-input-global-keys
         `(
           ([?\s-c] . (lambda ()
-                       (interactive)
-                       (start-process-shell-command
-                        "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal")))
-          ([?\s-g] . (lambda ()
-                       (interactive)
-                       (start-process-shell-command
-                        "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito")))
+                              (interactive)
+                              (start-process-shell-command
+                               "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal")))
+          ;;([?\s-g] . GetToBrowser)
           ([?\s-d] . dmenu)
           ([?\s-r] . exwm-reset)
           ([?\s-w] . exwm-workspace-switch)
@@ -855,6 +879,16 @@ and their terminal equivalents.")
 
           ))
 
+  ;; Shortcuts to programs using Super Key
+  (global-set-key (key "s-g") 'GetToBrowser)
+  (exwm-input-set-key (kbd "s-g") 'GetToBrowser)
+
+
+  ;; Shortcuts to programs using Super Key
+  (global-set-key (key "s-t") 'GetToTerminal)
+  (exwm-input-set-key (kbd "s-t") 'GetToTerminal)
+
+  ;; Window Mgmt using Emacs style Alt-Key
   (exwm-input-set-key (kbd "M-<left>") 'windmove-left)
   (exwm-input-set-key (kbd "M-<down>") 'windmove-down)
   (exwm-input-set-key (kbd "M-<up>") 'windmove-up)
@@ -863,11 +897,57 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "M-S-<left>") 'shrink-window-horizontally)
   (exwm-input-set-key (kbd "M-S-<up>") 'enlarge-window)
   (exwm-input-set-key (kbd "M-S-<down>") 'shrink-window)
-  (exwm-input-set-key (kbd "M-z") 'winner-undo)
-  (exwm-input-set-key (kbd "M-<tab>") 'next-buffer)            ; control-shift-tab
-  (exwm-input-set-key (kbd "M-<iso-lefttab>") 'previous-buffer)    ; control-shift-tab
 
-  ;; (global-set-key (key "<M-z>") 'winner-undo)
+  (exwm-input-set-key (kbd "M-z") 'winner-undo)
+  (global-set-key (kbd "M-z") 'winner-undo)
 )
 
 (i3WindowMgmtKeys)
+(GetToTerminal)
+(GetToBrowser)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;
+;;Setup alt-tab     ;;
+;;;;;;;;;;;;;;;;;;;;;;
+(setq iflipbTimerObj nil)
+(setq alt-tab-selection-hover-time "1 sec")
+(defun timed-iflipb-auto-off ()
+  (message ">")
+  (setq last-command 'message))
+
+(defun timed-iflipb-next-buffer (arg)
+  (interactive "P")
+  (iflipb-next-buffer arg)
+
+  (when iflipbTimerObj
+    (cancel-timer iflipbTimerObj)
+    (setq iflipbTimerObj nil))
+
+  (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+
+(defun timed-iflipb-previous-buffer ()
+  (interactive)
+  (iflipb-previous-buffer)
+  (when iflipbTimerObj
+    (cancel-timer iflipbTimerObj)
+    (setq iflipbTimerObj nil))
+  (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+
+(defun iflipb-first-iflipb-buffer-switch-command ()
+  "Determines whether this is the first invocation of
+  iflipb-next-buffer or iflipb-previous-buffer this round."
+  (message "FR %s" last-command)
+  (not (and (or (eq last-command 'timed-iflipb-next-buffer)
+                (eq last-command 'timed-iflipb-previous-buffer)))))
+
+
+(defun setupIFlipb()
+  (setq iflipb-wrap-around t)
+  (global-set-key (kbd "<M-<tab>>") 'timed-iflipb-next-buffer)
+  (global-set-key (kbd "<M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+  (exwm-input-set-key (kbd "M-<tab>") 'timed-iflipb-next-buffer)
+  (exwm-input-set-key (kbd "M-<iso-lefttab>") 'timed-iflipb-previous-buffer))
+
+(setupIFlipb)

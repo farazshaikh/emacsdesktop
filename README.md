@@ -1,6 +1,10 @@
 Desktop Setup for Emacs Window Manager
 ====
+
+```
 wget -qO- https://raw.githubusercontent.com/farazshaikh/Misc/master/emacs/installexwm.sh | sudo bash -x
+```
+
 Logout and login forever into emacs :)
 
 Misc
