@@ -916,6 +916,7 @@ and their terminal equivalents.")
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;Setup alt-tab     ;;
 ;;;;;;;;;;;;;;;;;;;;;;
+(require 'iflipb)
 (setq iflipbTimerObj nil)
 (setq alt-tab-selection-hover-time "1 sec")
 (defun timed-iflipb-auto-off ()
