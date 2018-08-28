@@ -849,6 +849,11 @@ and their terminal equivalents.")
     (switch-to-buffer "Gnome-terminal"))
   ))
 
+(defun LockScreen()
+  (interactive)
+  (start-process-shell-command
+        "/usr/bin/slock" nil  "/usr/bin/slock"))
+
 
 ;; i3 like window mgmt
 (defun i3WindowMgmtKeys ()
@@ -856,11 +861,7 @@ and their terminal equivalents.")
 
   (setq exwm-input-global-keys
         `(
-          ([?\s-c] . (lambda ()
-                              (interactive)
-                              (start-process-shell-command
-                               "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal")))
-          ;;([?\s-g] . GetToBrowser)
+          ([?\s-l] . 'LockScreen)
           ([?\s-d] . dmenu)
           ([?\s-r] . exwm-reset)
           ([?\s-w] . exwm-workspace-switch)
@@ -887,6 +888,10 @@ and their terminal equivalents.")
   ;; Shortcuts to programs using Super Key
   (global-set-key (key "s-t") 'GetToTerminal)
   (exwm-input-set-key (kbd "s-t") 'GetToTerminal)
+
+  (exwm-input-set-key (kbd "s-l") 'LockScreen)
+  (global-set-key (kbd "s-l") 'LockScreen)
+
 
   ;; Window Mgmt using Emacs style Alt-Key
   (exwm-input-set-key (kbd "M-<left>") 'windmove-left)

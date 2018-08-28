@@ -15,7 +15,7 @@ installTime=`date | sed -e "s/ /_/g"`
 echo ${installTime}
 
 sudo apt-get install emacs25 -y
-
+sudo agt-get install suckless-tools -y
 
 mkdir -p /usr/share/faraz/
 cd /usr/share/faraz/
