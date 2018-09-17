@@ -651,11 +651,6 @@
 (require 'exwm-config)
 (exwm-config-ido)
 
-(defun run-prog
-  (shell-command "google-chrome --incognito")
-)
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; KeyBoard Mappings ;;
@@ -747,15 +742,6 @@ and their terminal equivalents.")
 ;; Here are a few examples:
 (setq exwm-input-global-keys
       `(
-        ;; Bind "s-r" to exit char-mode and fullscreen mode.
-        ([?\s-c] . (lambda ()
-                     (interactive)
-                     (start-process-shell-command "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal")))
-
-        ([?\s-g] . (lambda ()
-                     (interactive)
-                     (start-process-shell-command "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito")))
-
         ;; Bind "s-r" to exit char-mode and fullscreen mode.
         ([?\s-d] . dmenu)
         ;; Bind "s-r" to exit char-mode and fullscreen mode.

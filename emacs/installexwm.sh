@@ -37,6 +37,15 @@ ln -s `pwd`/emacs/emacsdesktop.sh /usr/share/xsessions/emacsdesktop.sh
 mv ~/.emacs ~/.emacs.exwm.backup.${installTime}
 ln -s `pwd`/emacs/.emacs ~/.emacs
 
+##################
+# Setup retina   #
+##################
+mv /etc/X11/Xresources/retina-display /etc/X11/Xresources/retina-display.${installTime}
+ln -s `pwd`/emacs/etc_X11_Xresources_retina-display /etc/X11/Xresources/retina-display
+
+mv /etc/X11/Xsession.d/10-retina-display /etc/X11/Xsession.d/10-retina-display.${installTime}
+ln -s `pwd`/emacs/etc_X11_Xsession.d_10-retina-display /etc/X11/Xsession.d/10-retina-display
+
 
 ###################
 #Other setup      #
@@ -50,3 +59,4 @@ ln -s `pwd`/.screenrc ~/.screenrc
 mkdir ~/.i3
 mv ~/.i3/config ~/.i3/config.backup.${installTime}
 ln -s `pwd`/.i3/config ~/.i3/config
+
