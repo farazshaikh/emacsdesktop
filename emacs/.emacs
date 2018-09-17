@@ -98,6 +98,7 @@
                      flycheck
                      flycheck-irony
                      py-autopep8
+                     powerline
 
                      ;; emacs goodies
                      free-keys
@@ -191,6 +192,7 @@
  '(set-fill-column 80)
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
+ '(speedbar-default-position (quote left))
  '(standard-indent 3)
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
@@ -638,9 +640,24 @@
 
 
 
+(defun ShowTime()
 ;; Turn on `display-time-mode' if you don't use an external bar.
 (setq display-time-default-load-average nil)
 (display-time-mode t)
+(defface egoge-display-time
+   '((((type x w32 mac))
+      ;; #060525 is the background colour of my default face.
+      (:foreground "white" :inherit bold))
+     (((type tty))
+      (:foreground "white")))
+   "Face used to display the time in the mode line.")
+ ;; This causes the current time in the mode line to be displayed in
+ ;; `egoge-display-time-face' to make it stand out visually.
+(setq display-time-string-forms
+      '((propertize (concat dayname "-" monthname "-" day " " 12-hours ":" minutes " " am-pm)
+                    'face 'egoge-display-time))))
+(ShowTime)
+(powerline-center-theme)
 
 
 
@@ -650,6 +667,11 @@
 ;; Fix problems with Ido (if you use it).
 (require 'exwm-config)
 (exwm-config-ido)
+
+(defun run-prog
+  (shell-command "google-chrome --incognito")
+)
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -743,6 +765,15 @@ and their terminal equivalents.")
 (setq exwm-input-global-keys
       `(
         ;; Bind "s-r" to exit char-mode and fullscreen mode.
+        ([?\s-c] . (lambda ()
+                     (interactive)
+                     (start-process-shell-command "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal")))
+
+        ([?\s-g] . (lambda ()
+                     (interactive)
+                     (start-process-shell-command "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito")))
+
+        ;; Bind "s-r" to exit char-mode and fullscreen mode.
         ([?\s-d] . dmenu)
         ;; Bind "s-r" to exit char-mode and fullscreen mode.
         ([?\s-r] . exwm-reset)
@@ -805,34 +836,51 @@ and their terminal equivalents.")
 
 ;; Do not forget to enable EXWM. It will start by itself when things are
 ;; ready.  You can put it _anywhere_ in your configuration.
-(exwm-enable)
 (require 'exwm-systemtray)
 (exwm-systemtray-enable)
+(exwm-enable)
+(start-process "" nil "/usr/bin/nm-applet")
 
+
+(defun find-named-buffer(buffPrefix)
+  (interactive)
+  (setq named-buffer nil)
+  (cl-loop for buf in (buffer-list)  do
+           (when (string-prefix-p buffPrefix (buffer-name buf))
+             (progn
+               (setq named-buffer buf)
+                (cl-return)
+               )
+             )
+           )
+  named-buffer
+  )
 
 (defun GetToBrowser()
   (interactive)
-(if (eq (get-buffer "Google-chrome") nil)
+  (setq browser (find-named-buffer "Google-chrome"))
+(if (eq browser nil)
     (progn
       (message "Opening google chrome browser")
       (start-process-shell-command
         "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito"))
   (progn
     (message "Google Chrome browser")
-    (switch-to-buffer "Google-chrome"))
+    (switch-to-buffer browser))
   ))
 
 
 (defun GetToTerminal()
   (interactive)
-(if (eq (get-buffer "Gnome-terminal") nil)
+  (setq terminal (find-named-buffer "Gnome-terminal"))
+(if (eq terminal nil)
     (progn
       (message "Opening terminal")
       (start-process-shell-command
         "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal"))
   (progn
     (message "terminal")
-    (switch-to-buffer "Gnome-terminal"))
+    (switch-to-buffer terminal))
   ))
 
 (defun LockScreen()
@@ -866,6 +914,9 @@ and their terminal equivalents.")
 
           ))
 
+  ;;(setq exwm-workspace-show-all-buffers t)
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+
   ;; Shortcuts to programs using Super Key
   (global-set-key (key "s-g") 'GetToBrowser)
   (exwm-input-set-key (kbd "s-g") 'GetToBrowser)
@@ -880,14 +931,14 @@ and their terminal equivalents.")
 
 
   ;; Window Mgmt using Emacs style Alt-Key
-  (exwm-input-set-key (kbd "M-<left>") 'windmove-left)
-  (exwm-input-set-key (kbd "M-<down>") 'windmove-down)
-  (exwm-input-set-key (kbd "M-<up>") 'windmove-up)
-  (exwm-input-set-key (kbd "M-<right>") 'windmove-right)
-  (exwm-input-set-key (kbd "M-S-<right>") 'enlarge-window-horizontally)
-  (exwm-input-set-key (kbd "M-S-<left>") 'shrink-window-horizontally)
-  (exwm-input-set-key (kbd "M-S-<up>") 'enlarge-window)
-  (exwm-input-set-key (kbd "M-S-<down>") 'shrink-window)
+  (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
+  (exwm-input-set-key (kbd "s-<down>") 'windmove-down)
+  (exwm-input-set-key (kbd "s-<up>") 'windmove-up)
+  (exwm-input-set-key (kbd "s-<right>") 'windmove-right)
+  (exwm-input-set-key (kbd "s-S-<right>") 'enlarge-window-horizontally)
+  (exwm-input-set-key (kbd "s-S-<left>") 'shrink-window-horizontally)
+  (exwm-input-set-key (kbd "s-S-<up>") 'enlarge-window)
+  (exwm-input-set-key (kbd "s-S-<down>") 'shrink-window)
 
   (exwm-input-set-key (kbd "M-z") 'winner-undo)
   (global-set-key (kbd "M-z") 'winner-undo)
@@ -936,6 +987,7 @@ and their terminal equivalents.")
 
 
 (defun setupIFlipb()
+  (interactive)
   (setq iflipb-wrap-around t)
   (global-set-key (kbd "<M-<tab>>") 'timed-iflipb-next-buffer)
   (global-set-key (kbd "<M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
