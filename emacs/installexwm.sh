@@ -16,6 +16,9 @@ echo ${installTime}
 
 sudo apt-get install emacs25 -y
 sudo apt-get install suckless-tools -y
+sudo apt-get install git -y
+sudo apt-get install chromium-browser -y
+sudo apt-get install chromium-ublock-origin -y
 
 sudo mkdir -p /usr/share/faraz/
 cd /usr/share/faraz/
@@ -59,4 +62,3 @@ ln -s `pwd`/.screenrc ~/.screenrc
 mkdir ~/.i3
 mv ~/.i3/config ~/.i3/config.backup.${installTime}
 ln -s `pwd`/.i3/config ~/.i3/config
-

@@ -323,7 +323,10 @@
  '(ediff-fine-diff-B ((((class color)) (:background "cyan3" :foreground "black"))))
  '(ediff-fine-diff-C ((((class color)) (:background "Turquoise" :foreground "black" :weight bold))))
  '(hl-line ((t (:weight extra-bold))))
- '(mode-line-inactive ((t (:background "black" :foreground "white")))))
+ '(mode-line ((t (:background "cornflower blue" :foreground "white" :box (:line-width 1 :color "white") :height 0.9))))
+ '(mode-line-emphasis ((t nil)))
+ '(mode-line-highlight ((t (:box (:line-width 1 :color "white")))))
+ '(mode-line-inactive ((t (:background "cornflower blue" :foreground "white" :height 0.9)))))
 
 
 
@@ -657,7 +660,7 @@
       '((propertize (concat dayname "-" monthname "-" day " " 12-hours ":" minutes " " am-pm)
                     'face 'egoge-display-time))))
 (ShowTime)
-(powerline-center-theme)
+;;(powerline-center-theme)
 
 
 
@@ -858,14 +861,18 @@ and their terminal equivalents.")
 
 (defun GetToBrowser()
   (interactive)
-  (setq browser (find-named-buffer "Google-chrome"))
+  (setq browser-bufname "Chromium-browser")
+  (setq browser-binary "/usr/bin/chromium-browser")
+  (setq browser-invocation (concat browser-binary " --incognito"))
+
+  (setq browser (find-named-buffer browser-bufname))
 (if (eq browser nil)
     (progn
-      (message "Opening google chrome browser")
+      (message "Opening Web browser")
       (start-process-shell-command
-        "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito"))
+        browser-binary nil  browser-invocation))
   (progn
-    (message "Google Chrome browser")
+    (message "Web browser")
     (switch-to-buffer browser))
   ))
 
@@ -940,6 +947,9 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-S-<up>") 'enlarge-window)
   (exwm-input-set-key (kbd "s-S-<down>") 'shrink-window)
 
+  (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
+  (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
+
   (exwm-input-set-key (kbd "M-z") 'winner-undo)
   (global-set-key (kbd "M-z") 'winner-undo)
 )
@@ -947,7 +957,7 @@ and their terminal equivalents.")
 (i3WindowMgmtKeys)
 (GetToTerminal)
 (GetToBrowser)
-
+(set-face-attribute 'default nil :height 70)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;
