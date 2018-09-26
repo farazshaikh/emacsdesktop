@@ -331,11 +331,11 @@
 
 
 ;;;;;;;;;;;;;;;;;;;
-;; Emacs Tools   ;;
+;; Emacs email   ;;
 ;;;;;;;;;;;;;;;;;;;
 
 
-;; email
+;; Tools
 (setq smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
       smtpmail-smtp-server "smtp.gmail.com"
       smtpmail-default-smtp-server "smtp.gmail.com"
@@ -863,7 +863,7 @@ and their terminal equivalents.")
   (interactive)
   (setq browser-bufname "Chromium-browser")
   (setq browser-binary "/usr/bin/chromium-browser")
-  (setq browser-invocation (concat browser-binary " --incognito"))
+  (setq browser-invocation (concat browser-binary " --incognito --force-device-scale-factor=1.5"))
 
   (setq browser (find-named-buffer browser-bufname))
 (if (eq browser nil)
