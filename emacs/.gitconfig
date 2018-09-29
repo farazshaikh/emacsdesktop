@@ -1,0 +1,45 @@
+[user]
+	email = faraz.shaikh@gmail.com
+	name = Faraz Shaikh
+[core]
+	editor = "emacsclient -t"
+[user]
+        name = faraz
+        email = faraz.shaikh@gmail.com
+
+[diff]
+        tool = edifftwin
+        guitool = edifftwin
+
+[difftool "ediff"]
+        cmd = /home/faraz/ediff.sh $LOCAL $REMOTE  $MERGED
+[difftool "edifftwin"]
+        cmd = emacsclient --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
+
+[difftool "edifftwinst"]
+        cmd = emacsclient -t -nw --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
+
+
+[merge]
+        tool = ediff
+
+[mergetool "ediff"]
+        cmd = /home/faraz/ediff.sh $LOCAL $REMOTE $MERGED $BASE
+        trustExitCode = true
+[commit]
+        template = /home/faraz/.gitmessage
+
+[alias]
+    st = status
+    ci = commit
+    br = branch
+    co = checkout
+    df = diff
+    dc = diff --cached
+    lg = log -p
+    lol = log --graph --decorate --pretty=oneline --abbrev-commit
+    lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
+    ls = ls-files
+
+    # Show files ignored by git:
+    ign = ls-files -o -i --exclude-standard

@@ -1,64 +1,99 @@
 #!/bin/bash
 
+linkup() {
+    local ts=${1}
+    local src=${2}
+    local dst=${3}
+    [ -d `dirname ${src}` ] || mkdir `dirname ${src}`
+    if ! [ -e "${src}" ]; then
+        ## source doesn't exists
+        echo -n "Link "
+        ln -s ${dst} ${src}
+    elif ! [ "${src}" -ef "${dst}" ]; then
+        ## source exists and differs from destinaton
+        mv ${src} ${src}.${ts}.exwm.bkup
+        echo -n "Backup and Link "
+        ln -s ${dst} ${src}
+    else
+        ## source exists and is same as destination
+        echo -n "Skipping Link "
+    fi
+    echo ${src} "->" `readlink -f ${src}`
+}
 
-
-
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root or sudo"
-  exit
-fi
 
 ###################
 #EXWM Installation#
 ###################
-installTime=`date | sed -e "s/ /_/g"`
-echo ${installTime}
+packageInstall() {
+    sudo apt-get install emacs25 -y
+    sudo apt-get install suckless-tools -y
+    sudo apt-get install git -y
+    sudo apt-get install chromium-browser -y
+    sudo apt-get install chromium-ublock-origin -y
+    sudo apt-get install screen -y
+    sudo apt-get install xsel -y
+    sudo apt-get install vlc -y
+}
 
-sudo apt-get install emacs25 -y
-sudo apt-get install suckless-tools -y
-sudo apt-get install git -y
-sudo apt-get install chromium-browser -y
-sudo apt-get install chromium-ublock-origin -y
-
-sudo mkdir -p /usr/share/faraz/
-cd /usr/share/faraz/
-git clone http://github.com/farazshaikh/Misc
-sudo chmod -R 0777 ./Misc
-cd ./Misc/
-git config core.fileMode false
-
-
-# make xsession entry
-mv /usr/share/xsessions/emacs.desktop /usr/share/xsessions/emacs.desktop.backup.${installTime}
-ln -s `pwd`/emacs/usr_share_xsessions_emacs.desktop /usr/share/xsessions/emacs.desktop
-
-# make emacs wrapper for running as daemon
-mv /usr/share/xsessions/emacsdesktop.sh /usr/share/xsessions/emacsdesktop.sh.backup.${installTime}
-ln -s `pwd`/emacs/emacsdesktop.sh /usr/share/xsessions/emacsdesktop.sh
-
-# copy over our emacs file
-mv ~/.emacs ~/.emacs.exwm.backup.${installTime}
-ln -s `pwd`/emacs/.emacs ~/.emacs
-
-##################
-# Setup retina   #
-##################
-mv /etc/X11/Xresources/retina-display /etc/X11/Xresources/retina-display.${installTime}
-ln -s `pwd`/emacs/etc_X11_Xresources_retina-display /etc/X11/Xresources/retina-display
-
-mv /etc/X11/Xsession.d/10-retina-display /etc/X11/Xsession.d/10-retina-display.${installTime}
-ln -s `pwd`/emacs/etc_X11_Xsession.d_10-retina-display /etc/X11/Xsession.d/10-retina-display
+checkoutCode() {
+    pushd `pwd`
+    local installLoc=${1}
+    if [ -d ${installLoc} ]; then
+        cd ${installLoc}
+        git fetch
+        git rebase
+    else
+        mkdir -p ${installLoc}
+        cd ${installLoc}
+        git clone http://github.com/farazshaikh/Misc
+    fi
+    chmod -R 0777 ./Misc
+    git config core.fileMode false
+    popd
+}
 
 
-###################
-#Other setup      #
-###################
-mv ~/.bashrc ~/.bashrc.backup.${installTime}
-ln -s `pwd`/.bashrc ~/.bashrc
+linkupFiles() {
+    pushd `pwd`
+    local installLoc=${1}
+    local ts=${2}
 
-mv ~/.screenrc ~/.screenrc.backup.${installTime}
-ln -s `pwd`/.screenrc ~/.screenrc
+    cd ${installLoc}/Misc
 
-mkdir ~/.i3
-mv ~/.i3/config ~/.i3/config.backup.${installTime}
-ln -s `pwd`/.i3/config ~/.i3/config
+    linkup ${ts} ~/.bashrc `pwd`/.bashrc
+    linkup ${ts} ~/.screenrc `pwd`/.screenrc
+    linkup ${ts} ~/.i3/config `pwd`/.i3/config
+
+    linkup ${ts} ~/.gitconfig `pwd`/emacs/.gitconfig
+    linkup ${ts} ~/.emacs `pwd`/emacs/.emacs
+    linkup ${ts} ~/.xinitrc `pwd`/emacs/.xinitrc
+    linkup ${ts} ~/.Xresources `pwd`/emacs/.Xresources
+
+    linkup ${ts} /etc/X11/Xsession.d/10-retina-display `pwd`/emacs/etc_X11_Xsession.d_10-retina-display
+    linkup ${ts} /etc/X11/Xresources/retina-display `pwd`/emacs/etc_X11_Xresources_retina-display
+
+    ## Optional integrate with DM
+    linkup ${ts} /usr/share/xsessions/emacsdesktop.sh `pwd`/emacs/emacsdesktop.sh
+    linkup ${ts} /usr/share/xsessions/emacs.desktop `pwd`/emacs/usr_share_xsessions_emacs.desktop
+    popd
+}
+
+
+main() {
+    installTime=`date | sed -e "s/ /_/g"`
+    installLoc=/usr/share/faraz
+
+    if [ "$EUID" -ne 0 ]
+    then echo "Please run as root or sudo"
+         exit
+    fi
+
+    echo InstallID ${installTime}
+    packageInstall
+    checkoutCode ${installLoc}
+    linkupFiles ${installLoc} ${installTime}
+}
+
+set -e
+main

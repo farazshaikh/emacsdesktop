@@ -169,7 +169,7 @@
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -671,11 +671,6 @@
 (require 'exwm-config)
 (exwm-config-ido)
 
-(defun run-prog
-  (shell-command "google-chrome --incognito")
-)
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; KeyBoard Mappings ;;
@@ -767,16 +762,6 @@ and their terminal equivalents.")
 ;; Here are a few examples:
 (setq exwm-input-global-keys
       `(
-        ;; Bind "s-r" to exit char-mode and fullscreen mode.
-        ([?\s-c] . (lambda ()
-                     (interactive)
-                     (start-process-shell-command "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal")))
-
-        ([?\s-g] . (lambda ()
-                     (interactive)
-                     (start-process-shell-command "/usr/bin/google-chrome" nil  "/usr/bin/google-chrome --incognito")))
-
-        ;; Bind "s-r" to exit char-mode and fullscreen mode.
         ([?\s-d] . dmenu)
         ;; Bind "s-r" to exit char-mode and fullscreen mode.
         ([?\s-r] . exwm-reset)
@@ -859,11 +844,51 @@ and their terminal equivalents.")
   named-buffer
   )
 
+
+
+;; Application Specific setting for scaling etc
+(cl-defstruct appSettings
+  emacsAttributeFaceHeight
+  browserScalingFactor
+  terminalFontSize)
+
+(setq RetinaAppSettings (make-appSettings
+                        :emacsAttributeFaceHeight 150
+                        :browserScalingFactor "2"
+                        :terminalFontSize "14"))
+
+(setq MonitorAppSettings (make-appSettings
+                          :emacsAttributeFaceHeight 60
+                          :browserScalingFactor "1"
+                          :terminalFontSize "6"))
+
+(defun ApplyAppSettings(applySettings)
+    ;; emacs
+  (set-face-attribute 'default nil :height (appSettings-emacsAttributeFaceHeight applySettings))
+    ;; browser
+  (setq browserScaleFactor (appSettings-browserScalingFactor  applySettings))
+    ;; terminal
+  (setq terminalFontSize (appSettings-terminalFontSize  applySettings))
+)
+
+(defun MonitorSetup()
+  (interactive)
+  (ApplyAppSettings MonitorAppSettings))
+
+
+(defun RetinaSetup()
+  (interactive)
+  (ApplyAppSettings RetinaAppSettings))
+
+
+;; Application invocations
 (defun GetToBrowser()
   (interactive)
   (setq browser-bufname "Chromium-browser")
   (setq browser-binary "/usr/bin/chromium-browser")
-  (setq browser-invocation (concat browser-binary " --incognito --force-device-scale-factor=1.5"))
+  (setq browser-invocation (concat browser-binary
+                                   " --incognito --force-device-scale-factor="
+                                   browserScaleFactor))
 
   (setq browser (find-named-buffer browser-bufname))
 (if (eq browser nil)
@@ -879,21 +904,91 @@ and their terminal equivalents.")
 
 (defun GetToTerminal()
   (interactive)
-  (setq terminal (find-named-buffer "Gnome-terminal"))
-(if (eq terminal nil)
-    (progn
+  (setq term-bufname "XTerm")
+  (setq term-binary "/usr/bin/xterm")
+  (setq term-invocation (concat term-binary
+                                " -bg black -fg white "
+                                " -fa 'Monospace' -fs " terminalFontSize
+                                ;;" -e 'screen -DR'"
+                                ))
+
+  (setq terminal (find-named-buffer term-bufname))
+  (if (eq terminal nil)
+      (progn
       (message "Opening terminal")
       (start-process-shell-command
-        "/usr/bin/gnome-terminal" nil  "/usr/bin/gnome-terminal"))
+        term-binary nil term-invocation))
   (progn
     (message "terminal")
     (switch-to-buffer terminal))
   ))
 
+(defun newTerminal()
+  (interactive)
+  (setq term-bufname "XTerm")
+  (setq term-binary "/usr/bin/xterm")
+  (setq term-invocation (concat term-binary
+                                " -bg black -fg white "
+                                " -fa 'Monospace' -fs " terminalFontSize
+                                ;;" -e 'screen -DR'"
+                                ))
+
+  (setq terminal (find-named-buffer term-bufname))
+  (progn
+      (message "Opening terminal")
+      (start-process-shell-command
+        term-binary nil term-invocation))
+  )
+
+
 (defun LockScreen()
   (interactive)
   (start-process-shell-command
         "/usr/bin/slock" nil  "/usr/bin/slock"))
+
+
+;; Some custom configuration to ediff
+(setq ediff-split-window-function 'split-window-horizontally)
+(setq ediff-window-setup-function 'ediff-setup-windows-plain)
+(setq ediff-keep-variants nil)
+
+(defvar my-ediff-bwin-config nil "Window configuration before ediff.")
+(defcustom my-ediff-bwin-reg ?b
+  "*Register to be set up to hold `my-ediff-bwin-config'
+    configuration.")
+
+(defvar my-ediff-awin-config nil "Window configuration after ediff.")
+(defcustom my-ediff-awin-reg ?e
+  "*Register to be used to hold `my-ediff-awin-config' window
+    configuration.")
+
+(defun my-ediff-bsh ()
+  "Function to be called before any buffers or window setup for
+    ediff."
+  (setq my-ediff-bwin-config (current-window-configuration))
+  (when (characterp my-ediff-bwin-reg)
+    (set-register my-ediff-bwin-reg
+                  (list my-ediff-bwin-config (point-marker)))))
+
+(defun my-ediff-ash ()
+  "Function to be called after buffers and window setup for ediff."
+  (setq my-ediff-awin-config (current-window-configuration))
+  (when (characterp my-ediff-awin-reg)
+    (set-register my-ediff-awin-reg
+                  (list my-ediff-awin-config (point-marker)))))
+
+(defun my-ediff-qh ()
+  "Function to be called when ediff quits."
+  (ediff-janitor nil nil)
+  (ediff-cleanup-mess)
+  (when my-ediff-bwin-config
+    (set-window-configuration my-ediff-bwin-config)))
+
+(add-hook 'ediff-before-setup-hook 'my-ediff-bsh)
+(add-hook 'ediff-after-setup-windows-hook 'my-ediff-ash 'append)
+(add-hook 'ediff-quit-hook 'my-ediff-qh)
+
+
 
 
 ;; i3 like window mgmt
@@ -955,10 +1050,9 @@ and their terminal equivalents.")
 )
 
 (i3WindowMgmtKeys)
-(GetToTerminal)
-(GetToBrowser)
-(set-face-attribute 'default nil :height 70)
-
+(RetinaSetup)
+;;(GetToTerminal)
+;;(GetToBrowser)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;Setup alt-tab     ;;
@@ -991,7 +1085,7 @@ and their terminal equivalents.")
 (defun iflipb-first-iflipb-buffer-switch-command ()
   "Determines whether this is the first invocation of
   iflipb-next-buffer or iflipb-previous-buffer this round."
-  (message "FR %s" last-command)
+  ;; (message "FR %s" last-command)
   (not (and (or (eq last-command 'timed-iflipb-next-buffer)
                 (eq last-command 'timed-iflipb-previous-buffer)))))
 

@@ -1,0 +1,12 @@
+Xft.autohint: 0
+Xft.lcdfilter:  lcddefault
+Xft.hintstyle:  hintfull
+Xft.hinting: 1
+Xft.antialias: 1
+Xft.rgba: rgbt
+Xft.dpi:192
+
+XTerm*selectToClipboard:false
+Xterm*rightScrollBar: true
+XTerm*scrollBar: true
+XTerm*scrollbar.width: 40
