@@ -9,4 +9,4 @@ Xft.dpi:192
 XTerm*selectToClipboard:false
 Xterm*rightScrollBar: true
 XTerm*scrollBar: true
-XTerm*scrollbar.width: 40
+XTerm*metaSendsEscape: true

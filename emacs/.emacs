@@ -864,7 +864,7 @@ and their terminal equivalents.")
 
 (defun ApplyAppSettings(applySettings)
     ;; emacs
-  (set-face-attribute 'default nil :height (appSettings-emacsAttributeFaceHeight applySettings))
+  ;;(set-face-attribute 'default nil :height (appSettings-emacsAttributeFaceHeight applySettings))
     ;; browser
   (setq browserScaleFactor (appSettings-browserScalingFactor  applySettings))
     ;; terminal
@@ -923,7 +923,7 @@ and their terminal equivalents.")
     (switch-to-buffer terminal))
   ))
 
-(defun newTerminal()
+(defun NewTerminal()
   (interactive)
   (setq term-bufname "XTerm")
   (setq term-binary "/usr/bin/xterm")
@@ -941,10 +941,40 @@ and their terminal equivalents.")
   )
 
 
+
 (defun LockScreen()
   (interactive)
   (start-process-shell-command
-        "/usr/bin/slock" nil  "/usr/bin/slock"))
+   "/usr/bin/slock" nil  "/usr/bin/slock"))
+
+
+
+;; Swap monitors
+(defun MonitorMoveLeft()
+  (interactive)
+  (setq commandMoveLeft
+        "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --left-of /;s/^/xrandr --output /'`")
+  (shell-command commandMoveLeft))
+
+(defun MonitorMoveRight()
+  (interactive)
+  (setq commandMoveRight
+        "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --right-of /;s/^/xrandr --output /'`")
+  (shell-command commandMoveRight))
+
+
+(defun ssh()
+  (interactive)
+  (setq ssh-bufname "XTerm")
+  (setq ssh-binary "/usr/bin/xterm")
+  (setq ssh-invocation (concat ssh-binary
+                                " -bg black -fg white "
+                                " -fa 'Monospace' -fs " terminalFontSize
+                                " -e 'ssh faraz@faraz-dev'"
+                                ))
+  (start-process-shell-command
+   ssh-binary nil ssh-invocation))
+
 
 
 ;; Some custom configuration to ediff
@@ -1050,7 +1080,7 @@ and their terminal equivalents.")
 )
 
 (i3WindowMgmtKeys)
-(RetinaSetup)
+;;(RetinaSetup)
 ;;(GetToTerminal)
 ;;(GetToBrowser)
 
