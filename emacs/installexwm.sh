@@ -30,7 +30,7 @@ packageInstall() {
     sudo apt-get install suckless-tools -y
     sudo apt-get install git -y
     sudo apt-get install chromium-browser -y
-    sudo apt-get install chromium-ublock-origin -y
+#    sudo apt-get install chromium-ublock-origin -y
     sudo apt-get install screen -y
     sudo apt-get install xsel -y
     sudo apt-get install vlc -y
@@ -40,9 +40,10 @@ checkoutCode() {
     pushd `pwd`
     local installLoc=${1}
     if [ -d ${installLoc} ]; then
-        cd ${installLoc}
+        cd ${installLoc}/Misc
         git fetch
         git rebase
+        cd ..
     else
         mkdir -p ${installLoc}
         cd ${installLoc}
