@@ -864,7 +864,7 @@ and their terminal equivalents.")
 
 (defun ApplyAppSettings(applySettings)
     ;; emacs
-  ;;(set-face-attribute 'default nil :height (appSettings-emacsAttributeFaceHeight applySettings))
+  (set-face-attribute 'default nil :height (appSettings-emacsAttributeFaceHeight applySettings))
     ;; browser
   (setq browserScaleFactor (appSettings-browserScalingFactor  applySettings))
     ;; terminal
@@ -963,14 +963,14 @@ and their terminal equivalents.")
   (shell-command commandMoveRight))
 
 
-(defun ssh()
-  (interactive)
+(defun ssh(hostName)
+  (interactive "suserName@Host:")
   (setq ssh-bufname "XTerm")
   (setq ssh-binary "/usr/bin/xterm")
   (setq ssh-invocation (concat ssh-binary
                                 " -bg black -fg white "
                                 " -fa 'Monospace' -fs " terminalFontSize
-                                " -e 'ssh faraz@faraz-dev'"
+                                " -e 'ssh -Y " hostName "'"
                                 ))
   (start-process-shell-command
    ssh-binary nil ssh-invocation))
