@@ -30,7 +30,7 @@ packageInstall() {
     sudo apt-get install suckless-tools -y
     sudo apt-get install git -y
     sudo apt-get install chromium-browser -y
-#    sudo apt-get install chromium-ublock-origin -y
+    sudo apt-get install chromium-ublock-origin -y
     sudo apt-get install screen -y
     sudo apt-get install xsel -y
     sudo apt-get install vlc -y
@@ -50,6 +50,7 @@ checkoutCode() {
         git clone http://github.com/farazshaikh/Misc
     fi
     chmod -R 0777 ./Misc
+    cd ./Misc
     git config core.fileMode false
     popd
 }

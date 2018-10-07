@@ -1080,7 +1080,7 @@ and their terminal equivalents.")
 )
 
 (i3WindowMgmtKeys)
-;;(RetinaSetup)
+(RetinaSetup)
 ;;(GetToTerminal)
 ;;(GetToBrowser)
 
