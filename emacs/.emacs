@@ -1072,6 +1072,13 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-S-<up>") 'enlarge-window)
   (exwm-input-set-key (kbd "s-S-<down>") 'shrink-window)
 
+  ;; window splits
+  (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally)
+  (exwm-input-set-key (kbd "s-]") 'split-window-vertically)
+  (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
+  (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
+  (exwm-input-set-key (kbd "s-b") 'ido-switch-buffer)
+
   (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
   (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
 
