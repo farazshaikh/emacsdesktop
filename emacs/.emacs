@@ -926,7 +926,7 @@ and their terminal equivalents.")
 (defun NewTerminal()
   (interactive)
   (setq term-bufname "XTerm")
-  (setq term-binary "/usr/bin/xterm")
+  (setq term-binary "TERM=xterm-256color /usr/bin/xterm")
   (setq term-invocation (concat term-binary
                                 " -bg black -fg white "
                                 " -fa 'Monospace' -fs " terminalFontSize
