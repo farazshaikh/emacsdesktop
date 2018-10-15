@@ -12,7 +12,7 @@
         guitool = edifftwin
 
 [difftool "ediff"]
-        cmd = /home/faraz/ediff.sh $LOCAL $REMOTE  $MERGED
+        cmd = ~/ediff.sh $LOCAL $REMOTE  $MERGED
 [difftool "edifftwin"]
         cmd = emacsclient --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
 
@@ -24,7 +24,7 @@
         tool = ediff
 
 [mergetool "ediff"]
-        cmd = /home/faraz/ediff.sh $LOCAL $REMOTE $MERGED $BASE
+        cmd = ~/ediff.sh $LOCAL $REMOTE $MERGED $BASE
         trustExitCode = true
 [commit]
         template = /home/faraz/.gitmessage

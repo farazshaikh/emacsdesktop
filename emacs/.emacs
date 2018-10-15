@@ -326,7 +326,7 @@
  '(mode-line ((t (:background "cornflower blue" :foreground "white" :box (:line-width 1 :color "white") :height 0.9))))
  '(mode-line-emphasis ((t nil)))
  '(mode-line-highlight ((t (:box (:line-width 1 :color "white")))))
- '(mode-line-inactive ((t (:background "cornflower blue" :foreground "white" :height 0.9)))))
+ '(mode-line-inactive ((t (:background "grey" :foreground "black" :height 0.9)))))
 
 
 
@@ -853,7 +853,7 @@ and their terminal equivalents.")
   terminalFontSize)
 
 (setq RetinaAppSettings (make-appSettings
-                        :emacsAttributeFaceHeight 100
+                        :emacsAttributeFaceHeight 90
                         :browserScalingFactor "1.5"
                         :terminalFontSize "8"))
 
@@ -879,6 +879,22 @@ and their terminal equivalents.")
 (defun RetinaSetup()
   (interactive)
   (ApplyAppSettings RetinaAppSettings))
+
+
+(defun GuessMonitorSetup()
+  (setq monitorResolutionThreshold 3000)   ;; beyond which we consider the display to be a monitor
+  (setq displayResolutionX
+        (shell-command-to-string "xrandr  -q | grep current | cut -f 2 -d ',' | cut -f 3 -d' '"))
+  (setq displayResolutionY
+        (shell-command-to-string "xrandr  -q | grep current | cut -f 2 -d ',' | cut -f 5 -d' '"))
+  (message (concat displayResolutionX "*" displayResolutionY))
+  (if (> (string-to-number displayResolutionX) monitorResolutionThreshold)
+      (MonitorSetup)
+    (RetinaSetup)
+    )
+  )
+
+(GuessMonitorSetup)
 
 
 ;; Application invocations
@@ -1063,14 +1079,21 @@ and their terminal equivalents.")
 
 
   ;; Window Mgmt using Emacs style Alt-Key
+  ;; window move
   (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
   (exwm-input-set-key (kbd "s-<down>") 'windmove-down)
   (exwm-input-set-key (kbd "s-<up>") 'windmove-up)
   (exwm-input-set-key (kbd "s-<right>") 'windmove-right)
-  (exwm-input-set-key (kbd "s-S-<right>") 'enlarge-window-horizontally)
-  (exwm-input-set-key (kbd "s-S-<left>") 'shrink-window-horizontally)
-  (exwm-input-set-key (kbd "s-S-<up>") 'enlarge-window)
-  (exwm-input-set-key (kbd "s-S-<down>") 'shrink-window)
+
+  ;; window size
+  (exwm-input-set-key (kbd "s-S-<right>")
+                      (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 50)))
+  (exwm-input-set-key (kbd "s-S-<left>")
+                      (lambda () (interactive) (exwm-layout-shrink-window-horizontally 50)))
+  (exwm-input-set-key (kbd "s-S-<up>")
+                      (lambda () (interactive) (exwm-layout-enlarge-window             50)))
+  (exwm-input-set-key (kbd "s-S-<down>")
+                      (lambda () (interactive) (exwm-layout-shrink-window              50)))
 
   ;; window splits
   (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally)
@@ -1078,6 +1101,11 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
   (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
   (exwm-input-set-key (kbd "s-b") 'ido-switch-buffer)
+
+  ;; window undo
+  (exwm-input-set-key (kbd "s-z") 'winner-undo)
+  (exwm-input-set-key (kbd "s-Z") 'winner-redo)
+
 
   (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
   (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
@@ -1087,7 +1115,11 @@ and their terminal equivalents.")
 )
 
 (i3WindowMgmtKeys)
-(RetinaSetup)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Open any startup apps     ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;(GetToTerminal)
 ;;(GetToBrowser)
 
