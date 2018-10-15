@@ -853,9 +853,9 @@ and their terminal equivalents.")
   terminalFontSize)
 
 (setq RetinaAppSettings (make-appSettings
-                        :emacsAttributeFaceHeight 150
-                        :browserScalingFactor "2"
-                        :terminalFontSize "14"))
+                        :emacsAttributeFaceHeight 100
+                        :browserScalingFactor "1.5"
+                        :terminalFontSize "8"))
 
 (setq MonitorAppSettings (make-appSettings
                           :emacsAttributeFaceHeight 60
