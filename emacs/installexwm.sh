@@ -30,7 +30,9 @@ packageInstall() {
     sudo apt-get install suckless-tools -y
     sudo apt-get install git -y
     sudo apt-get install chromium-browser -y
+    set +e
     sudo apt-get install chromium-ublock-origin -y
+    set -e
     sudo apt-get install screen -y
     sudo apt-get install xsel -y
     sudo apt-get install vlc -y
