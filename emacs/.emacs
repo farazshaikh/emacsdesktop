@@ -647,6 +647,7 @@
 ;; Turn on `display-time-mode' if you don't use an external bar.
 (setq display-time-default-load-average nil)
 (display-time-mode t)
+(display-battery-mode t)
 (defface egoge-display-time
    '((((type x w32 mac))
       ;; #060525 is the background colour of my default face.
@@ -853,7 +854,7 @@ and their terminal equivalents.")
   terminalFontSize)
 
 (setq RetinaAppSettings (make-appSettings
-                        :emacsAttributeFaceHeight 90
+                        :emacsAttributeFaceHeight 95
                         :browserScalingFactor "1.5"
                         :terminalFontSize "8"))
 
@@ -938,6 +939,26 @@ and their terminal equivalents.")
     (message "terminal")
     (switch-to-buffer terminal))
   ))
+
+(defun GetToSplash()
+  (interactive)
+  (setq term-bufname "feh")
+  (setq term-binary "feh")
+  (setq term-invocation (concat term-binary
+                                " ~/wallpaper.jpg"
+                                ))
+
+  (setq terminal (find-named-buffer term-bufname))
+  (if (eq terminal nil)
+      (progn
+      (message "Opening terminal")
+      (start-process-shell-command
+        term-binary nil term-invocation))
+  (progn
+    (message "terminal")
+    (switch-to-buffer terminal))
+  ))
+
 
 (defun NewTerminal()
   (interactive)
@@ -1043,10 +1064,6 @@ and their terminal equivalents.")
 
   (setq exwm-input-global-keys
         `(
-          ([?\s-l] . 'LockScreen)
-          ([?\s-d] . dmenu)
-          ([?\s-r] . exwm-reset)
-          ([?\s-w] . exwm-workspace-switch)
           ,@(mapcar (lambda (i)
                       `(,(kbd (format "s-%d" i)) .
                         (lambda ()
@@ -1056,10 +1073,6 @@ and their terminal equivalents.")
           ([?\s-&] . (lambda (command)
                        (interactive (list (read-shell-command "$ ")))
                        (start-process-shell-command command nil command)))
-          ([s-f2] . (lambda ()
-                      (interactive)
-                      (start-process "" nil "/usr/bin/slock")))
-
           ))
 
   ;;(setq exwm-workspace-show-all-buffers t)
@@ -1076,6 +1089,15 @@ and their terminal equivalents.")
 
   (exwm-input-set-key (kbd "s-l") 'LockScreen)
   (global-set-key (kbd "s-l") 'LockScreen)
+
+  (exwm-input-set-key (kbd "s-d") 'dmenu)
+  (global-set-key (kbd "s-d") 'dmenu)
+
+  (exwm-input-set-key (kbd "s-r") 'exwm-reset)
+  (global-set-key (kbd "s-r") 'exwm-reset)
+
+  (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
+  (global-set-key (kbd "s-w") 'exwm-workspace-switch)
 
 
   ;; Window Mgmt using Emacs style Alt-Key
@@ -1122,6 +1144,7 @@ and their terminal equivalents.")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;(GetToTerminal)
 ;;(GetToBrowser)
+(GetToSplash)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;Setup alt-tab     ;;
@@ -1168,3 +1191,4 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "M-<iso-lefttab>") 'timed-iflipb-previous-buffer))
 
 (setupIFlipb)
+(server-start)

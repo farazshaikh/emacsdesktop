@@ -3,6 +3,7 @@ alias ssho='ssh -o "StrictHostKeyChecking no"'
 alias ff="find . -name"
 alias ffg="find . -type f | xargs grep -nH "
 alias pssh='parallel-ssh -i -t0 -h ~/.vmcluster $@'
+alias ee='emacsclient -n '
 
 export GIT_PS1_SHOWDIRTYSTATE=true
 export GIT_PS1_SHOWSTASHSTATE=true
