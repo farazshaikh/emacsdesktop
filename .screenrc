@@ -6,3 +6,4 @@ hardstatus alwaysfirstline
 hardstatus string "%H %-Lw%{= BW}%50>%n%f* %t%{-}%+Lw%<"
 term screen.linux
 shelltitle '$ |...'
+term screen-256color
