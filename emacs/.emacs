@@ -100,6 +100,11 @@
                      py-autopep8
                      powerline
 
+                     ;; javascript setup from emacs.cafe Nicolas Petton
+                     company-tern
+                     js2-mode
+                     xref-js2
+
                      ;; emacs goodies
                      free-keys
                      ido-vertical-mode
@@ -144,7 +149,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(c-basic-offset 4)
+ '(c-basic-offset 3)
  '(c-echo-syntactic-information-p t)
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
@@ -169,7 +174,7 @@
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (company-tern ac-js2 js2-mode tern-auto-complete tern react-snippets xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -618,17 +623,30 @@
 ;;;;;;;;;;;;;;;;
 ;; JavaScript ;;
 ;;;;;;;;;;;;;;;;
-(defun js-mode-setup()
-  (tern-mode t)
-  (add-to-list 'ac-modes 'js3-mode)
-  (global-auto-complete-mode t)
+(require 'company)
+(require 'company-tern)
+(add-to-list 'company-backends 'company-tern)
+
+(defun js2-mode-setup()
+  (tern-mode)
+  (company-mode)
+  (auto-complete-mode)  // either AC + or company may Complete
+  ;; Disable completion keybindings, as we use xref-js2 instead
+  (define-key tern-mode-keymap (kbd "M-.") nil)
+  (define-key tern-mode-keymap (kbd "M-,") nil)
 )
-(add-hook 'js3-mode-hook 'ac-js-mode-setup)
-(add-hook 'js3-mode-hook 'js-mode-setup)
+
+(add-hook 'js2-mode-hook 'js2-mode-setup)
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+
+
+
+
+
+
 
 
 (put 'downcase-region 'disabled nil)
-
 
 
 

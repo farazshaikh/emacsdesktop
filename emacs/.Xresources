@@ -3,6 +3,7 @@ Xft.lcdfilter:  lcddefault
 Xft.hintstyle:  hintslight
 Xft.hinting: 1
 Xft.antialias: 1
+Xft.rgba: rgbt
 Xft.dpi:192
 
 XTerm*selectToClipboard:false
@@ -10,3 +11,4 @@ Xterm*rightScrollBar: true
 XTerm*scrollBar: true
 XTerm*metaSendsEscape: true
 XTerm*termName: xterm-256color
+XTerm*metaSendsEscape: true
