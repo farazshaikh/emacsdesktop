@@ -306,6 +306,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(default ((t (:inherit nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 94 :width normal :foundry "PfEd" :family "Ubuntu Mono"))))
  '(company-echo-common ((t (:foreground "firebrick"))))
  '(company-preview-common ((t (:inherit company-preview :foreground "navy"))))
  '(company-scrollbar-bg ((t (:background "gray"))))
@@ -854,17 +855,18 @@ and their terminal equivalents.")
   terminalFontSize)
 
 (setq RetinaAppSettings (make-appSettings
-                        :emacsAttributeFaceHeight 95
+                        :emacsAttributeFaceHeight 100
                         :browserScalingFactor "1.5"
-                        :terminalFontSize "8"))
+                        :terminalFontSize "10"))
 
 (setq MonitorAppSettings (make-appSettings
-                          :emacsAttributeFaceHeight 60
+                          :emacsAttributeFaceHeight 70
                           :browserScalingFactor "1"
-                          :terminalFontSize "6"))
+                          :terminalFontSize "8"))
 
 (defun ApplyAppSettings(applySettings)
-    ;; emacs
+  ;; emacs
+  (set-face-attribute 'default nil :font "Ubuntu Mono")
   (set-face-attribute 'default nil :height (appSettings-emacsAttributeFaceHeight applySettings))
     ;; browser
   (setq browserScaleFactor (appSettings-browserScalingFactor  applySettings))
@@ -925,7 +927,7 @@ and their terminal equivalents.")
   (setq term-binary "/usr/bin/xterm")
   (setq term-invocation (concat term-binary
                                 " -bg black -fg white "
-                                " -fa 'Monospace' -fs " terminalFontSize
+                                " -fa 'Ubuntu Mono' -fs " terminalFontSize
                                 ;;" -e 'screen -DR'"
                                 ))
 
@@ -963,10 +965,10 @@ and their terminal equivalents.")
 (defun NewTerminal()
   (interactive)
   (setq term-bufname "XTerm")
-  (setq term-binary "TERM=xterm-256color /usr/bin/xterm")
+  (setq term-binary "/usr/bin/xterm")
   (setq term-invocation (concat term-binary
                                 " -bg black -fg white "
-                                " -fa 'Monospace' -fs " terminalFontSize
+                                " -fa 'Ubuntu Mono' -fs " terminalFontSize
                                 ;;" -e 'screen -DR'"
                                 ))
 
@@ -1006,7 +1008,7 @@ and their terminal equivalents.")
   (setq ssh-binary "/usr/bin/xterm")
   (setq ssh-invocation (concat ssh-binary
                                 " -bg black -fg white "
-                                " -fa 'Monospace' -fs " terminalFontSize
+                                " -fa 'Ubuntu Mono' -fs 6"
                                 " -e 'ssh -Y " hostName "'"
                                 ))
   (start-process-shell-command
@@ -1116,6 +1118,16 @@ and their terminal equivalents.")
                       (lambda () (interactive) (exwm-layout-enlarge-window             50)))
   (exwm-input-set-key (kbd "s-S-<down>")
                       (lambda () (interactive) (exwm-layout-shrink-window              50)))
+
+  (global-set-key (kbd "s-S-<right>")
+                      (lambda () (interactive) (enlarge-window-horizontally 5)))
+  (global-set-key (kbd "s-S-<left>")
+                      (lambda () (interactive) (shrink-window-horizontally 5)))
+  (global-set-key (kbd "s-S-<up>")
+                      (lambda () (interactive) (enlarge-window             5)))
+  (global-set-key (kbd "s-S-<down>")
+                      (lambda () (interactive) (shrink-window              5)))
+
 
   ;; window splits
   (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally)
