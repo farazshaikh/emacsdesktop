@@ -69,6 +69,7 @@
                      company-jedi
 
                      ;; Completion engines
+                     function-args
                      irony
                      irony-eldoc
                      jedi
@@ -154,7 +155,9 @@
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
  '(column-number-mode t)
+ '(company-idle-delay 0)
  '(company-tooltip-align-annotations t)
+ '(company-tooltip-idle-delay 0)
  '(compilation-scroll-output (quote first-error))
  '(compile-command
    "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
@@ -171,10 +174,11 @@
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
  '(inverse-video t)
+ '(irony-additional-clang-options (quote ("-std=c++11")))
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (company-tern ac-js2 js2-mode tern-auto-complete tern react-snippets xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (function-args golden-ratio neotree sr-speedbar company-tern ac-js2 js2-mode tern-auto-complete tern react-snippets xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -311,16 +315,12 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((t (:inherit nil :stipple nil :background "black" :foreground "white" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight normal :height 94 :width normal :foundry "PfEd" :family "Ubuntu Mono"))))
- '(company-echo-common ((t (:foreground "firebrick"))))
- '(company-preview-common ((t (:inherit company-preview :foreground "navy"))))
- '(company-scrollbar-bg ((t (:background "gray"))))
- '(company-scrollbar-fg ((t (:background "dark blue"))))
- '(company-template-field ((t (:background "dark blue" :foreground "white"))))
- '(company-tooltip ((t (:background "gray" :foreground "black"))))
- '(company-tooltip-annotation ((t (:foreground "black"))))
- '(company-tooltip-common ((t (:foreground "black" :slant italic))))
- '(company-tooltip-selection ((t (:background "blue"))))
+ '(company-preview-common ((t (:foreground "white" :background "cornflower blue"))))
+ '(company-scrollbar-bg ((t (:background "cornflower blue"))))
+ '(company-scrollbar-fg ((t (:background "white"))))
+ '(company-tooltip ((t (:background "cornflower blue" :foreground "white"))))
+ '(company-tooltip-annotation ((t (:foreground "white"))))
+ '(company-tooltip-selection ((t (:foreground "white" :background "cornflower blue" :box (:line-width 1 :color "white")))))
  '(ediff-current-diff-A ((((class color)) (:background "blue" :foreground "white"))))
  '(ediff-current-diff-B ((((class color)) (:background "blue" :foreground "white" :weight bold))))
  '(ediff-current-diff-C ((((class color)) (:background "yellow3" :foreground "black" :weight bold))))
@@ -430,6 +430,9 @@
 (require 'company-c-headers)
 (require 'company-irony)
 
+(require 'function-args)
+(fa-config-default)
+
 (require 'flycheck-irony)
 (require 'ggtags)
 (add-hook 'compilation-mode '(lamda ()
@@ -496,15 +499,20 @@
        (local-set-key [tab] 'irony--indent-or-complete))
 
 (defun ccppIronySetup ()
-  (ggtags-mode)
-  (flyspell-prog-mode)
-  (yas-minor-mode)
+  (eval-after-load 'flycheck '(add-hook 'flycheck-mode-hook 'flycheck-irony-setup))
+  (eval-after-load 'company  '(add-to-list 'company-backends 'company-irony))
+  (add-hook 'irony-mode-hook 'irony-eldoc)
 
+  (flycheck-mode)
   (company-mode t)
   (irony-mode t)
+  (ggtags-mode)
+
+
+  (flyspell-prog-mode)
+  (yas-minor-mode)
   (irony-cdb-autosetup-compile-options)
-  (eval-after-load 'flycheck '(add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
-  (add-hook 'irony-mode-hook 'irony-eldoc)
+
   (irony-mode-keys)
 )
 
@@ -514,7 +522,7 @@
   (yas-minor-mode)
   (auto-complete-mode t)
 
-  ;;(add-to-list 'ac-clang-cflags " -std=c++11")
+  (add-to-list 'ac-clang-cflags " -std=c++11")
   (setq ac-clang-cflags
       (mapcar (lambda (item)(concat "-I" item))
               (append
@@ -555,7 +563,7 @@
            (message "using irony company for c/c++ completions"))
   (progn
     (ac-config-default)
-    (global-auto-complete-mode t)
+    (auto-complete-mode t)
     (add-hook 'c++-mode-hook 'ccppClangAsyncSetup)
     (add-hook 'c-mode-hook 'ccppClangAsyncSetup)
     (add-hook 'auto-complete-mode-hook 'ac-common-setup)
@@ -625,21 +633,41 @@
 ;;;;;;;;;;;;;;;;
 (require 'company)
 (require 'company-tern)
-(add-to-list 'company-backends 'company-tern)
+
+(defun adbReverse()
+  (interactive)
+  (start-process-shell-command
+   "/usr/bin/adb"
+   nil
+   "adb devices | head -n2  | tail -n1 | cut -f 1 | xargs -I{} adb -s {} reverse tcp:8081 tcp:8081"))
+
+
+
+(defun adbReload()
+  (interactive)
+  (start-process-shell-command
+   "/usr/bin/adb" nil "adb shell input keyevent R"))
+
+
+(defun adbShake()
+  (interactive)
+  (start-process-shell-command
+   "/usr/bin/adb" nil  "adb shell input keyevent 82"))
+
 
 (defun js2-mode-setup()
   (tern-mode)
   (company-mode)
-  (auto-complete-mode)  // either AC + or company may Complete
+  (add-to-list 'company-backends 'company-tern)
+  ;;  (auto-complete-mode)  // either AC + or company may Complete
   ;; Disable completion keybindings, as we use xref-js2 instead
   (define-key tern-mode-keymap (kbd "M-.") nil)
   (define-key tern-mode-keymap (kbd "M-,") nil)
+  (local-set-key (kbd "s-a") 'adbShake)
 )
 
 (add-hook 'js2-mode-hook 'js2-mode-setup)
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-
-
 
 
 
@@ -919,6 +947,19 @@ and their terminal equivalents.")
 
 
 ;; Application invocations
+(defun GetToNetflix()
+  (interactive)
+  (setq browser-bufname "Chromium-browser")
+  (setq browser-binary "/usr/bin/google-chrome")
+  (setq browser-invocation (concat browser-binary
+                                   " --force-device-scale-factor="
+                                   browserScaleFactor))
+  (setq browser-invocation (concat browser-invocation "  --app=http://netflix.com"))
+  (message "Opening Web browser")
+  (start-process-shell-command
+   browser-binary nil  browser-invocation))
+
+
 (defun GetToBrowser()
   (interactive)
   (setq browser-bufname "Chromium-browser")
@@ -1174,7 +1215,7 @@ and their terminal equivalents.")
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;(GetToTerminal)
 ;;(GetToBrowser)
-(GetToSplash)
+;;(GetToSplash)
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;Setup alt-tab     ;;
