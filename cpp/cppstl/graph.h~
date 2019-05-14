@@ -1,0 +1,92 @@
+#include <vector>
+#include <iostream>
+#include <set>
+
+using namespace std;
+class Node {
+ public:
+   int num;
+   std::vector< int> adjacents;
+};
+
+class Graph {
+   std::vector<Node> adjacencyList;
+ public:
+ Graph(int numNodes): adjacencyList(numNodes) {
+      int num = 0;
+      for (auto &x: adjacencyList) {
+         x.num = num;
+         num++;
+      }
+   };
+   void insertEdge(int start, int end) {
+      adjacencyList[start].num = start;
+      adjacencyList[start].adjacents.push_back(end);
+   }
+   void printEdges() {
+      for (auto &x: adjacencyList) {
+         cout << x.num << "->";
+         for (auto y: x.adjacents) {
+            cout << y << "  ";
+         }
+         cout << endl;
+      }
+   }
+
+   void bfs() {
+      /*
+        frontier = root;
+        get all nodes from frontier into next;
+        while (frontier)
+        for x
+           (for x adjacents ) { !visited add to next}
+           print frontier if not visited
+        next = frontier
+       */
+      set<int> frontier;
+      set<int> next;
+      set<int> visited;
+      frontier.insert(adjacencyList[0].num);
+
+      while (!frontier.empty()) {
+         for (auto &x: frontier) {
+            if (visited.find(x) == visited.end()) {
+               cout << x;
+               visited.insert(x);
+            }
+
+            for (auto &y: adjacencyList[x].adjacents) {
+               if (visited.find(y) == visited.end()) {
+                  next.insert(y);
+               }
+            }
+         }
+
+         frontier = next;
+         next.clear();
+         cout << endl;
+      }
+   }
+
+   void dfs() {
+      /* start with node
+         for all int unvisisted children perform recursive dfs
+         print node
+       */
+
+      dfs_x(root) {
+         if (root != NULL)
+         for all unvisited (
+                            dfs(unvisited)
+                            )
+         print(root);
+         mark_root_visited;
+      }
+
+      root = tr;
+      stack = {};
+      while (root && stack!empty) {
+         if ()
+      }
+   }
+};
