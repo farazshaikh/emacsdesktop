@@ -178,7 +178,7 @@
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (function-args golden-ratio neotree sr-speedbar company-tern ac-js2 js2-mode tern-auto-complete tern react-snippets xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (function-args company-tern ac-js2 js2-mode tern-auto-complete tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -674,10 +674,29 @@
 
 
 
+;;;;;;;;;;;;;;;
+;;    rust   ;;
+;;;;;;;;;;;;;;;
+;;http://julienblanchard.com/2016/fancy-rust-development-with-emacs/
+;;packages rustic cargo racer
+(defun rustModeSetup()
+  ;; # cargo install rustfmt
+  (add-hook 'rust-mode-hook
+            (lambda ()
+              (local-set-key (kbd "C-c <tab>") #'rust-format-buffer)))
+  ;; # rustup default nightly
+  ;; # cargo install racer
+  ;; # rustup component add rust-src
+  (add-hook 'rust-mode-hook #'racer-mode)
+  (add-hook 'racer-mode-hook #'eldoc-mode)
+  (add-hook 'racer-mode-hook #'company-mode)
+  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
+  )
+(rustModeSetup)
+
+
+
 (put 'downcase-region 'disabled nil)
-
-
-
 
 
 ;;;;;;;;;;;;;;;
@@ -1252,10 +1271,23 @@ and their terminal equivalents.")
   (not (and (or (eq last-command 'timed-iflipb-next-buffer)
                 (eq last-command 'timed-iflipb-previous-buffer)))))
 
+;; in iflip just flip with candidate windows that are not currently being displayed in a window
+;; and include the current buffer
+;; not doing so can jumble up the entire layout at other windows will swap buffers with current window
+(defun iflipb-ignore-windowed-buffers(buffer)
+  ;;(message buffer)
+  (if
+      (or (eq (get-buffer-window buffer "visible") nil)
+          (string= (buffer-name) buffer)
+          )
+      nil t)
+  )
 
 (defun setupIFlipb()
   (interactive)
   (setq iflipb-wrap-around t)
+  (setq iflipb-ignore-buffers 'iflipb-ignore-windowed-buffers)
+  (setq iflipb-always-ignore-buffers "^[ *]")
   (global-set-key (kbd "<M-<tab>>") 'timed-iflipb-next-buffer)
   (global-set-key (kbd "<M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
   (exwm-input-set-key (kbd "M-<tab>") 'timed-iflipb-next-buffer)
