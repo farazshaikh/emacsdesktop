@@ -14,19 +14,20 @@
 
 
 ;; check up and set installation mode.
-(defvar frinstallation nil "are we installing fremacs")
-(when (or (member "-frinstall" command-line-args)
-          (eq package-archive-contents nil))
+(defvar eosinstallation nil "are we installing emacs os")
+(when (or (member "-eosinstall" command-line-args)
+          (eq package-archive-contents nil)
+          (not (file-exists-p "~/.eosinstall")))
   (progn
-    (setq frinstallation t)
+    (setq eosinstallation t)
     (message "emacs in running in installation mode")))
 
 ;; eat up the command line args in the end
-(defun frinstall-fn (switch)
-  (message "emacs running in frinstall mode")
-  (setq frinstallation t)
+(defun eosinstall-fn (switch)
+  (message "emacs running in eosinstall mode")
+  (setq eosinstallation t)
   )
-(add-to-list 'command-switch-alist '("-frinstall" . frinstall-fn))
+(add-to-list 'command-switch-alist '("-eosinstall" . eosinstall-fn))
 
 ;; install packages
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
@@ -122,7 +123,7 @@
 ;; install the missing packages ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (when
-    (eq frinstallation t)
+    (eq eosinstallation t)
   (progn (message "refreshing package list")
          (package-refresh-contents)
          ;; required for irony mode
@@ -130,6 +131,7 @@
          (dolist (package package-list)
            (unless (package-installed-p package)
              (package-install package)))
+         (write-region "" "" "~/.eosinstall")
 	 ;;(require 'irony)
 	 ;;(irony-mode t)
 	 ;;(irony-install-server)
@@ -925,9 +927,9 @@ and their terminal equivalents.")
                         :terminalFontSize "10"))
 
 (setq MonitorAppSettings (make-appSettings
-                          :emacsAttributeFaceHeight 70
+                          :emacsAttributeFaceHeight 60
                           :browserScalingFactor "1"
-                          :terminalFontSize "8"))
+                          :terminalFontSize "6"))
 
 (defun ApplyAppSettings(applySettings)
   ;; emacs
@@ -950,7 +952,7 @@ and their terminal equivalents.")
 
 
 (defun GuessMonitorSetup()
-  (setq monitorResolutionThreshold 3000)   ;; beyond which we consider the display to be a monitor
+  (setq monitorResolutionThreshold 2000)   ;; beyond which we consider the display to be a monitor
   (setq displayResolutionX
         (shell-command-to-string "xrandr  -q | grep current | cut -f 2 -d ',' | cut -f 3 -d' '"))
   (setq displayResolutionY
@@ -996,6 +998,7 @@ and their terminal equivalents.")
   (progn
     (message "Web browser")
     (switch-to-buffer browser))
+  
   ))
 
 

@@ -37,6 +37,8 @@ packageInstall() {
     sudo apt-get install xsel -y
     sudo apt-get install vlc -y
     sudo apt-get install feh -y
+    sudo apt-get install xterm -y
+    sudo apt-get install vim -y
 }
 
 checkoutCode() {
@@ -98,8 +100,8 @@ main() {
     fi
 
     echo InstallID ${installTime}
-   # packageInstall
-   # checkoutCode ${installLoc}
+    packageInstall
+    checkoutCode ${installLoc}
     linkupFiles ${installLoc} ${installTime}
 }
 
