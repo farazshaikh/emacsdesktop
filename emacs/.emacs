@@ -1298,3 +1298,117 @@ and their terminal equivalents.")
 
 (setupIFlipb)
 (server-start)
+
+
+
+
+;; HELP DOCUMENTATION AND OTHER STUFF
+(defvar emacsDesktopHelp
+"
+ .ooooo.  ooo. .oo.  .oo.    .oooo.    .ooooo.   .oooo.o
+d88. .88b .888P.Y88bP.Y88b  .P  )88b  d88. ..Y8 d88(  .8
+888ooo888  888   888   888   .oP.888  888       ..Y88b.
+888    .o  888   888   888  d8(  888  888   .o8 o.  )88b
+.Y8bod8P. o888o o888o o888o .Y888..8o .Y8bod8P. 8..888P.
+
+
+
+      .o8                     oooo            .
+     .888                     .888          .o8
+ .oooo888   .ooooo.   .oooo.o  888  oooo  .o888oo  .ooooo.  oo.ooooo.
+d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
+888   888  888ooo888 ..Y88b.   888888.      888   888   888  888   888
+888   888  888    .o o.  )88b  888 .88b.    888 . 888   888  888   888
+.Y8bod88P. .Y8bod8P. 8..888P. o888o o888o   .888. .Y8bod8P.  888bod8P.
+                                                             888
+                                                            o888o
+
+ Emacs Desktop Environment[EDE] Help.
+ ....................................
+ EDE is fully function emacs based desktop environment built using EXWM
+ This provides a full fledged desktop experience for software development.
+ EDE manages applications and emacs buffers using single window managment
+ system. In a nutshell you can manage your application windows the same way
+ as would manager your emacs window.
+
+ Keys
+ ....
+ Win/Apple/SuperKey: This is windows keys or the apple command key.
+ This will be referred to as the super key while describing key bindings
+
+ Window Management:
+ .................
+ Window splitting and movement using emacs key bindings is available
+ i.e. C-x-3 C-x-2 for horizontal and veritcal splitting and C-x-o for focus
+ change works.
+
+ In addition to this the following shortcuts are used.
+ Super+|                             Split window vertically
+ Super+]                             Split window horizontally
+ Super+[                             Close all window except current
+ Super+z                             Undo recent window managment action
+ Ctrl-g   Super+z                    Redo recent window managment action
+ Super+[Up/Down/Shift/Left]          Move focus to window above/below/left/right
+                                     adjacent window
+ Super+Shift+[[Up/Down/Shift/Left]]  Resize current window in the key direction
+ Super+b                             Menu based application switching
+ Alt-tab                             Windows style application switching
+
+
+ Application Management:
+ .......................
+ S-d                                 Launch apps. Present menu lising all available apps
+ C-x-k                               Kill buffer/application
+ S-g                                 Find Or launch default browser (chromoim-browser)_
+ S-t                                 Find Or launch a new terminal (xterm)
+ S-l                                 Lock screen using default screen saver
+ S-&                                 Run bash command
+
+ Workspace (Multiple desktops)
+ .............................
+ S-w                                 Interactively Switch to workspace
+ S-{0..9}                            Switch to workspace 0 ... 9
+
+
+ Git Integration
+ ...............
+ Git diff and merge conflicts are trasparently handled withing the EDE editior
+ ee  <filename> bash alias  open file in current emacs desktop
+
+ Programming Language Suport
+ ............................
+ C
+ C++                Using irony
+ Python             Using Elpy
+ Rust               Using rustic
+ Golang
+ JavaScript/Node    Using tern
+
+ Monitor Support:
+ ................
+ Auto-detects monitor resolution aka. retina/HD/UHD and does scaling for app
+ Working for 13inch, 15inch Macbook Pro Retina
+ 1440p and 4K monitors
+
+ One can over ride detected Monitor Setting by calling the interactive
+ functions
+ Alt-x RetinaSetup
+ Alt-x MonitorSetup
+
+ Miscellaneous
+ -------------
+ Alt-x GetToNetflix                   Start Netflix using chromium HTML-5
+ Alt-x GetToSplash                    Splash Screen
+ Alt-x LockScreen
+ Alt-x MonitorMoveLeft                Re-positon dual monitor setups
+ Alt-x MonitorMoveRight               Re-positon dual monitor setups
+ Alt-x ssh                            Open up secure-shell (interactive)
+")
+
+
+(defun  EmacsDesktopGetSplash ()
+  (with-current-buffer (get-buffer-create "EmacsDesktopSplash") (insert emacsDesktopHelp) (goto-char (point-min)))
+  (get-buffer-create "EmacsDesktopSplash")
+)
+
+(setf initial-buffer-choice 'EmacsDesktopGetSplash)
