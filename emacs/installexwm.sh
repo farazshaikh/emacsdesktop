@@ -27,6 +27,7 @@ linkup() {
 ###################
 packageInstall() {
     sudo apt-get install emacs25 -y
+    sudo apt-get install emacs26 -y
     sudo apt-get install suckless-tools -y
     sudo apt-get install git -y
     sudo apt-get install chromium-browser -y
@@ -39,6 +40,10 @@ packageInstall() {
     sudo apt-get install feh -y
     sudo apt-get install xterm -y
     sudo apt-get install vim -y
+    sudo apt-get install mame -y
+    sudo apt-get install blueman -y
+    sudo apt-get install cheese -y
+    sudo apt-get isntall redshift-gtk -y
 }
 
 checkoutCode() {

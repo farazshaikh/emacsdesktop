@@ -213,6 +213,7 @@
 
 ;; theme
 ;;(load-theme 'spacemacs-dark)
+(load-theme 'deeper-blue)
 (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
 (setenv "WRK" "/storvisor/work/cypress")
 
@@ -896,8 +897,6 @@ and their terminal equivalents.")
 (require 'exwm-systemtray)
 (exwm-systemtray-enable)
 (exwm-enable)
-(start-process "" nil "/usr/bin/nm-applet")
-
 
 (defun find-named-buffer(buffPrefix)
   (interactive)
@@ -966,6 +965,17 @@ and their terminal equivalents.")
 
 (GuessMonitorSetup)
 
+(setenv "GDK_SCALE" "0.5")
+(setenv "GDK_DPI_SCALE" "0.5")
+
+;; GNOME is used for mosto of the system settings
+(setenv "XDG_CURRENT_DESKTOP" "GNOME")
+
+(start-process "" nil "/usr/bin/nm-applet")
+(start-process "" nil "/usr/bin/blueman-applet")
+(start-process "" nil "/snap/bin/pa-applet")
+(start-process "" nil "/usr/bin/redshift-gtk")
+(start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
 
 ;; Application invocations
 (defun GetToNetflix()
@@ -1407,7 +1417,10 @@ d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
 
 
 (defun  EmacsDesktopGetSplash ()
-  (with-current-buffer (get-buffer-create "EmacsDesktopSplash") (insert emacsDesktopHelp) (goto-char (point-min)))
+  (with-current-buffer
+      (get-buffer-create "EmacsDesktopSplash")
+    (insert emacsDesktopHelp)
+    (goto-char (point-min)))
   (get-buffer-create "EmacsDesktopSplash")
 )
 
