@@ -74,8 +74,11 @@ linkupFiles() {
     cd ${installLoc}/Misc
 
     linkup ${ts} ~/.bashrc `pwd`/.bashrc
+    linkup ${ts} ~/.XtermModifiedITERM.json `pwd`/.XtermModifiedITERM.json
     linkup ${ts} ~/.screenrc `pwd`/.screenrc
     linkup ${ts} ~/.i3/config `pwd`/.i3/config
+    linkup ${ts} ~/.i3/.inputrc `pwd`/.inputrc
+
 
     linkup ${ts} ~/.gitconfig `pwd`/emacs/.gitconfig
     linkup ${ts} ~/.emacs `pwd`/emacs/.emacs

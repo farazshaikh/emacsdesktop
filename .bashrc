@@ -14,12 +14,6 @@ export PS1='[\033[1m\033[34m \u@\h:`pwd` \[\033[00m\]][$(__git_ps1)]\n'
 export HISTCONTROL=ignoredups
 
 
-export PERL_LOCAL_LIB_ROOT="/home/mts/faraz/perl5";
-export PERL_MB_OPT="--install_base /home/mts/faraz/perl5";
-export PERL_MM_OPT="INSTALL_BASE=/home/mts/faraz/perl5";
-export PERL5LIB="/home/mts/faraz/perl5/lib/perl5/x86_64-linux-gnu-thread-multi:/home/mts/faraz/perl5/lib/perl5";
-export PATH="/home/mts/faraz/perl5/bin:$PATH";
-
 __git_ps1 ()
 {
     local b="$(git symbolic-ref HEAD 2>/dev/null)";
@@ -86,6 +80,10 @@ runtillfail () {
 }
 
 export PYTHONSTARTUP=~/.pythonrc
+# Source rust and rust/cargo/nix
+source   /Users/faraz/.nix-profile/etc/profile.d/nix.sh
+source $HOME/.cargo/env
+export RUST_SRC_PATH=/Users/faraz/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src
 
 # dynamic title for screen
 case "$TERM" in
@@ -95,3 +93,5 @@ case "$TERM" in
     *)
          export PS1=$PS1'\$ '
 esac
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash

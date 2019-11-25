@@ -144,6 +144,32 @@
 (require 'whitespace)
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Project Specific Setup                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun SetupProjectDFN()
+  (interactive)
+  (setenv "WRK" (concat (concat "/Users/" (getenv "USER") "/dfn/dfinity/.")))
+  (setq compile-command
+          "cd $WRK/rs; source /Users/faraz/.nix-profile/etc/profile.d/nix.sh; nix-shell --run \"nix build\";")
+)
+
+
+(defun SetupProjectSP()
+  (interactive)
+  (setenv "WRK" "/storvisor/work/cypress")
+  (setq compile-command
+   "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
+)
+
+
+(defun SetupProjectEXCB()
+  (interactive)
+  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
+)
+
+(SetupProjectDFN)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Setup common variables across packages ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -161,8 +187,6 @@
  '(company-tooltip-align-annotations t)
  '(company-tooltip-idle-delay 0)
  '(compilation-scroll-output (quote first-error))
- '(compile-command
-   "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
  '(custom-safe-themes
    (quote
     ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
@@ -180,7 +204,7 @@
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (function-args company-tern ac-js2 js2-mode tern-auto-complete tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -214,8 +238,6 @@
 ;; theme
 ;;(load-theme 'spacemacs-dark)
 (load-theme 'deeper-blue)
-(setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
-(setenv "WRK" "/storvisor/work/cypress")
 
 
 
@@ -323,7 +345,7 @@
  '(company-scrollbar-fg ((t (:background "white"))))
  '(company-tooltip ((t (:background "cornflower blue" :foreground "white"))))
  '(company-tooltip-annotation ((t (:foreground "white"))))
- '(company-tooltip-selection ((t (:foreground "white" :background "cornflower blue" :box (:line-width 1 :color "white")))))
+ '(company-tooltip-selection ((t (:foreground "white" :background "black" :box (:line-width 1 :color "white")))))
  '(ediff-current-diff-A ((((class color)) (:background "blue" :foreground "white"))))
  '(ediff-current-diff-B ((((class color)) (:background "blue" :foreground "white" :weight bold))))
  '(ediff-current-diff-C ((((class color)) (:background "yellow3" :foreground "black" :weight bold))))
@@ -392,6 +414,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Code Auto Complete and browsing  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Compilation buffer colorize
+(when (require 'ansi-color nil t)
+  (defun colorize-compilation-buffer ()
+    (when (eq major-mode 'compilation-mode)
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
+  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+
 
 ;;;;;;;;;;;;;;;
 ;;    python ;;
@@ -600,10 +630,10 @@
 ;;   )
 
 
-(eval-after-load 'tern
-  '(progn
-     (require 'tern-auto-complete)
-     (tern-ac-setup)))
+;; (eval-after-load 'tern
+;;   '(progn
+;;      (require 'tern-auto-complete)
+;;      (tern-ac-setup)))
 
 
 
@@ -749,10 +779,40 @@
 ;; super becomes     ;;
 ;; accessible        ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
-(define-key input-decode-map "\e\eOA" [(meta up)])
-(define-key input-decode-map "\e\eOB" [(meta down)])
-(define-key input-decode-map "\e\eOC" [(meta right)])
-(define-key input-decode-map "\e\eOD" [(meta left)])
+(defun input_decode_map_putty()
+  (interactive)
+  ;; keys for iterm2 - you have to edit the default keys for the profile for [option][direction]
+  ;; xterm.defaults presets
+  (define-key input-decode-map "\e[A" [(meta up)])
+  (define-key input-decode-map "\e[B" [(meta down)])
+  (define-key input-decode-map "\ef" [(meta right)])
+  (define-key input-decode-map "\eb" [(meta left)])
+
+  ;; putty sends escape sequences
+  (define-key input-decode-map "\e\eOA" [(meta up)])
+  (define-key input-decode-map "\e\eOB" [(meta down)])
+  (define-key input-decode-map "\e\eOC" [(meta right)])
+  (define-key input-decode-map "\e\eOD" [(meta left)]))
+
+(defun input_decode_map_xterm_compatibility()
+  (interactive)
+  ;; key bindinds based on xterm.defaullts presets set by iterm2
+  (define-key input-decode-map "\e[1;5A" [(ctrl up)])
+  (define-key input-decode-map "\e[1;5B" [(ctrl down)])
+  (define-key input-decode-map "\e[1;5C" [(ctrl right)])
+  (define-key input-decode-map "\e[1;5D" [(ctrl left)])
+
+  (define-key input-decode-map "\e[1;3A" [(meta up)])
+  (define-key input-decode-map "\e[1;3B" [(meta down)])
+  (define-key input-decode-map "\e[1;3C" [(meta right)])
+  (define-key input-decode-map "\e[1;3D" [(meta left)])
+  )
+
+(add-hook 'tty-setup-hook 'input_decode_map_xterm_compatibility)
+
+
+
+
 (global-set-key [(meta up)] 'windmove-up)
 (global-set-key [(meta down)] 'windmove-down)
 (global-set-key [(meta right)] 'windmove-right)
