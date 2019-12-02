@@ -43,7 +43,7 @@ packageInstall() {
     sudo apt-get install mame -y
     sudo apt-get install blueman -y
     sudo apt-get install cheese -y
-    sudo apt-get isntall redshift-gtk -y
+    sudo apt-get install redshift-gtk -y
 }
 
 checkoutCode() {
