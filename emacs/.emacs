@@ -149,7 +149,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun SetupProjectDFN()
   (interactive)
-  (setenv "WRK" (concat (concat "/Users/" (getenv "USER") "/dfn/dfinity/.")))
+  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/.")))
   (setq compile-command
 "cd $WRK/rs;\n\
  source /Users/faraz/.nix-profile/etc/profile.d/nix.sh;\n \
