@@ -151,7 +151,10 @@
   (interactive)
   (setenv "WRK" (concat (concat "/Users/" (getenv "USER") "/dfn/dfinity/.")))
   (setq compile-command
-          "cd $WRK/rs; source /Users/faraz/.nix-profile/etc/profile.d/nix.sh; nix-shell --run \"nix build\";")
+"cd $WRK/rs;\n\
+ source /Users/faraz/.nix-profile/etc/profile.d/nix.sh;\n \
+ nix-shell --run \"nix build\" &&\n \
+ sudo cp ./target/debug/client /Users/faraz/.cache/dfinity/versions/0.4.7/")
 )
 
 
@@ -204,7 +207,7 @@
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -720,10 +723,15 @@
   ;; # rustup default nightly
   ;; # cargo install racer
   ;; # rustup component add rust-src
-  (add-hook 'rust-mode-hook #'racer-mode)
-  (add-hook 'racer-mode-hook #'eldoc-mode)
-  (add-hook 'racer-mode-hook #'company-mode)
-  (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
+  (ac-config-default)
+  (ac-racer-setup)
+  (auto-complete-mode t)
+  (add-hook 'rust-mode-hook 'racer-mode)
+  (add-hook 'racer-mode-hook 'eldoc-mode)
+  ;;(add-hook 'racer-mode-hook 'company-mode)
+  (add-hook 'racer-mode-hook 'auto-complete-mode)
+  (add-hook 'racer-mode-hook 'flycheck-mode)
+  (add-hook 'flycheck-mode-hook 'flycheck-rust-setup)
   )
 (rustModeSetup)
 

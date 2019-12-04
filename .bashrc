@@ -95,3 +95,7 @@ case "$TERM" in
 esac
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# sync bash commands to file always
+shopt -s histappend
+PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
