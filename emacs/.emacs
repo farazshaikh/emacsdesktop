@@ -62,6 +62,7 @@
 
                      ;; COMPANY & ITS BACKENDS
                      company
+                     company-quickhelp
                      company-c-headers
                      company-cmake
                      company-irony
@@ -76,6 +77,11 @@
                      jedi
                      elpy
                      ggtags
+
+                     ;; rust
+                     ac-racer
+                     flycheck-rust
+                     cargo
 
                      ;; Snippets
                      yasnippet-classic-snippets
@@ -149,12 +155,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun SetupProjectDFN()
   (interactive)
+  (setenv "RUST_SRC_PATH" "/home/emacs/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/")
   (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/.")))
   (setq compile-command
 "cd $WRK/rs;\n\
- source /Users/faraz/.nix-profile/etc/profile.d/nix.sh;\n \
+ source ~/.nix-profile/etc/profile.d/nix.sh;\n \
  nix-shell --run \"nix build\" &&\n \
- sudo cp ./target/debug/client /Users/faraz/.cache/dfinity/versions/0.4.7/")
+ sudo cp ./target/debug/client ~/.cache/dfinity/versions/0.4.7/")
 )
 
 
@@ -728,8 +735,15 @@
   (auto-complete-mode t)
   (add-hook 'rust-mode-hook 'racer-mode)
   (add-hook 'racer-mode-hook 'eldoc-mode)
-  ;;(add-hook 'racer-mode-hook 'company-mode)
-  (add-hook 'racer-mode-hook 'auto-complete-mode)
+
+  ;; Company mode
+  (add-hook 'racer-mode-hook 'company-mode)
+  (add-hook 'racer-mode-hook 'company-quickhelp-mode)
+
+  ;; Auto complete mode
+  ;;(add-hook 'racer-mode-hook 'auto-complete-mode)
+  ;;(add-hook 'racer-mode-hook 'ac-racer-setup)
+
   (add-hook 'racer-mode-hook 'flycheck-mode)
   (add-hook 'flycheck-mode-hook 'flycheck-rust-setup)
   )

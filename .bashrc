@@ -82,7 +82,6 @@ export PYTHONSTARTUP=~/.pythonrc
 # Source rust and rust/cargo/nix
 [ -f $HOME/.nix-profile/etc/profile.d/nix.sh ] && source $HOME/.nix-profile/etc/profile.d/nix.sh
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
-#export RUST_SRC_PATH=/Users/faraz/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/src
 
 # dynamic title for screen
 case "$TERM" in

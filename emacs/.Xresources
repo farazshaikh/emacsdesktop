@@ -7,8 +7,19 @@ Xft.rgba: rgbt
 Xft.dpi:192
 
 XTerm*selectToClipboard:false
-Xterm*rightScrollBar: true
+XTerm*rightScrollBar: true
 XTerm*scrollBar: true
 XTerm*metaSendsEscape: true
 XTerm*termName: xterm-256color
 XTerm*metaSendsEscape: true
+
+
+
+xterm*selectToClipboard:false
+xterm*rightScrollBar: true
+xterm*scrollBar: true
+xterm*metaSendsEscape: true
+xterm*termName: xterm-256color
+xterm*metaSendsEscape: true
+
+
