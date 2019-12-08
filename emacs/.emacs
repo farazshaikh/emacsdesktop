@@ -723,6 +723,7 @@
 ;;http://julienblanchard.com/2016/fancy-rust-development-with-emacs/
 ;;packages rustic cargo racer
 (defun rustModeSetup()
+  (interactive)
   ;; # cargo install rustfmt
   (add-hook 'rust-mode-hook
             (lambda ()
@@ -746,6 +747,7 @@
 
   (add-hook 'racer-mode-hook 'flycheck-mode)
   (add-hook 'flycheck-mode-hook 'flycheck-rust-setup)
+  (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
   )
 (rustModeSetup)
 
