@@ -82,6 +82,7 @@ export PYTHONSTARTUP=~/.pythonrc
 # Source rust and rust/cargo/nix
 [ -f $HOME/.nix-profile/etc/profile.d/nix.sh ] && source $HOME/.nix-profile/etc/profile.d/nix.sh
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
+[ -f /usr/share/bash-completion/completions/git ] && source /usr/share/bash-completion/completions/git
 
 # dynamic title for screen
 case "$TERM" in
@@ -93,6 +94,8 @@ case "$TERM" in
 esac
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+
 
 # sync bash commands to file always
 shopt -s histappend

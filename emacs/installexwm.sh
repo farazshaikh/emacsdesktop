@@ -98,6 +98,10 @@ linkupFiles() {
     popd
 }
 
+disable_greeter() {
+    sudo systemctl enable multi-user.target --force
+    sudo systemctl set-default multi-user.target
+}
 
 main() {
     installTime=`date | sed -e "s/ /_/g"`
@@ -112,6 +116,7 @@ main() {
     packageInstall
     checkoutCode ${installLoc}
     linkupFiles ${installLoc} ${installTime}
+    disable_greeter
 }
 
 set -e

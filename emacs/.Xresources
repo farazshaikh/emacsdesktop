@@ -13,13 +13,9 @@ XTerm*metaSendsEscape: true
 XTerm*termName: xterm-256color
 XTerm*metaSendsEscape: true
 
-
-
 xterm*selectToClipboard:false
 xterm*rightScrollBar: true
 xterm*scrollBar: true
 xterm*metaSendsEscape: true
 xterm*termName: xterm-256color
 xterm*metaSendsEscape: true
-
-

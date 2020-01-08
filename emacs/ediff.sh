@@ -10,10 +10,10 @@ fi
 # tools
 _EMACSCLIENT=emacsclient
 #_EMACSCLIENT=/usr/bin/emacs
-_BASENAME=/bin/basename
-_CP=/bin/cp
-_EGREP=/bin/egrep
-_MKTEMP=/bin/mktemp
+_BASENAME=basename
+_CP=cp
+_EGREP=egrep
+_MKTEMP=mktemp
 
 # args
 _LOCAL=${1}
@@ -38,12 +38,13 @@ fi
 # console vs. X
 if [ "${TERM}" = "linux" ]; then
     unset DISPLAY
-    _EMACSCLIENTOPTS="-nw"
+    _EMACSCLIENTOPTS=" -t "
 else
-    _EMACSCLIENTOPTS="-nw"
+    _EMACSCLIENTOPTS=" -t "
 fi
 
 # run emacsclient
+echo ${_EMACSCLIENT} ${_EMACSCLIENTOPTS} --eval "(${_EVAL})" 2>&1
 ${_EMACSCLIENT} ${_EMACSCLIENTOPTS} --eval "(${_EVAL})" 2>&1
 
 # check modified file

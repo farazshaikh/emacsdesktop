@@ -11,14 +11,10 @@
         tool = edifftwin
         guitool = edifftwin
 
-[difftool "ediff"]
-        cmd = ~/ediff.sh $LOCAL $REMOTE  $MERGED
 [difftool "edifftwin"]
         cmd = emacsclient --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
-
-[difftool "edifftwinst"]
-        cmd = emacsclient -t -nw --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
-
+[difftool "ediff"]
+        cmd = ~/ediff.sh $LOCAL $REMOTE  $MERGED
 
 [merge]
         tool = ediff

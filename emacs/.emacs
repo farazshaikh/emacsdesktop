@@ -114,12 +114,17 @@
                      xref-js2
 
                      ;; emacs goodies
+                     use-package
                      free-keys
                      ido-vertical-mode
                      ag
                      exwm
                      dmenu
                      iflipb
+                     neotree
+                     centaur-tabs
+                     swiper
+                     ivy
 
                      ;; UI
                      spacemacs-theme))
@@ -144,11 +149,6 @@
          )
   )
 
-;;;;;;;;;;;;;;;;;;;;;;;
-;; Required packages ;;
-;;;;;;;;;;;;;;;;;;;;;;;
-(require 'whitespace)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Project Specific Setup                   ;;
@@ -160,7 +160,7 @@
   (setq compile-command
 "cd $WRK/rs;\n\
  source ~/.nix-profile/etc/profile.d/nix.sh;\n \
- nix-shell --run \"nix build\" &&\n \
+ nix-shell --run \"cargo build\" &&\n \
  sudo cp ./target/debug/client ~/.cache/dfinity/versions/0.4.7/")
 )
 
@@ -179,6 +179,107 @@
 )
 
 (SetupProjectDFN)
+(neotree-dir (getenv "WRK"))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; Centaur Tabs      ;;
+;;;;;;;;;;;;;;;;;;;;;;;
+(defun centaur-tabs-custom-buffer-groups ()
+  "`centaur-tabs-buffer-groups' control buffers' group rules.
+
+    Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+    All buffer name start with * will group to \"Emacs\".
+    Other buffer group by `centaur-tabs-get-group-name' with project name."
+  (list
+   (cond
+    ((or (string-equal "*" (substring (buffer-name) 0 1))
+         (memq major-mode '(magit-process-mode
+                            magit-status-mode
+                            magit-diff-mode
+                            magit-log-mode
+                            magit-file-mode
+                            magit-blob-mode
+                            magit-blame-mode
+                            )))
+     "Emacs")
+    ((derived-mode-p 'prog-mode)
+     "Editing")
+    ((derived-mode-p 'dired-mode)
+     "Dired")
+    ((memq major-mode '(helpful-mode
+                        help-mode))
+     "Help")
+    ((memq major-mode '(org-mode
+                        org-agenda-clockreport-mode
+                        org-src-mode
+                        org-agenda-mode
+                        org-beamer-mode
+                        org-indent-mode
+                        org-bullets-mode
+                        org-cdlatex-mode
+                        org-agenda-log-mode
+                        diary-mode))
+     "OrgMode")
+    (t "Editing")
+    )))
+
+(defun centaur-tabs-group-by-custom ()
+  "Custom grouping for Centaur tabs"
+  (interactive)
+  (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
+  (centaur-tabs-force-update))
+
+(use-package centaur-tabs
+  :demand
+  :init (setq centaur-tabs-set-bar 'over)
+  :config
+  (centaur-tabs-mode +1)
+  (centaur-tabs-headline-match)
+  (setq centaur-tabs-set-modified-marker t
+        centaur-tabs-modified-marker " ● "
+        centaur-tabs-cycle-scope 'tabs
+        centaur-tabs-height 30
+        centaur-tabs-set-icons t
+        centaur-tabs-close-button " × "
+        centaur-tabs-show-navigation-buttons t)
+  (centaur-tabs-group-by-custom)
+  :bind
+  ("C-S-<tab>" . centaur-tabs-backward)
+  ("C-<tab>" . centaur-tabs-forward)
+  :hook
+  (dired-mode . centaur-tabs-local-mode)
+  (neotree-mode . centaur-tabs-local-mode))
+
+(define-minor-mode sticky-buffer-mode
+  "Make the current window always display this buffer."
+  nil " sticky" nil
+  (set-window-dedicated-p (selected-window) sticky-buffer-mode))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; Required packages ;;
+;;;;;;;;;;;;;;;;;;;;;;;
+(use-package ivy
+  :diminish ivy-mode
+  :init
+  (setq ivy-use-virtual-buffers t)
+  (ivy-mode 1)
+  :config
+  (setq ivy-wrap t)
+  )
+
+(use-package swiper
+  :ensure t
+  :bind ("\C-s" . swiper)
+  ("C-S-f" . swiper-multi)
+  :config
+  (define-key ivy-minibuffer-map (kbd "C-w") 'ivy-yank-word)
+  )
+
+(use-package whitespace)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Setup common variables across packages ;;
@@ -214,7 +315,7 @@
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (swiper ivy centaur-tabs neotree adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -247,7 +348,7 @@
 
 ;; theme
 ;;(load-theme 'spacemacs-dark)
-(load-theme 'deeper-blue)
+;;(load-theme 'deeper-blue)
 
 
 
@@ -368,6 +469,19 @@
  '(mode-line-emphasis ((t nil)))
  '(mode-line-highlight ((t (:box (:line-width 1 :color "white")))))
  '(mode-line-inactive ((t (:background "grey" :foreground "black" :height 0.9)))))
+
+
+(defun mark-directory-readonly(name)
+  "Mark a directory to be opened readonly under emacs"
+  (interactive "sDirectory Name:")
+  (setq name (concat name "/./.dir-locals.el"))
+  (message (concat "Created : " name))
+  (unless (file-exists-p name)
+    (progn
+      (write-region "" nil name)
+      (f-append-text "((nil . ((buffer-reado-only . t))))" 'utf-8 name))
+    )
+)
 
 
 
@@ -878,7 +992,7 @@ and their terminal equivalents.")
 (normal-erase-is-backspace-mode 0)
 (global-set-key (kbd "C-F") 'rgrep)
 (global-set-key (kbd "C-f") 'ag)
-
+(global-set-key (kbd "C-x b") 'ivy-switch-buffer)
 
 
 
@@ -914,29 +1028,29 @@ and their terminal equivalents.")
 
 ;; Global keybindings can be defined with `exwm-input-global-keys'.
 ;; Here are a few examples:
-(setq exwm-input-global-keys
-      `(
-        ([?\s-d] . dmenu)
-        ;; Bind "s-r" to exit char-mode and fullscreen mode.
-        ([?\s-r] . exwm-reset)
-        ;; Bind "s-w" to switch workspace interactively.
-        ([?\s-w] . exwm-workspace-switch)
-        ;; Bind "s-0" to "s-9" to switch to a workspace by its index.
-        ,@(mapcar (lambda (i)
-                    `(,(kbd (format "s-%d" i)) .
-                      (lambda ()
-                        (interactive)
-                        (exwm-workspace-switch-create ,i))))
-                  (number-sequence 0 9))
-        ;; Bind "s-&" to launch applications ('M-&' also works if the output
-        ;; buffer does not bother you).
-        ([?\s-&] . (lambda (command)
-		     (interactive (list (read-shell-command "$ ")))
-		     (start-process-shell-command command nil command)))
-        ;; Bind "s-<f2>" to "slock", a simple X display locker.
-        ([s-f2] . (lambda ()
-		    (interactive)
-		    (start-process "" nil "/usr/bin/slock")))))
+;; (setq exwm-input-global-keys
+;;       `(
+;;         ([?\s-d] . dmenu)
+;;         ;; Bind "s-r" to exit char-mode and fullscreen mode.
+;;         ([?\s-r] . exwm-reset)
+;;         ;; Bind "s-w" to switch workspace interactively.
+;;         ([?\s-w] . exwm-workspace-switch)
+;;         ;; Bind "s-0" to "s-9" to switch to a workspace by its index.
+;;         ,@(mapcar (lambda (i)
+;;                     `(,(kbd (format "s-%d" i)) .
+;;                       (lambda ()
+;;                         (interactive)
+;;                         (exwm-workspace-switch-create ,i))))
+;;                   (number-sequence 1 9))
+;;         ;; Bind "s-&" to launch applications ('M-&' also works if the output
+;;         ;; buffer does not bother you).
+;;         ([?\s-&] . (lambda (command)
+;; 		     (interactive (list (read-shell-command "$ ")))
+;; 		     (start-process-shell-command command nil command)))
+;;         ;; Bind "s-<f2>" to "slock", a simple X display locker.
+;;         ([s-f2] . (lambda ()
+;; 		    (interactive)
+;; 		    (start-process "" nil "/usr/bin/slock")))))
 
 ;; To add a key binding only available in line-mode, simply define it in
 ;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.
@@ -978,6 +1092,14 @@ and their terminal equivalents.")
 
 ;; Do not forget to enable EXWM. It will start by itself when things are
 ;; ready.  You can put it _anywhere_ in your configuration.
+(require 'exwm-randr)
+(setq exwm-randr-workspace-output-plist '(1 "Virtual1"))
+;; (add-hook 'exwm-randr-screen-change-hook
+;;           (lambda ()
+;;             (start-process-shell-command
+;;              "xrandr" nil "xrandr --output DP-1 --right-of DP-2 --auto")))
+(exwm-randr-enable)
+
 (require 'exwm-systemtray)
 (exwm-systemtray-enable)
 (exwm-enable)
@@ -1014,10 +1136,16 @@ and their terminal equivalents.")
                           :browserScalingFactor "1"
                           :terminalFontSize "6"))
 
+(setq NoAppSettings (make-appSettings
+                     :emacsAttributeFaceHeight 100
+                     :browserScalingFactor "1"
+                     :terminalFontSize "10"))
+
+
 (defun ApplyAppSettings(applySettings)
   ;; emacs
-  (set-face-attribute 'default nil :font "Ubuntu Mono")
-  (set-face-attribute 'default nil :height (appSettings-emacsAttributeFaceHeight applySettings))
+  ;;(set-face-attribute 'default nil :font "Ubuntu Mono")
+  ;;(set-face-attribute 'default nil :height (appSettings-emacsAttributeFaceHeight applySettings))
     ;; browser
   (setq browserScaleFactor (appSettings-browserScalingFactor  applySettings))
     ;; terminal
@@ -1033,6 +1161,9 @@ and their terminal equivalents.")
   (interactive)
   (ApplyAppSettings RetinaAppSettings))
 
+(defun NoSetup()
+  (interactive)
+  (ApplyAppSettings NoAppSettings))
 
 (defun GuessMonitorSetup()
   (setq monitorResolutionThreshold 2000)   ;; beyond which we consider the display to be a monitor
@@ -1047,14 +1178,15 @@ and their terminal equivalents.")
     )
   )
 
-(GuessMonitorSetup)
+;;(GuessMonitorSetup)
+(NoSetup)
 
-(setenv "GDK_SCALE" "0.5")
-(setenv "GDK_DPI_SCALE" "0.5")
+;;(setenv "GDK_SCALE" "0.5")
+;;(setenv "GDK_DPI_SCALE" "0.5")
 
 ;; GNOME is used for mosto of the system settings
 (setenv "XDG_CURRENT_DESKTOP" "GNOME")
-
+(start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-xsettings")
 (start-process "" nil "/usr/bin/nm-applet")
 (start-process "" nil "/usr/bin/blueman-applet")
 (start-process "" nil "/snap/bin/pa-applet")
@@ -1064,11 +1196,8 @@ and their terminal equivalents.")
 ;; Application invocations
 (defun GetToNetflix()
   (interactive)
-  (setq browser-bufname "Chromium-browser")
   (setq browser-binary "/usr/bin/google-chrome")
-  (setq browser-invocation (concat browser-binary
-                                   " --force-device-scale-factor="
-                                   browserScaleFactor))
+  (setq browser-invocation (concat browser-binary))
   (setq browser-invocation (concat browser-invocation "  --app=http://netflix.com"))
   (message "Opening Web browser")
   (start-process-shell-command
@@ -1077,11 +1206,9 @@ and their terminal equivalents.")
 
 (defun GetToBrowser()
   (interactive)
-  (setq browser-bufname "Chromium-browser")
-  (setq browser-binary "/usr/bin/chromium-browser")
-  (setq browser-invocation (concat browser-binary
-                                   " --incognito --force-device-scale-factor="
-                                   browserScaleFactor))
+  (setq browser-bufname "Google-chrome")
+  (setq browser-binary "/usr/bin/google-chrome")
+  (setq browser-invocation (concat browser-binary))
 
   (setq browser (find-named-buffer browser-bufname))
 (if (eq browser nil)
@@ -1092,7 +1219,6 @@ and their terminal equivalents.")
   (progn
     (message "Web browser")
     (switch-to-buffer browser))
-  
   ))
 
 
@@ -1102,7 +1228,7 @@ and their terminal equivalents.")
   (setq term-binary "/usr/bin/xterm")
   (setq term-invocation (concat term-binary
                                 " -bg black -fg white "
-                                " -fa 'Ubuntu Mono' -fs " terminalFontSize
+                                " -fa 'Ubuntu Mono'"
                                 ;;" -e 'screen -DR'"
                                 ))
 
@@ -1143,7 +1269,7 @@ and their terminal equivalents.")
   (setq term-binary "/usr/bin/xterm")
   (setq term-invocation (concat term-binary
                                 " -bg black -fg white "
-                                " -fa 'Ubuntu Mono' -fs " terminalFontSize
+                                " -fa 'Ubuntu Mono'"
                                 ;;" -e 'screen -DR'"
                                 ))
 
@@ -1183,7 +1309,7 @@ and their terminal equivalents.")
   (setq ssh-binary "/usr/bin/xterm")
   (setq ssh-invocation (concat ssh-binary
                                 " -bg black -fg white "
-                                " -fa 'Ubuntu Mono' -fs 6"
+                                " -fa 'Ubuntu Mono'"
                                 " -e 'ssh -Y " hostName "'"
                                 ))
   (start-process-shell-command
@@ -1245,7 +1371,7 @@ and their terminal equivalents.")
                       `(,(kbd (format "s-%d" i)) .
                         (lambda ()
                           (interactive)
-                          (exwm-workspace-switch-create ,i))))
+                          (exwm-workspace-switch ,i))))
                     (number-sequence 0 9))
           ([?\s-&] . (lambda (command)
                        (interactive (list (read-shell-command "$ ")))
@@ -1275,7 +1401,6 @@ and their terminal equivalents.")
 
   (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
   (global-set-key (kbd "s-w") 'exwm-workspace-switch)
-
 
   ;; Window Mgmt using Emacs style Alt-Key
   ;; window move
@@ -1309,7 +1434,7 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-]") 'split-window-vertically)
   (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
   (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
-  (exwm-input-set-key (kbd "s-b") 'ido-switch-buffer)
+  (exwm-input-set-key (kbd "s-b") 'ivy-switch-buffer)
 
   ;; window undo
   (exwm-input-set-key (kbd "s-z") 'winner-undo)
@@ -1321,6 +1446,15 @@ and their terminal equivalents.")
 
   (exwm-input-set-key (kbd "M-z") 'winner-undo)
   (global-set-key (kbd "M-z") 'winner-undo)
+
+  ;; setup workspaces in addition to the 0th workspace
+  (exwm-workspace-add)
+  (start-process-shell-command "" nil "/usr/bin/slack")
+  (exwm-workspace-add)
+  (GetToBrowser)
+  (exwm-workspace-add)
+  (NewTerminal)
+  (exwm-workspace-add)
 )
 
 (i3WindowMgmtKeys)
@@ -1508,4 +1642,4 @@ d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
   (get-buffer-create "EmacsDesktopSplash")
 )
 
-(setf initial-buffer-choice 'EmacsDesktopGetSplash)
+;;(setf initial-buffer-choice 'EmacsDesktopGetSplash)
