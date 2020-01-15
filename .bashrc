@@ -3,6 +3,8 @@ alias ff="find . -name"
 alias ffg="find . -type f | xargs grep -nH "
 alias pssh='parallel-ssh -i -t0 -h ~/.vmcluster $@'
 alias ee='emacsclient -n '
+alias toff="tmux set-window-option synchronize-panes off"
+alias ton="tmux set-window-option synchronize-panes on"
 export EDITOR='emacsclient -n'
 
 export GIT_PS1_SHOWDIRTYSTATE=true

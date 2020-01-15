@@ -38,7 +38,7 @@ xrandr --addmode $OUTPUT 3840x2160
 #xrandr --output $OUTPUT --mode 2880x1800 --dpi 192 --preferred
 
 #13 inch
-#xrandr --output $OUTPUT --mode 2560x1600 --dpi 192 --preferred
+xrandr --output $OUTPUT --mode 2560x1600 --dpi 192 --preferred
 
 # Finally launch emacs.
 exec dbus-launch emacs -rv

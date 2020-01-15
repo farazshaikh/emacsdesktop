@@ -115,6 +115,7 @@
 
                      ;; emacs goodies
                      use-package
+                     general
                      free-keys
                      ido-vertical-mode
                      ag
@@ -125,6 +126,11 @@
                      centaur-tabs
                      swiper
                      ivy
+                     hydra
+
+                     ;;
+                     git-gutter
+                     git-timemachine
 
                      ;; UI
                      spacemacs-theme))
@@ -261,6 +267,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Required packages ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
+(use-package general
+  :init
+  (defalias 'gsetq #'general-setq)
+  (defalias 'gsetq-local #'general-setq-local)
+  (defalias 'gsetq-default #'general-setq-default))
+
+
 (use-package ivy
   :diminish ivy-mode
   :init
@@ -277,6 +290,49 @@
   :config
   (define-key ivy-minibuffer-map (kbd "C-w") 'ivy-yank-word)
   )
+
+(use-package git-gutter
+  :diminish
+  :hook (after-init . global-git-gutter-mode)
+  :init (setq git-gutter:visual-line t
+              git-gutter:disabled-modes '(asm-mode image-mode)
+              git-gutter:modified-sign "*"
+              git-gutter:added-sign "✚"
+              git-gutter:deleted-sign "x")
+
+  :bind
+  ("C-c g" . hydra-git-gutter/body))
+
+
+(use-package hydra)
+(defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
+                            :hint nil)
+  "
+Git gutter:
+  _j_: next hunk        _s_tage hunk     _q_uit
+  _k_: previous hunk    _r_evert hunk    _Q_uit and deactivate git-gutter
+  ^ ^                   _p_opup hunk
+  _h_: first hunk
+  _l_: last hunk        set start _R_evision
+"
+  ("j" git-gutter:next-hunk)
+  ("k" git-gutter:previous-hunk)
+  ("h" (progn (goto-char (point-min))
+              (git-gutter:next-hunk 1)))
+  ("l" (progn (goto-char (point-min))
+              (git-gutter:previous-hunk 1)))
+  ("s" git-gutter:stage-hunk)
+  ("r" git-gutter:revert-hunk)
+  ("p" git-gutter:popup-hunk)
+  ("R" git-gutter:set-start-revision)
+  ("q" nil :color blue)
+  ("Q" (progn (git-gutter-mode -1)
+              ;; git-gutter-fringe doesn't seem to
+              ;; clear the markup right away
+              (sit-for 0.1)
+              (git-gutter:clear))
+       :color blue))
+
 
 (use-package whitespace)
 
@@ -315,7 +371,7 @@
  '(load-home-init-file t t)
  '(package-selected-packages
    (quote
-    (swiper ivy centaur-tabs neotree adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (git-timemachine hydra general git-gutter swiper ivy centaur-tabs neotree adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -366,7 +422,6 @@
       )
     )
 
-(require 'whitespace)
 (defvar my:prev-whitespace-mode nil)
 (make-variable-buffer-local 'my:prev-whitespace-mode)
 (defvar my:prev-whitespace-pushed nil)
@@ -1139,7 +1194,7 @@ and their terminal equivalents.")
 (setq NoAppSettings (make-appSettings
                      :emacsAttributeFaceHeight 100
                      :browserScalingFactor "1"
-                     :terminalFontSize "10"))
+                     :terminalFontSize "15"))
 
 
 (defun ApplyAppSettings(applySettings)
@@ -1224,20 +1279,11 @@ and their terminal equivalents.")
 
 (defun GetToTerminal()
   (interactive)
-  (setq term-bufname "XTerm")
-  (setq term-binary "/usr/bin/xterm")
-  (setq term-invocation (concat term-binary
-                                " -bg black -fg white "
-                                " -fa 'Ubuntu Mono'"
-                                ;;" -e 'screen -DR'"
-                                ))
-
   (setq terminal (find-named-buffer term-bufname))
   (if (eq terminal nil)
       (progn
-      (message "Opening terminal")
-      (start-process-shell-command
-        term-binary nil term-invocation))
+        (message "Opening terminal")
+        (NewTerminal))
   (progn
     (message "terminal")
     (switch-to-buffer terminal))
@@ -1262,16 +1308,21 @@ and their terminal equivalents.")
     (switch-to-buffer terminal))
   ))
 
-
 (defun NewTerminal()
   (interactive)
-  (setq term-bufname "XTerm")
-  (setq term-binary "/usr/bin/xterm")
-  (setq term-invocation (concat term-binary
-                                " -bg black -fg white "
-                                " -fa 'Ubuntu Mono'"
-                                ;;" -e 'screen -DR'"
-                                ))
+  ;;  (setq term-bufname "XTerm")
+  ;;  (setq term-binary "/usr/bin/xterm")
+  ;;  (setq term-bufname "XTerm")
+  ;;  (setq term-binary "/usr/bin/uxterm")
+  ;;  (setq term-invocation (concat term-binary
+  ;;                                " -bg black -fg white "
+  ;;                                 " -fa 'Ubuntu Mono' -fs " terminalFontSize
+  ;;                                ;;" -e 'screen -DR'"
+  ;;                                ))
+
+ (setq term-bufname "Gnome-terminal")
+ (setq term-binary "/usr/bin/gnome-terminal")
+ (setq term-invocation term-binary)
 
   (setq terminal (find-named-buffer term-bufname))
   (progn
@@ -1302,6 +1353,17 @@ and their terminal equivalents.")
         "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --right-of /;s/^/xrandr --output /'`")
   (shell-command commandMoveRight))
 
+;; Scale/Descale gdm
+(defun gdm-set-scale(scale-factor)
+  (interactive "scale-factor: ")
+  (setq gsettings-binary "/usr/bin/gsettings")
+  (setq gsettings-invocation
+        (concat gsettings-binary  " set org.gnome.desktop.interface text-scaling-factor "  scale-factor))
+  (message gsettings-invocation)
+  (start-process-shell-command
+   gsettings-binary nil gsettings-invocation)
+  )
+(gdm-set-scale "1")
 
 (defun ssh(hostName)
   (interactive "suserName@Host:")
@@ -1402,6 +1464,9 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
   (global-set-key (kbd "s-w") 'exwm-workspace-switch)
 
+  (exwm-input-set-key (kbd "s-e") 'neotree-toggle)
+  (global-set-key (kbd "s-e") 'neotree-toggle)
+
   ;; Window Mgmt using Emacs style Alt-Key
   ;; window move
   (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
@@ -1437,15 +1502,13 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-b") 'ivy-switch-buffer)
 
   ;; window undo
-  (exwm-input-set-key (kbd "s-z") 'winner-undo)
-  (exwm-input-set-key (kbd "s-Z") 'winner-redo)
+  (exwm-input-set-key (kbd "s-u") 'winner-undo)
+  (global-set-key (kbd "s-u") 'winner-undo)
 
 
   (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
   (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
 
-  (exwm-input-set-key (kbd "M-z") 'winner-undo)
-  (global-set-key (kbd "M-z") 'winner-undo)
 
   ;; setup workspaces in addition to the 0th workspace
   (exwm-workspace-add)

@@ -44,6 +44,8 @@ packageInstall() {
     sudo apt-get install blueman -y
     sudo apt-get install cheese -y
     sudo apt-get install redshift-gtk -y
+    sudo apt-get install tmux -y
+    sudo apt-get install gnome-flashback -y
 }
 
 checkoutCode() {
@@ -77,6 +79,7 @@ linkupFiles() {
     linkup ${ts} ~/.gdbinit `pwd`/.gdbinit
     linkup ${ts} ~/.XtermModifiedITERM.json `pwd`/.XtermModifiedITERM.json
     linkup ${ts} ~/.screenrc `pwd`/.screenrc
+    linkup ${ts} ~/.tmux.conf `pwd`/.tmux.conf
     linkup ${ts} ~/.i3/config `pwd`/.i3/config
     linkup ${ts} ~/.i3/.inputrc `pwd`/.inputrc
 
