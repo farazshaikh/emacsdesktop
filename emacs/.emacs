@@ -14,7 +14,7 @@
 
 
 ;; check up and set installation mode.
-(defvar eosinstallation nil "are we installing emacs os")
+(defvar eosinstallation nil "Are we installing Emacs os ?")
 (when (or (member "-eosinstall" command-line-args)
           (eq package-archive-contents nil)
           (not (file-exists-p "~/.eosinstall")))
@@ -84,8 +84,9 @@
                      cargo
 
                      ;; Snippets
-                     yasnippet-classic-snippets
+                     yasnippet
                      yasnippet-snippets
+                     yasnippet-classic-snippets
 
                      ;; go goodies
                      go-autocomplete
@@ -114,26 +115,30 @@
                      xref-js2
 
                      ;; emacs goodies
-                     use-package
-                     general
                      free-keys
                      ido-vertical-mode
                      ag
                      exwm
                      dmenu
                      iflipb
-                     neotree
+
+                     ;; emacs next gen
+                     use-package
+                     general
                      centaur-tabs
+                     treemacs
                      swiper
                      ivy
+                     counsel
                      hydra
+                     lsp-ui
+                     lsp-mode
+                     lsp-treemacs
 
                      ;;
                      git-gutter
                      git-timemachine
-
-                     ;; UI
-                     spacemacs-theme))
+                     magit))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -185,7 +190,6 @@
 )
 
 (SetupProjectDFN)
-(neotree-dir (getenv "WRK"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;
@@ -254,8 +258,7 @@
   ("C-S-<tab>" . centaur-tabs-backward)
   ("C-<tab>" . centaur-tabs-forward)
   :hook
-  (dired-mode . centaur-tabs-local-mode)
-  (neotree-mode . centaur-tabs-local-mode))
+  (dired-mode . centaur-tabs-local-mode))
 
 (define-minor-mode sticky-buffer-mode
   "Make the current window always display this buffer."
@@ -274,22 +277,60 @@
   (defalias 'gsetq-default #'general-setq-default))
 
 
+(use-package counsel
+:ensure t
+  :bind
+  (("M-y" . counsel-yank-pop)
+   :map ivy-minibuffer-map
+   ("M-y" . ivy-next-line)))
+
+;; (with-eval-after-load 'ivy
+;;   (push (cons #'swiper (cdr (assq t ivy-re-builders-alist)))
+;;         ivy-re-builders-alist)
+;;   (push (cons t #'ivy--regex-fuzzy) ivy-re-builders-alist))
+
+
 (use-package ivy
-  :diminish ivy-mode
-  :init
-  (setq ivy-use-virtual-buffers t)
-  (ivy-mode 1)
+  :ensure t
+  :diminish (ivy-mode)
+  :bind (("C-x b" . ivy-switch-buffer))
   :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t)
+  (setq ivy-count-format "%d/%d ")
+  (setq ivy-display-style 'fancy)
   (setq ivy-wrap t)
-  )
+
+)
 
 (use-package swiper
   :ensure t
-  :bind ("\C-s" . swiper)
-  ("C-S-f" . swiper-multi)
+  :bind (("C-s" . swiper-isearch)
+	 ("C-r" . swiper-isearch)
+	 ("C-c C-r" . ivy-resume)
+	 ("M-x" . counsel-M-x)
+	 ("C-x C-f" . counsel-find-file)
+         ("C-x C-j" . counsel-fzf))
   :config
-  (define-key ivy-minibuffer-map (kbd "C-w") 'ivy-yank-word)
-  )
+  (progn
+    (ivy-mode 1)
+    (setq ivy-use-virtual-buffers t)
+    (setq ivy-display-style 'fancy)
+    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+    ))
+
+
+(use-package whitespace
+  :hook (prog-mode-hook . whitespace-mode))
+
+(use-package flycheck
+  :ensure t
+  :init
+  (global-flycheck-mode t))
+
+
+(use-package hydra
+  :ensure t)
 
 (use-package git-gutter
   :diminish
@@ -304,7 +345,7 @@
   ("C-c g" . hydra-git-gutter/body))
 
 
-(use-package hydra)
+
 (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
                             :hint nil)
   "
@@ -333,8 +374,130 @@ Git gutter:
               (git-gutter:clear))
        :color blue))
 
+(use-package magit
+    :ensure t
+    :init
+    (progn
+    (bind-key "C-x g" 'magit-status)
+    ))
 
-(use-package whitespace)
+
+(use-package yasnippet
+  :ensure t
+  :init
+  (yas-global-mode 1))
+
+(use-package yasnippet-snippets
+  :ensure t)
+(use-package yasnippet-classic-snippets
+  :ensure t)
+
+(use-package lsp-mode
+  :ensure t
+  :commands lsp
+  :custom
+  (lsp-auto-guess-root nil)
+  (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
+  :bind (:map lsp-mode-map ("C-c C-f" . lsp-format-buffer))
+  :hook ((prog-mode) . lsp))
+
+(use-package lsp-ui
+  :after lsp-mode
+  :diminish
+  :commands lsp-ui-mode
+  :custom-face
+  (lsp-ui-doc-background ((t (:background nil))))
+  (lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
+  :bind (:map lsp-ui-mode-map
+              ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+              ([remap xref-find-references] . lsp-ui-peek-find-references)
+              ("C-c u" . lsp-ui-imenu))
+  :custom
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-header t)
+  (lsp-ui-doc-include-signature t)
+  (lsp-ui-doc-glance t)
+  (lsp-ui-doc-position 'at-point)
+  (lsp-ui-doc-border (face-foreground 'default))
+  (lsp-ui-sideline-enable nil)
+  (lsp-ui-sideline-ignore-duplicate t)
+  (lsp-ui-sideline-show-code-actions nil)
+  :config
+  ;;  Use lsp-ui-doc-webkit only in GUI
+  (setq lsp-ui-doc-use-webkit nil)
+  ;;WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
+  ;;https://github.com/emacs-lsp/lsp-ui/issues/243
+  (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
+    (setq mode-line-format nil)))
+
+
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay      0.5
+          treemacs-directory-name-transformer    #'identity
+          treemacs-display-in-side-window        t
+          treemacs-eldoc-display                 t
+          treemacs-file-event-delay              5000
+          treemacs-file-extension-regex          treemacs-last-period-regex-value
+          treemacs-file-follow-delay             0.2
+          treemacs-file-name-transformer         #'identity
+          treemacs-follow-after-init             t
+          treemacs-git-command-pipe              ""
+          treemacs-goto-tag-strategy             'refetch-index
+          treemacs-indentation                   2
+          treemacs-indentation-string            " "
+          treemacs-is-never-other-window         nil
+          treemacs-max-git-entries               5000
+          treemacs-missing-project-action        'ask
+          treemacs-no-png-images                 nil
+          treemacs-no-delete-other-windows       t
+          treemacs-project-follow-cleanup        nil
+          treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                      'left
+          treemacs-recenter-distance             0.1
+          treemacs-recenter-after-file-follow    nil
+          treemacs-recenter-after-tag-follow     nil
+          treemacs-recenter-after-project-jump   'always
+          treemacs-recenter-after-project-expand 'on-distance
+          treemacs-show-cursor                   nil
+          treemacs-show-hidden-files             t
+          treemacs-silent-filewatch              nil
+          treemacs-silent-refresh                nil
+          treemacs-sorting                       'alphabetic-asc
+          treemacs-space-between-root-nodes      t
+          treemacs-tag-follow-cleanup            t
+          treemacs-tag-follow-delay              1.5
+          treemacs-width                         20)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode t)
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple))))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -356,11 +519,10 @@ Git gutter:
  '(compilation-scroll-output (quote first-error))
  '(custom-safe-themes
    (quote
-    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" default)))
+    ("f0a76ae259b7be77e59f98501957eb45a10af0839dd9eb29fdd5691ed74771d4" "ed573618e4c25fa441f12cbbb786fb56d918f216ae4a895ca1c74f34a19cfe67" "58c2c8cc4473c5973e77f4b78a68c0978e68f1ddeb7a1eb34456fce8450be497" "f7b0f2d0f37846ef75157f5c8c159e6d610c3efcc507cbddec789c02e165c121" "a70b47c87e9b0940f6fece46656200acbfbc55e129f03178de8f50934ac89f58" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" "2f945b8cbfdd750aeb82c8afb3753ebf76a1c30c2b368d9d1f13ca3cc674c7bc" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "b69323309e5839676409607f91c69da2bf913914321c995f63960c3887224848" "a7928e99b48819aac3203355cbffac9b825df50d2b3347ceeec1e7f6b592c647" "3ee39fe8a6b6e0f1cbdfa33db1384bc778e3eff4118daa54af7965e9ab8243b3" default)))
  '(dabbrev-case-fold-search nil)
  '(dmenu-prompt-string "Run App: ")
  '(global-hl-line-mode t)
- '(global-whitespace-mode t)
  '(ido-mode t nil (ido))
  '(ido-vertical-define-keys (quote C-n-and-C-p-only))
  '(ido-vertical-mode 1)
@@ -369,9 +531,20 @@ Git gutter:
  '(inverse-video t)
  '(irony-additional-clang-options (quote ("-std=c++11")))
  '(load-home-init-file t t)
+ '(lsp-auto-guess-root nil)
+ '(lsp-prefer-flymake nil)
+ '(lsp-ui-doc-border "white" t)
+ '(lsp-ui-doc-enable t t)
+ '(lsp-ui-doc-glance t t)
+ '(lsp-ui-doc-header t t)
+ '(lsp-ui-doc-include-signature t t)
+ '(lsp-ui-doc-position (quote at-point) t)
+ '(lsp-ui-sideline-enable nil t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
+ '(lsp-ui-sideline-show-code-actions nil t)
  '(package-selected-packages
    (quote
-    (git-timemachine hydra general git-gutter swiper ivy centaur-tabs neotree adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets spacemacs-theme py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (kaolin-themes lsp-treemacs lsp-ui magit git-timemachine hydra general git-gutter swiper ivy centaur-tabs adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -401,11 +574,6 @@ Git gutter:
  '(which-function-mode t)
  '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
  '(winner-mode t))
-
-;; theme
-;;(load-theme 'spacemacs-dark)
-;;(load-theme 'deeper-blue)
-
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -520,6 +688,8 @@ Git gutter:
  '(ediff-fine-diff-B ((((class color)) (:background "cyan3" :foreground "black"))))
  '(ediff-fine-diff-C ((((class color)) (:background "Turquoise" :foreground "black" :weight bold))))
  '(hl-line ((t (:weight extra-bold))))
+ '(lsp-ui-doc-background ((t (:background nil))))
+ '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
  '(mode-line ((t (:background "cornflower blue" :foreground "white" :box (:line-width 1 :color "white") :height 0.9))))
  '(mode-line-emphasis ((t nil)))
  '(mode-line-highlight ((t (:box (:line-width 1 :color "white")))))
@@ -560,34 +730,6 @@ Git gutter:
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (ido-mode 1)
-
-;;;;;;;;;;;;;;;;;;
-;; YASnippets   ;;
-;;;;;;;;;;;;;;;;;;
-(defun insert-function-header(functionname)
-  "Insert a c function header"
-  (interactive "sEnter Function Name:")
-  (insert (format
-"/*
- *  %s
- *
- *
- *
- *  Parameters:
- *                          -
- *
- *  Results:
- *      errOk on success.
- *
- *  Side Effects:
- *      None
- */
-
-%s() {
-}
-
-" functionname functionname))
-)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -781,40 +923,7 @@ Git gutter:
     (add-hook 'auto-complete-mode-hook 'ac-common-setup)
     (message "using clang-async autocomplete for c/c++ completions")))
 
-
-
-
-
-
-
-
-
-
 (put 'erase-buffer 'disabled nil)
-
-
-;;(add-to-list 'load-path "~/.emacs.d/")
-;; (require 'auto-complete-clang-async)
-;; (defun ac-cc-mode-setup ()
-;;   ;;(add-to-list 'ac-clang-cflags " -std=c++11")
-;;   (setq ac-clang-cflags
-;;       (mapcar (lambda (item)(concat "-I" item))
-;;               (append
-;;                clangincludes
-;;                )
-;;               )
-;;       )
-;;   (setq ac-clang-complete-executable "~/.emacs.d/clang-complete")
-;;   (ac-clang-launch-completion-process)
-;;   )
-
-
-;; (eval-after-load 'tern
-;;   '(progn
-;;      (require 'tern-auto-complete)
-;;      (tern-ac-setup)))
-
-
 
 
 ;;;;;;;;;;;;;
@@ -1073,40 +1182,6 @@ and their terminal equivalents.")
                       (string= "gimp" exwm-instance-name))
               (exwm-workspace-rename-buffer exwm-title))))
 
-;; ;; Set global EXWM key bindings
-;; (exwm-input-set-key (kbd "M-r") #'exwm-restart)
-;; (exwm-input-set-key (kbd "M-w") #'exwm-workspace-switch)
-;; (exwm-input-set-key (kbd "M-d") 'dmenu)
-;; (exwm-input-set-key (kbd "M-t") #'exwm-floating-toggle-floating)
-;; (exwm-input-set-key (kbd "M-s") #'exwm-workspace-switch-to-buffer)
-;; (exwm-input-set-key (kbd "M-f") #'exwm-layout-toggle-fullscreen)
-
-;; Global keybindings can be defined with `exwm-input-global-keys'.
-;; Here are a few examples:
-;; (setq exwm-input-global-keys
-;;       `(
-;;         ([?\s-d] . dmenu)
-;;         ;; Bind "s-r" to exit char-mode and fullscreen mode.
-;;         ([?\s-r] . exwm-reset)
-;;         ;; Bind "s-w" to switch workspace interactively.
-;;         ([?\s-w] . exwm-workspace-switch)
-;;         ;; Bind "s-0" to "s-9" to switch to a workspace by its index.
-;;         ,@(mapcar (lambda (i)
-;;                     `(,(kbd (format "s-%d" i)) .
-;;                       (lambda ()
-;;                         (interactive)
-;;                         (exwm-workspace-switch-create ,i))))
-;;                   (number-sequence 1 9))
-;;         ;; Bind "s-&" to launch applications ('M-&' also works if the output
-;;         ;; buffer does not bother you).
-;;         ([?\s-&] . (lambda (command)
-;; 		     (interactive (list (read-shell-command "$ ")))
-;; 		     (start-process-shell-command command nil command)))
-;;         ;; Bind "s-<f2>" to "slock", a simple X display locker.
-;;         ([s-f2] . (lambda ()
-;; 		    (interactive)
-;; 		    (start-process "" nil "/usr/bin/slock")))))
-
 ;; To add a key binding only available in line-mode, simply define it in
 ;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.
 (define-key exwm-mode-map [?\C-q] #'exwm-input-send-next-key)
@@ -1278,6 +1353,7 @@ and their terminal equivalents.")
 
 
 (defun GetToTerminal()
+  (setq term-bufname "Gnome-terminal")
   (interactive)
   (setq terminal (find-named-buffer term-bufname))
   (if (eq terminal nil)
@@ -1363,7 +1439,7 @@ and their terminal equivalents.")
   (start-process-shell-command
    gsettings-binary nil gsettings-invocation)
   )
-(gdm-set-scale "1")
+;;(gdm-set-scale "1")
 
 (defun ssh(hostName)
   (interactive "suserName@Host:")
@@ -1464,8 +1540,8 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
   (global-set-key (kbd "s-w") 'exwm-workspace-switch)
 
-  (exwm-input-set-key (kbd "s-e") 'neotree-toggle)
-  (global-set-key (kbd "s-e") 'neotree-toggle)
+;;  (exwm-input-set-key (kbd "s-e") 'neotree-toggle)
+;;  (global-set-key (kbd "s-e") 'neotree-toggle)
 
   ;; Window Mgmt using Emacs style Alt-Key
   ;; window move
@@ -1508,8 +1584,13 @@ and their terminal equivalents.")
 
   (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
   (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
+  )
+
+(i3WindowMgmtKeys)
 
 
+(defun SetupWorkSpace()
+  (interactive)
   ;; setup workspaces in addition to the 0th workspace
   (exwm-workspace-add)
   (start-process-shell-command "" nil "/usr/bin/slack")
@@ -1518,10 +1599,8 @@ and their terminal equivalents.")
   (exwm-workspace-add)
   (NewTerminal)
   (exwm-workspace-add)
-)
-
-(i3WindowMgmtKeys)
-
+  )
+;;(SetupWorkSpace)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Open any startup apps     ;;
@@ -1589,6 +1668,7 @@ and their terminal equivalents.")
 
 (setupIFlipb)
 (server-start)
+(treemacs)
 
 
 

@@ -46,6 +46,7 @@ packageInstall() {
     sudo apt-get install redshift-gtk -y
     sudo apt-get install tmux -y
     sudo apt-get install gnome-flashback -y
+    sudo apt-get install fonts-noto
 }
 
 checkoutCode() {
