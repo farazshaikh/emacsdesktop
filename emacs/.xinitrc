@@ -20,7 +20,7 @@ export EDITOR="$VISUAL"
 #setup monitor resolution
 #xrandr -s 2560x1600
 # Get name of connected output
-#OUTPUT=$(xrandr -q | grep " connected " | awk '{ print $1 }' ) 
+OUTPUT=$(xrandr -q | grep " connected " | awk '{ print $1 }' ) 
 
 
 # Following lines are for vmware linux guests: vmware doesn't pass macbook's native resolution to guest, so we must add resolutions manually with proper timings (use gft or cvt to get timings)

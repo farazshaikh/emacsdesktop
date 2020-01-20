@@ -10,6 +10,7 @@
 ;; ;; Package Managment system Initialization ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (package-initialize)
+;;(setq package-check-signature nil)
 (setq inverse-video t)
 
 
@@ -1317,6 +1318,7 @@ and their terminal equivalents.")
 ;; GNOME is used for mosto of the system settings
 (setenv "XDG_CURRENT_DESKTOP" "GNOME")
 (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-xsettings")
+(start-process "" nil "/usr/lib/gnome-settings-daemon/gnome-settings-daemon")
 (start-process "" nil "/usr/bin/nm-applet")
 (start-process "" nil "/usr/bin/blueman-applet")
 (start-process "" nil "/snap/bin/pa-applet")
