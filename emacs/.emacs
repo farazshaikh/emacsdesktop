@@ -531,8 +531,8 @@ Git gutter:
  '(inverse-video t)
  '(irony-additional-clang-options (quote ("-std=c++11")))
  '(load-home-init-file t t)
- '(lsp-auto-guess-root nil)
- '(lsp-prefer-flymake nil)
+ '(lsp-auto-guess-root nil t)
+ '(lsp-prefer-flymake nil t)
  '(lsp-ui-doc-border "white" t)
  '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
@@ -1538,8 +1538,8 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
   (global-set-key (kbd "s-w") 'exwm-workspace-switch)
 
-;;  (exwm-input-set-key (kbd "s-e") 'neotree-toggle)
-;;  (global-set-key (kbd "s-e") 'neotree-toggle)
+  (exwm-input-set-key (kbd "s-e") 'treemacs)
+  (global-set-key (kbd "s-e") 'treemacs)
 
   ;; Window Mgmt using Emacs style Alt-Key
   ;; window move
