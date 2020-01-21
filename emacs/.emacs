@@ -120,7 +120,6 @@
                      ido-vertical-mode
                      ag
                      exwm
-                     dmenu
                      iflipb
 
                      ;; emacs next gen
@@ -130,6 +129,7 @@
                      treemacs
                      swiper
                      ivy
+                     ivy-hydra
                      counsel
                      hydra
                      lsp-ui
@@ -285,10 +285,6 @@
    :map ivy-minibuffer-map
    ("M-y" . ivy-next-line)))
 
-;; (with-eval-after-load 'ivy
-;;   (push (cons #'swiper (cdr (assq t ivy-re-builders-alist)))
-;;         ivy-re-builders-alist)
-;;   (push (cons t #'ivy--regex-fuzzy) ivy-re-builders-alist))
 
 
 (use-package ivy
@@ -301,8 +297,11 @@
   (setq ivy-count-format "%d/%d ")
   (setq ivy-display-style 'fancy)
   (setq ivy-wrap t)
+  (setq ivy-re-builders-alist
+        '((swiper . ivy--regex-plus)
+          (t      . ivy--regex-fuzzy))))
 
-)
+(use-package ivy-hrdra)
 
 (use-package swiper
   :ensure t
@@ -311,7 +310,8 @@
 	 ("C-c C-r" . ivy-resume)
 	 ("M-x" . counsel-M-x)
 	 ("C-x C-f" . counsel-find-file)
-         ("C-x C-j" . counsel-fzf))
+         ("C-x C-j" . counsel-fzf)
+         ("s-d" . counsel-linux-app))
   :config
   (progn
     (ivy-mode 1)
@@ -522,7 +522,6 @@ Git gutter:
    (quote
     ("f0a76ae259b7be77e59f98501957eb45a10af0839dd9eb29fdd5691ed74771d4" "ed573618e4c25fa441f12cbbb786fb56d918f216ae4a895ca1c74f34a19cfe67" "58c2c8cc4473c5973e77f4b78a68c0978e68f1ddeb7a1eb34456fce8450be497" "f7b0f2d0f37846ef75157f5c8c159e6d610c3efcc507cbddec789c02e165c121" "a70b47c87e9b0940f6fece46656200acbfbc55e129f03178de8f50934ac89f58" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" "2f945b8cbfdd750aeb82c8afb3753ebf76a1c30c2b368d9d1f13ca3cc674c7bc" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "b69323309e5839676409607f91c69da2bf913914321c995f63960c3887224848" "a7928e99b48819aac3203355cbffac9b825df50d2b3347ceeec1e7f6b592c647" "3ee39fe8a6b6e0f1cbdfa33db1384bc778e3eff4118daa54af7965e9ab8243b3" default)))
  '(dabbrev-case-fold-search nil)
- '(dmenu-prompt-string "Run App: ")
  '(global-hl-line-mode t)
  '(ido-mode t nil (ido))
  '(ido-vertical-define-keys (quote C-n-and-C-p-only))
@@ -545,7 +544,7 @@ Git gutter:
  '(lsp-ui-sideline-show-code-actions nil t)
  '(package-selected-packages
    (quote
-    (kaolin-themes lsp-treemacs lsp-ui magit git-timemachine hydra general git-gutter swiper ivy centaur-tabs adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline dmenu iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (ivy-hydra kaolin-themes lsp-treemacs lsp-ui magit git-timemachine hydra general git-gutter swiper ivy centaur-tabs adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -1533,9 +1532,6 @@ and their terminal equivalents.")
   (exwm-input-set-key (kbd "s-l") 'LockScreen)
   (global-set-key (kbd "s-l") 'LockScreen)
 
-  (exwm-input-set-key (kbd "s-d") 'dmenu)
-  (global-set-key (kbd "s-d") 'dmenu)
-
   (exwm-input-set-key (kbd "s-r") 'exwm-reset)
   (global-set-key (kbd "s-r") 'exwm-reset)
 
@@ -1590,6 +1586,59 @@ and their terminal equivalents.")
 
 (i3WindowMgmtKeys)
 
+(defun exwm-workspace-ui()
+  (interactive)
+  (easy-menu-define exwm-workspace-menu nil
+    "Menu for Exwm Workspace.
+
+Also used in `exwm-mode-line-workspace-map'."
+    '("Exwm Workspace"
+      ["Add workspace" exwm-workspace-add]
+      ["Delete current workspace" exwm-workspace-delete]
+      ["Move workspace to" exwm-workspace-move]
+      ["Swap workspaces" exwm-workspace-swap]
+      ["Move X window to" exwm-workspace-move-window]
+      ["Move X window from" exwm-workspace-switch-to-buffer]
+      ["Toggle minibuffer" exwm-workspace-toggle-minibuffer]
+      ["Switch workspace" exwm-workspace-switch]
+      ;; Place this entry at bottom to avoid selecting others by accident.
+      ("Switch to" :filter
+       (lambda (&rest _args)
+         (mapcar (lambda (i)
+                   `[,(format "workspace %d" i)
+                     (lambda ()
+                       (interactive)
+                       (exwm-workspace-switch ,i))
+                     (/= ,i exwm-workspace-current-index)])
+                 (number-sequence 0 (1- (exwm-workspace--count))))))))
+
+  (defvar exwm-mode-line-workspace-map
+    (let ((map (make-sparse-keymap)))
+      (define-key map [mode-line mouse-1] 'exwm-workspace-switch)
+      (define-key map [mode-line mouse-3] exwm-workspace-menu)
+      map)
+    "Local keymap for EXWM mode line string.  See `exwm-mode-line-format'.")
+
+  (defcustom exwm-mode-line-format
+    `("["
+      (:propertize (:eval (format "WS-%d" exwm-workspace-current-index))
+                   local-map ,exwm-mode-line-workspace-map
+                   face bold
+                   mouse-face mode-line-highlight
+                   help-echo "mouse-1: Switch to / add / delete to EXWM workspaces.
+mouse-2: EXWM Workspace menu.
+")
+      "]")
+    "EXWM workspace in the mode line."
+    :type 'sexp)
+
+
+  ;; FIXME: Don't push the value.  Instead push a symbol.  If done, (1)
+  ;; this will avoid duplicate entries for EXWM workspace (2) The mode
+  ;; line string will change in sync with the value of
+  ;; `exwm-mode-line-format'.
+  (add-to-list 'mode-line-misc-info exwm-mode-line-format t))
+(exwm-workspace-ui)
 
 (defun SetupWorkSpace()
   (interactive)
