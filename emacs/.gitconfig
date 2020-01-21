@@ -23,7 +23,7 @@
         cmd = ~/ediff.sh $LOCAL $REMOTE $MERGED $BASE
         trustExitCode = true
 [commit]
-        template = /home/faraz/.gitmessage
+        template = ~/.gitmessage
 
 [alias]
     st = status

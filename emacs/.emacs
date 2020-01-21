@@ -301,7 +301,7 @@
         '((swiper . ivy--regex-plus)
           (t      . ivy--regex-fuzzy))))
 
-(use-package ivy-hrdra)
+(use-package ivy-hydra)
 
 (use-package swiper
   :ensure t
