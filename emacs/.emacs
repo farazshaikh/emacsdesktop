@@ -127,6 +127,7 @@
                      general
                      centaur-tabs
                      treemacs
+                     flx
                      swiper
                      ivy
                      ivy-hydra
@@ -277,6 +278,7 @@
   (defalias 'gsetq-local #'general-setq-local)
   (defalias 'gsetq-default #'general-setq-default))
 
+(use-package flx)
 
 (use-package counsel
 :ensure t
@@ -479,8 +481,7 @@ Git gutter:
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
-    ;;(treemacs-resize-icons 44)
-
+    (treemacs-resize-icons 10)
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
     (treemacs-fringe-indicator-mode t)
@@ -531,8 +532,8 @@ Git gutter:
  '(inverse-video t)
  '(irony-additional-clang-options (quote ("-std=c++11")))
  '(load-home-init-file t t)
- '(lsp-auto-guess-root nil t)
- '(lsp-prefer-flymake nil t)
+ '(lsp-auto-guess-root nil)
+ '(lsp-prefer-flymake nil)
  '(lsp-ui-doc-border "white" t)
  '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
@@ -544,7 +545,7 @@ Git gutter:
  '(lsp-ui-sideline-show-code-actions nil t)
  '(package-selected-packages
    (quote
-    (ivy-hydra kaolin-themes lsp-treemacs lsp-ui magit git-timemachine hydra general git-gutter swiper ivy centaur-tabs adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (flx ivy-hydra kaolin-themes lsp-treemacs lsp-ui magit git-timemachine hydra general git-gutter swiper ivy centaur-tabs adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
