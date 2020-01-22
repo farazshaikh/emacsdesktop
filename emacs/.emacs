@@ -324,12 +324,16 @@
 
 
 (use-package whitespace
-  :hook (prog-mode-hook . whitespace-mode))
+  :hook
+  (prog-mode-hook . whitespace-mode)
+  :init
+  (setq whitespace-global-modes '(not exwm-mode treemacs-mode)))
 
 (use-package flycheck
   :ensure t
   :init
-  (global-flycheck-mode t))
+  (global-flycheck-mode t)
+  (setq flycheck-global-modes '(not exwm-mode treemacs-mode)))
 
 
 (use-package hydra
