@@ -400,6 +400,7 @@ Git gutter:
 
 (use-package auto-complete :ensure t :defer t)
 (use-package auto-complete-config
+  :disabled
   :requires auto-complete
   :ensure t
   :defer t)
@@ -511,16 +512,16 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
+ '(lsp-ui-doc-border "black" t)
+ '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position (quote bottom))
- '(lsp-ui-sideline-enable t)
- '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-doc-header t t)
+ '(lsp-ui-doc-include-signature t t)
+ '(lsp-ui-doc-position (quote bottom) t)
+ '(lsp-ui-sideline-enable t t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions nil)
+ '(lsp-ui-sideline-show-code-actions nil t)
  '(package-selected-packages
    (quote
     (ccls auto-complete-config auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine)))
