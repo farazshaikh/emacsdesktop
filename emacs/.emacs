@@ -1,208 +1,171 @@
+;;; package -- Summary EOS
+;;         EXWM/Gnome based Desktop Environment using Emacs.
+;;; Commentary:
+;;         Use EXWM to as a window manager and gnome and the desktop to provide a development
+;;         friendly desktop.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; No point in supporting multiple version, there is way to much work needed for that ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(if (version< emacs-version  "24.4")
- (error "Script depends on emacs version being greater than 24.4")
- (message "Version greater or equal to 24.4"))
+
+;;; Code:
+(defun check-version()
+  "Check that Emacs version is at the least supported version."
+  (if (version< emacs-version  "24.4")
+      (error "Script depends on Emacs version being greater than 24.4")
+    (message "Version greater or equal to 24.4")))
+(check-version)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;; Package Managment system Initialization ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(package-initialize)
-;;(setq package-check-signature nil)
-(setq inverse-video t)
+;; Package Mgmt and EOS installation
+(defun setup-package-mgmt()
+  "Setup the package management for EOS."
+  (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                           ("marmalade" . "http://marmalade-repo.org/packages/")
+                           ("melpa" . "http://melpa.milkbox.net/packages/")
+                           ("elpy" . "http://jorgenschaefer.github.io/packages/")))
+  ;;elget
+  (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+  (unless (require 'el-get nil t)
+    (url-retrieve
+     "https://raw.github.com/dimitri/el-get/master/el-get-install.el"
+     (lambda (s)
+       (end-of-buffer)
+       (eval-print-last-sexp))))
+  (package-initialize))
 
 
-;; check up and set installation mode.
-(defvar eosinstallation nil "Are we installing Emacs os ?")
-(when (or (member "-eosinstall" command-line-args)
-          (eq package-archive-contents nil)
-          (not (file-exists-p "~/.eosinstall")))
-  (progn
-    (setq eosinstallation t)
-    (message "emacs in running in installation mode")))
 
-;; eat up the command line args in the end
-(defun eosinstall-fn (switch)
-  (message "emacs running in eosinstall mode")
-  (setq eosinstallation t)
-  )
-(add-to-list 'command-switch-alist '("-eosinstall" . eosinstall-fn))
-
-;; install packages
-(setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                         ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("melpa" . "http://melpa.milkbox.net/packages/")
-                         ("elpy" . "http://jorgenschaefer.github.io/packages/")))
-;;elget
-(add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-(unless (require 'el-get nil t)
-  (url-retrieve
-   "https://raw.github.com/dimitri/el-get/master/el-get-install.el"
-   (lambda (s)
-     (end-of-buffer)
-     (eval-print-last-sexp))))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Auto install packages if not installed ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; list the packages you want
-;; basically all the packages needs for auto-complete of common languages C/C++/Python/JS
-;; Auto-complete used to be my preferred package for completions - Now moving to Company
-(setq package-list '(;; Auto complete and IT's backends
-                     auto-complete
-                     auto-complete-c-headers
-                     auto-complete-chunk
-                     auto-complete-clang
-                     auto-complete-clang-async
-                     auto-complete-etags
-                     auto-complete-exuberant-ctags
-                     auto-complete-nxml
-
-                     ;; COMPANY & ITS BACKENDS
-                     company
-                     company-quickhelp
-                     company-c-headers
-                     company-cmake
-                     company-irony
-                     company-irony-c-headers
-                     company-go
-                     company-jedi
-
-                     ;; Completion engines
-                     function-args
-                     irony
-                     irony-eldoc
-                     jedi
-                     elpy
-                     ggtags
-
-                     ;; rust
-                     ac-racer
-                     flycheck-rust
-                     cargo
-
-                     ;; Snippets
-                     yasnippet
-                     yasnippet-snippets
-                     yasnippet-classic-snippets
-
-                     ;; go goodies
-                     go-autocomplete
-                     spacemacs-theme
-                     go-direx
-                     go-eldoc
-                     go-errcheck
-                     go-mode
-                     go-play
-                     go-projectile
-                     go-snippets
-                     go-stacktracer
-                     golint
-                     go-eldoc
-
-                     ;; flycheck
-                     google-c-style
-                     flycheck
-                     flycheck-irony
-                     py-autopep8
-                     powerline
-
-                     ;; javascript setup from emacs.cafe Nicolas Petton
-                     company-tern
-                     js2-mode
-                     xref-js2
-
-                     ;; emacs goodies
-                     free-keys
-                     ido-vertical-mode
-                     ag
-                     exwm
-                     iflipb
-
-                     ;; emacs next gen
-                     use-package
-                     general
-                     centaur-tabs
-                     treemacs
-                     flx
-                     swiper
-                     ivy
-                     ivy-hydra
-                     counsel
-                     hydra
-                     lsp-ui
-                     lsp-mode
-                     lsp-treemacs
-
-                     ;;
-                     git-gutter
-                     git-timemachine
-                     magit))
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; install the missing packages ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(when
-    (eq eosinstallation t)
-  (progn (message "refreshing package list")
-         (package-refresh-contents)
-         ;; required for irony mode
-         (shell-command "apt install cmake libclang-dev")
-         (dolist (package package-list)
-           (unless (package-installed-p package)
-             (package-install package)))
-         (write-region "" "" "~/.eosinstall")
-	 ;;(require 'irony)
-	 ;;(irony-mode t)
-	 ;;(irony-install-server)
-         )
-  )
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Project Specific Setup                   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun SetupProjectDFN()
+(defun install-packages ()
+  "Install all required packages."
   (interactive)
-  (setenv "RUST_SRC_PATH" "/home/emacs/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/")
-  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/.")))
-  (setq compile-command
-"cd $WRK/rs;\n\
- source ~/.nix-profile/etc/profile.d/nix.sh;\n \
- nix-shell --run \"cargo build\" &&\n \
- sudo cp ./target/debug/client ~/.cache/dfinity/versions/0.4.7/")
-)
+  (message "installing missing packages")
+  (setq package-selected-packages
+        '(auto-complete
+          auto-complete-c-headers
+          auto-complete-chunk
+          auto-complete-clang
+          auto-complete-clang-async
+          auto-complete-etags
+          auto-complete-exuberant-ctags
+          auto-complete-nxml
 
+          ;; COMPANY & ITS BACKENDS
+          company
+          company-lsp
+          company-quickhelp
+          company-c-headers
+          company-cmake
+          company-irony
+          company-irony-c-headers
+          company-go
+          company-jedi
 
-(defun SetupProjectSP()
+          ;; Completion engines
+          function-args
+          irony
+          irony-eldoc
+          jedi
+          elpy
+          ggtags
+
+          ;; rust
+          ac-racer
+          flycheck-rust
+          cargo
+
+          ;; Snippets
+          yasnippet
+          yasnippet-snippets
+          yasnippet-classic-snippets
+
+          ;; go goodies
+          go-autocomplete
+          spacemacs-theme
+          go-direx
+          go-eldoc
+          go-errcheck
+          go-mode
+          go-play
+          go-projectile
+          go-snippets
+          go-stacktracer
+          golint
+          go-eldoc
+
+          ;; flycheck
+          google-c-style
+          flycheck
+          flycheck-irony
+          py-autopep8
+          powerline
+
+          ;; javascript setup from emacs.cafe Nicolas Petton
+          company-tern
+          js2-mode
+          xref-js2
+
+          ;; emacs goodies
+          free-keys
+          ido-vertical-mode
+          ag
+          exwm
+          iflipb
+
+          ;; emacs next gen
+          use-package
+          general
+          centaur-tabs
+          treemacs
+          flx
+          swiper
+          ivy
+          ivy-hydra
+          counsel
+          hydra
+          lsp-ui
+          lsp-mode
+          lsp-treemacs
+
+          ;;
+          git-gutter
+          git-timemachine
+          magit))
+  (unless package-archive-contents
+    (package-refresh-contents))
+
+  (dolist (package package-selected-packages)
+    (unless (package-installed-p package)
+      (package-install package)))
+
+  (write-region "" "" "~/.eosinstall"))
+
+(defvar
+  eosinstallation nil
+  "Are we in installation mode.  In installation mode all you are doing in downloading and setting up the packages.")
+
+(defun install-if-needed()
+  "Check if Emacs is being invoked in the installation mode."
   (interactive)
-  (setenv "WRK" "/storvisor/work/cypress")
-  (setq compile-command
-   "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
-)
+ (if (not (file-exists-p "~/.eosinstall"))
+      (message "Hello"))
+  (when (or (member "-eosinstall" command-line-args)
+            (eq package-archive-contents nil)
+            (not (file-exists-p "~/.eosinstall")))
+    (progn
+     (install-packages)
+     (setq eosinstallation t))))
 
-
-(defun SetupProjectEXCB()
-  (interactive)
-  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
-)
-
-(SetupProjectDFN)
-
+(setup-package-mgmt)
+(install-if-needed)
+(load-theme 'kaolin-bubblegum)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
-;; Centaur Tabs      ;;
+;; Package Setup     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 (defun centaur-tabs-custom-buffer-groups ()
   "`centaur-tabs-buffer-groups' control buffers' group rules.
-
-    Group centaur-tabs with mode if buffer is derived from `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
-    All buffer name start with * will group to \"Emacs\".
-    Other buffer group by `centaur-tabs-get-group-name' with project name."
+Group centaur-tabs with mode if buffer is derived from
+`eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+All buffer name start with * will group to \"Emacs\".
+Other buffer group by `centaur-tabs-get-group-name' with project name."
   (list
    (cond
     ((or (string-equal "*" (substring (buffer-name) 0 1))
@@ -233,11 +196,10 @@
                         org-agenda-log-mode
                         diary-mode))
      "OrgMode")
-    (t "Editing")
-    )))
+    (t "Editing"))))
 
 (defun centaur-tabs-group-by-custom ()
-  "Custom grouping for Centaur tabs"
+  "Custom grouping for Centaur tabs."
   (interactive)
   (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
   (centaur-tabs-force-update))
@@ -262,16 +224,7 @@
   :hook
   (dired-mode . centaur-tabs-local-mode))
 
-(define-minor-mode sticky-buffer-mode
-  "Make the current window always display this buffer."
-  nil " sticky" nil
-  (set-window-dedicated-p (selected-window) sticky-buffer-mode))
 
-
-
-;;;;;;;;;;;;;;;;;;;;;;;
-;; Required packages ;;
-;;;;;;;;;;;;;;;;;;;;;;;
 (use-package general
   :init
   (defalias 'gsetq #'general-setq)
@@ -394,10 +347,15 @@ Git gutter:
   :init
   (yas-global-mode 1))
 
-(use-package yasnippet-snippets
-  :ensure t)
-(use-package yasnippet-classic-snippets
-  :ensure t)
+(use-package yasnippet-snippets  :ensure t :defer t)
+(use-package yasnippet-classic-snippets :ensure t :defer t)
+(use-package popup  :ensure t :defer t)
+(use-package function-args
+  :config
+  (fa-config-default))
+
+
+
 
 (use-package lsp-mode
   :ensure t
@@ -409,6 +367,7 @@ Git gutter:
   :hook ((prog-mode) . lsp))
 
 (use-package lsp-ui
+  :ensure t
   :after lsp-mode
   :diminish
   :commands lsp-ui-mode
@@ -424,10 +383,11 @@ Git gutter:
   (lsp-ui-doc-header t)
   (lsp-ui-doc-include-signature t)
   (lsp-ui-doc-glance t)
-  (lsp-ui-doc-position 'at-point)
+  (lsp-ui-doc-position 'bottom)
   (lsp-ui-doc-border (face-foreground 'default))
   (lsp-ui-sideline-enable nil)
   (lsp-ui-sideline-ignore-duplicate t)
+  (lsp-ui-sideline-enable t)
   (lsp-ui-sideline-show-code-actions nil)
   :config
   ;;  Use lsp-ui-doc-webkit only in GUI
@@ -436,6 +396,19 @@ Git gutter:
   ;;https://github.com/emacs-lsp/lsp-ui/issues/243
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
     (setq mode-line-format nil)))
+
+
+(use-package auto-complete :ensure t :defer t)
+(use-package auto-complete-config
+  :requires auto-complete
+  :ensure t
+  :defer t)
+
+(use-package company :ensure t :defer t)
+(use-package company-lsp
+  :ensure t
+  :commands company-lsp
+  :config (push 'company-lsp company-backends))
 
 
 (use-package treemacs
@@ -538,18 +511,19 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "white" t)
- '(lsp-ui-doc-enable t t)
+ '(lsp-ui-doc-border "black")
+ '(lsp-ui-doc-enable t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t t)
- '(lsp-ui-doc-include-signature t t)
- '(lsp-ui-doc-position (quote at-point) t)
- '(lsp-ui-sideline-enable nil t)
- '(lsp-ui-sideline-ignore-duplicate t t)
- '(lsp-ui-sideline-show-code-actions nil t)
+ '(lsp-ui-doc-header t)
+ '(lsp-ui-doc-include-signature t)
+ '(lsp-ui-doc-position (quote bottom))
+ '(lsp-ui-sideline-enable t)
+ '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-sideline-mode t t)
+ '(lsp-ui-sideline-show-code-actions nil)
  '(package-selected-packages
    (quote
-    (flx ivy-hydra kaolin-themes lsp-treemacs lsp-ui magit git-timemachine hydra general git-gutter swiper ivy centaur-tabs adoc-mode ac-racer clippy eldoc-overlay function-args company-tern ac-js2 js2-mode tern react-snippets flycheck-rust cargo racer rustic xclip powerline iflipb smart-mode-line mode-line-bell free-keys ag yasnippet-snippets yasnippet-classic-snippets py-autopep8 jedi google-c-style golint go-stacktracer go-snippets go-projectile go-play go-errcheck go-direx go-autocomplete flycheck elpy edebug-x company-irony-c-headers company-irony cmake-mode auto-complete-nxml auto-complete-exuberant-ctags auto-complete-etags auto-complete-clang-async auto-complete-clang auto-complete-chunk auto-complete-c-headers)))
+    (ccls auto-complete-config auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine)))
  '(python-python-command "/usr/bin/ipython")
  '(ring-bell-function
    (lambda nil
@@ -581,80 +555,29 @@ Git gutter:
  '(winner-mode t))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Workaround auto complete and whitespace show YELLOW/RED boxes								     ;;
-;; https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576 ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun my:force-modes (rule-mode &rest modes)
-    "switch on/off several modes depending of state of
-    the controlling minor mode
-  "
-    (let ((rule-state (if rule-mode 1 -1)
-                      ))
-      (mapcar (lambda (k) (funcall k rule-state)) modes)
-      )
-    )
-
-(defvar my:prev-whitespace-mode nil)
-(make-variable-buffer-local 'my:prev-whitespace-mode)
-(defvar my:prev-whitespace-pushed nil)
-(make-variable-buffer-local 'my:prev-whitespace-pushed)
-
-(defun my:push-whitespace (&rest skip)
-  (if my:prev-whitespace-pushed () (progn
-                                     (setq my:prev-whitespace-mode whitespace-mode)
-                                     (setq my:prev-whitespace-pushed t)
-                                     (my:force-modes nil 'whitespace-mode)
-                                     ))
-  )
-
-(defun my:pop-whitespace (&rest skip)
-  (if my:prev-whitespace-pushed (progn
-                                  (setq my:prev-whitespace-pushed nil)
-                                  (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
-                                  ))
-  )
-
-(require 'popup)
-(advice-add 'popup-draw :before #'my:push-whitespace)
-(advice-add 'popup-delete :after #'my:pop-whitespace)
-;; End workaround auto complete and whitespace
+;;;;;;;;;;;;;;;;;;;
+;; Coloring      ;;
+;;;;;;;;;;;;;;;;;;;
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(lsp-ui-doc-background ((t (:background nil))))
+ '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic))))))
 
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helper/Utility functions ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun compileloop ()
-  (interactive)
-  (setq compilation-scroll-output t)
-  (setq compilation-finish-function
-        (lambda (buffer msg) (compile-internal compile-command "No more errors")))
-  (compile-internal compile-command "No more errors.")
-  ;;(compile compile-command)
-  ;;(shell-command "/bin/bash /home/faraz-local-home/compile-loop.sh &")
-  ;;(shell-command "ls")
-)
-
-
-(defun compile2 ()
-  (interactive)
-  (setq compilation-scroll-output t)
-  (setq compilation-finish-function
-        (lambda (buffer msg)))
-  (compile compile-command)
-  ;;(shell-command "/bin/bash /home/faraz-local-home/compile-loop.sh &")
-  ;;(shell-command "ls")
-)
-
-
 (defun toggle-show-trailing-whitespace ()
-  "Toggle show-trailing-whitespace between t and nil"
+  "Toggle 'show-trailing-whitespace' between t and nil."
   (interactive)
   (setq show-trailing-whitespace (not show-trailing-whitespace)))
 
 (defun tags-create (dir-name)
-     "Create tags file."
+     "Create tags file Arguments DIR-NAME."
      (interactive "DDirectory: ")
      (eshell-command
       (format "find %s -type f -name \"*.hpp\" -o -name \"*.cpp\" -o -name \"*.[ch]\" | xargs etags -f %s/TAGS" dir-name dir-name))
@@ -663,46 +586,20 @@ Git gutter:
 )
 
 (defun copy-rectangle-as-kill ()
+    "Copy a rectangle as kill."
     (interactive)
     (save-excursion
     (kill-rectangle (mark) (point))
     (exchange-point-and-mark)
     (yank-rectangle)))
 
-
-;;;;;;;;;;;;;;;;;;;
-;; Coloring      ;;
-;;;;;;;;;;;;;;;;;;;
-;; ediff
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(company-preview-common ((t (:foreground "white" :background "cornflower blue"))))
- '(company-scrollbar-bg ((t (:background "cornflower blue"))))
- '(company-scrollbar-fg ((t (:background "white"))))
- '(company-tooltip ((t (:background "cornflower blue" :foreground "white"))))
- '(company-tooltip-annotation ((t (:foreground "white"))))
- '(company-tooltip-selection ((t (:foreground "white" :background "black" :box (:line-width 1 :color "white")))))
- '(ediff-current-diff-A ((((class color)) (:background "blue" :foreground "white"))))
- '(ediff-current-diff-B ((((class color)) (:background "blue" :foreground "white" :weight bold))))
- '(ediff-current-diff-C ((((class color)) (:background "yellow3" :foreground "black" :weight bold))))
- '(ediff-even-diff-Ancestor ((((class color)) (:background "light grey" :foreground "black" :weight bold))))
- '(ediff-even-diff-C ((((class color)) (:background "light grey" :foreground "black" :weight bold))))
- '(ediff-fine-diff-B ((((class color)) (:background "cyan3" :foreground "black"))))
- '(ediff-fine-diff-C ((((class color)) (:background "Turquoise" :foreground "black" :weight bold))))
- '(hl-line ((t (:weight extra-bold))))
- '(lsp-ui-doc-background ((t (:background nil))))
- '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
- '(mode-line ((t (:background "cornflower blue" :foreground "white" :box (:line-width 1 :color "white") :height 0.9))))
- '(mode-line-emphasis ((t nil)))
- '(mode-line-highlight ((t (:box (:line-width 1 :color "white")))))
- '(mode-line-inactive ((t (:background "grey" :foreground "black" :height 0.9)))))
-
+(define-minor-mode sticky-buffer-mode
+  "Make the current window always display this buffer."
+  nil " sticky" nil
+  (set-window-dedicated-p (selected-window) sticky-buffer-mode))
 
 (defun mark-directory-readonly(name)
-  "Mark a directory to be opened readonly under emacs"
+  "Mark a directory NAME to be opened readonly under Emacs."
   (interactive "sDirectory Name:")
   (setq name (concat name "/./.dir-locals.el"))
   (message (concat "Created : " name))
@@ -713,13 +610,61 @@ Git gutter:
     )
 )
 
+;;;;;;;;;;;;;;;
+;;Workarounds;;
+;kk;;;;;;;;;;;;
+;;https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
+(defun my:force-modes (rule-mode &rest modes)
+  "RULE-MODE MODES switch on/off several modes depending of state of the controlling minor mode."
+    (let ((rule-state (if rule-mode 1 -1)
+                      ))
+      (mapcar (lambda (k) (funcall k rule-state)) modes)
+      )
+    )
+(defvar my:prev-whitespace-mode nil)
+(make-variable-buffer-local 'my:prev-whitespace-mode)
+(defvar my:prev-whitespace-pushed nil)
+(make-variable-buffer-local 'my:prev-whitespace-pushed)
+(defun my:push-whitespace (&rest skip)
+  "SKIP docstring :(."
+  (if my:prev-whitespace-pushed () (progn
+                                     (setq my:prev-whitespace-mode whitespace-mode)
+                                     (setq my:prev-whitespace-pushed t)
+                                     (my:force-modes nil 'whitespace-mode)
+                                     ))
+  )
+
+(defun my:pop-whitespace (&rest skip)
+  "SKIP docstring :(."
+  (if my:prev-whitespace-pushed (progn
+                                  (setq my:prev-whitespace-pushed nil)
+                                  (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
+                                  ))
+  )
+(advice-add 'popup-draw :before #'my:push-whitespace)
+(advice-add 'popup-delete :after #'my:pop-whitespace)
+;; End workaround auto complete and whitespace
+
+
+;; Compilation buffer colorize
+(when (require 'ansi-color nil t)
+  (defun colorize-compilation-buffer ()
+    (when (eq major-mode 'compilation-mode)
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
+  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+
+;;  terminal mode settings
+(add-hook 'ansi-term-mode-hook '(lambda ()
+      (setq term-buffer-maximum-size 0)
+      (setq-default show-trailing-whitespace f)
+))
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;
 ;; Emacs email   ;;
 ;;;;;;;;;;;;;;;;;;;
-
-
 ;; Tools
 (setq smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
       smtpmail-smtp-server "smtp.gmail.com"
@@ -732,65 +677,61 @@ Git gutter:
                                    "faraz@email.com"
                                    nil)))
 
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
-(ido-mode 1)
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Code Auto Complete and browsing  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; Compilation buffer colorize
-(when (require 'ansi-color nil t)
-  (defun colorize-compilation-buffer ()
-    (when (eq major-mode 'compilation-mode)
-      (ansi-color-apply-on-region compilation-filter-start (point-max))))
-  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
-
-
 ;;;;;;;;;;;;;;;
 ;;    python ;;
 ;;;;;;;;;;;;;;;
-(elpy-enable)
-(setq elpy-rpc-python-command "python3")
-(add-hook 'python-mode-hook 'elpy-mode)
-(add-hook 'python-mode-hook 'jedi:setup)
-(setq elpy-rpc-backend "jedi")
-(setq jedi:setup-keys t)                      ; optional
-(setq jedi:complete-on-dot t)                 ; optional
+(use-package elpy
+  :ensure t
+  :defer t
+  :init
+  (advice-add 'python-mode :before 'elpy-enable)
+  (add-hook 'python-mode-hook 'elpy-mode)
+  (add-hook 'python-mode-hook 'jedi:setup)
+  (add-hook 'elpy-mode-hook 'flycheck-mode)
+  :config
+  (setq elpy-rpc-python-command "python3"
+        elpy-rpc-backend "jedi"
+        jedi:setup-keys t                      ; optional
+        jedi:complete-on-dot t)
+  ;; use flycheck not flymake with elpy
+  (when (require 'flycheck nil t)
+    (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))))
 
-;; use flycheck not flymake with elpy
-(when (require 'flycheck nil t)
-  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-  (add-hook 'elpy-mode-hook 'flycheck-mode))
 ;; enable autopep8 formatting on save
-(require 'py-autopep8)
-(add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+(use-package py-autopep8
+  :ensure t
+  :defer t
+  :init
+  (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save))
 
-
-;;;;;;;;;;;;;;;;;;;
-;; terminal mode ;;
-;;;;;;;;;;;;;;;;;;;
-(add-hook 'ansi-term-mode-hook '(lambda ()
-      (setq term-buffer-maximum-size 0)
-      (setq-default show-trailing-whitespace f)
-))
 
 
 ;;;;;;;;;;;
 ;; C C++ ;;
 ;;;;;;;;;;;
-(require 'auto-complete)
-(require 'auto-complete-config)
-(require 'auto-complete-clang-async)
+(use-package auto-complete-clang-async
+  :ensure t
+  :defer t)
 
-(require 'company)
+
 (require 'company-c-headers)
+(use-package ccls
+  :ensure t
+  :config
+  (setq ccls-executable "ccls")
+  (setq lsp-prefer-flymake nil)
+  (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
+  :hook ((c-mode c++-mode objc-mode) .
+         (lambda () (require 'ccls) (lsp))))
+
 (require 'company-irony)
 
-(require 'function-args)
-(fa-config-default)
+
+
 
 (require 'flycheck-irony)
 (require 'ggtags)
@@ -834,7 +775,6 @@ Git gutter:
   :group 'mycustom
   :type '(repeat directory)
 )
-
 
 (setq ccppCompletions "ironycompany")
 ;;(setq ccppCompletions "clangac")
@@ -1034,9 +974,42 @@ Git gutter:
   )
 (rustModeSetup)
 
-
-
 (put 'downcase-region 'disabled nil)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Project Specific Setup                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun SetupProjectDFN()
+  "Setup DFN project."
+  (interactive)
+  (setenv "RUST_SRC_PATH" "/home/emacs/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/")
+  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/.")))
+  (setq compile-command
+        "cd $WRK/rs;\n\
+ source ~/.nix-profile/etc/profile.d/nix.sh;\n \
+ nix-shell --run \"cargo build\"")
+  )
+
+
+(defun SetupProjectSP()
+  "Setup SP project."
+  (interactive)
+  (setenv "WRK" "/storvisor/work/cypress")
+  (setq compile-command
+   "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
+)
+
+
+(defun SetupProjectEXCB()
+  "Setup Excubito Project."
+  (interactive)
+  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
+)
+
+(SetupProjectDFN)
+
+
 
 
 ;;;;;;;;;;;;;;;
