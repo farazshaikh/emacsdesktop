@@ -31,8 +31,6 @@
        (eval-print-last-sexp))))
   (package-initialize))
 
-
-
 (defun install-packages ()
   "Install all required packages."
   (interactive)
@@ -95,7 +93,7 @@
           flycheck
           flycheck-irony
           py-autopep8
-          powerline
+          spaceline
 
           ;; javascript setup from emacs.cafe Nicolas Petton
           company-tern
@@ -140,20 +138,18 @@
   (write-region "" "" "~/.eosinstall"))
 
 (defvar
-  eosinstallation nil
+  es/eosinstallation nil
   "Are we in installation mode.  In installation mode all you are doing in downloading and setting up the packages.")
 
 (defun install-if-needed()
   "Check if Emacs is being invoked in the installation mode."
   (interactive)
- (if (not (file-exists-p "~/.eosinstall"))
-      (message "Hello"))
   (when (or (member "-eosinstall" command-line-args)
             (eq package-archive-contents nil)
             (not (file-exists-p "~/.eosinstall")))
     (progn
      (install-packages)
-     (setq eosinstallation t))))
+     (setq es/eosinstallation t))))
 
 (setup-package-mgmt)
 (install-if-needed)
@@ -161,6 +157,137 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package Setup     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
+(use-package kaolin-themes
+  :config
+  (kaolin-treemacs-theme)
+  (load-theme 'kaolin-bubblegum t))
+
+
+;; Load EXWM.
+(defun es/set-up-gnome-desktop()
+  "GNOME is used for mosto of the system settings."
+  (setenv "XDG_CURRENT_DESKTOP" "GNOME")
+  (start-process "" nil "/usr/bin/gnome-flashback")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gnome-settings-daemon")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-power")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-print-notifications")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-rfkill")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-screensaver-proxy")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sharing")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-smartcard")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-xsettings")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-wacom")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sound")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-a11y-settings")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-clipboard")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-color")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-datetime")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-housekeeping")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-keyboard")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-media-keys")
+  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-mouse")
+  (start-process "" nil "/usr/lib/gnome-disk-utility/gsd-disk-utility-(not )otify")
+  (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
+  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/(insert )ndicator-messages-service")
+  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
+;;  (start-process "" nil "zeitgeist-datahub")
+  (start-process "" nil "update-notifier")
+  (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")
+
+  (start-process "" nil "/usr/bin/nm-applet")
+  (start-process "" nil "/usr/bin/blueman-applet")
+  (start-process "" nil "/snap/bin/pa-applet")
+  (start-process "" nil "/usr/bin/redshift-gtk")
+  (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600"))
+(es/set-up-gnome-desktop)
+
+(use-package exwm-config
+  :disabled
+  :init
+  (exwm-config-default))
+
+(use-package exwm
+  :ensure t
+  :pin gnu
+  :init
+  :hook
+  (('exwm-update-class .
+                       (lambda ()
+                         (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                                     (string= "gimp" exwm-instance-name))
+                           (exwm-workspace-rename-buffer exwm-class-name))))
+   ('exwm-update-title-hook .
+                            (lambda ()
+                              (when (or (not exwm-instance-name)
+                                        (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                                        (string= "gimp" exwm-instance-name))
+                               (exwm-workspace-rename-buffer exwm-title)))))
+
+  :config
+  (setq exwm-workspace-number 10)
+
+  ;; create space
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (fringe-mode 1)
+
+  ;; applications
+  (exwm-input-set-key (kbd "s-l") 'es/lock-screen)
+  (exwm-input-set-key (kbd "s-g") 'es/app-browser)
+  (exwm-input-set-key (kbd "s-t") 'es/app-terminal)
+  (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
+  (exwm-input-set-key (kbd "s-e") 'treemacs)
+  ;; window move
+  (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
+  (exwm-input-set-key (kbd "s-<down>") 'windmove-down)
+  (exwm-input-set-key (kbd "s-<up>") 'windmove-up)
+  (exwm-input-set-key (kbd "s-<right>") 'windmove-right)
+  ;; window resize
+  (exwm-input-set-key (kbd "s-S-<right>")
+                      (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 50)))
+  (exwm-input-set-key (kbd "s-S-<left>")
+                      (lambda () (interactive) (exwm-layout-shrink-window-horizontally 50)))
+  (exwm-input-set-key (kbd "s-S-<up>")
+                      (lambda () (interactive) (exwm-layout-enlarge-window             50)))
+  (exwm-input-set-key (kbd "s-S-<down>")
+                      (lambda () (interactive) (exwm-layout-shrink-window              50)))
+    ;; window splits
+  (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally)
+  (exwm-input-set-key (kbd "s-]") 'split-window-vertically)
+  (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
+  (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
+  (exwm-input-set-key (kbd "s-b") 'ivy-switch-buffer)
+
+  ;; window undo
+  (exwm-input-set-key (kbd "s-u") 'winner-undo)
+  (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
+  (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
+  (setq exwm-input-global-keys
+        `(
+          ,@(mapcar (lambda (i)
+                      `(,(kbd (format "s-%d" i)) .
+                        (lambda ()
+                          (interactive)
+                          (exwm-workspace-switch ,i))))
+                    (number-sequence 0 9))
+          ([?\s-&] . (lambda (command)
+                       (interactive (list (read-shell-command "$ ")))
+                       (start-process-shell-command command nil command)))))
+
+  (require 'exwm-systemtray)
+  (exwm-systemtray-enable)
+  (require 'exwm-randr)
+  (setq exwm-randr-workspace-output-plist '(1 "Virtual1"))
+  (exwm-randr-enable)
+  (exwm-enable)
+
+  ;; hack to refresh screen size
+  (exwm-workspace-delete)
+  (exwm-workspace-add))
+
+
+
 (defun centaur-tabs-custom-buffer-groups ()
   "`centaur-tabs-buffer-groups' control buffers' group rules.
 Group centaur-tabs with mode if buffer is derived from
@@ -447,7 +574,7 @@ Git gutter:
 
     ;; The default width and height of the icons is 22 pixels. If you are
     ;; using a Hi-DPI display, uncomment this to double the icon size.
-    (treemacs-resize-icons 10)
+    ;; (treemacs-resize-icons 10)
     (treemacs-follow-mode t)
     (treemacs-filewatch-mode t)
     (treemacs-fringe-indicator-mode t)
@@ -468,126 +595,6 @@ Git gutter:
 
 
 
-
-
-
-
-
-;; Load EXWM.
-(defun es/set-up-gnome-desktop()
-  "GNOME is used for mosto of the system settings."
-  (setenv "XDG_CURRENT_DESKTOP" "GNOME")
-  (start-process "" nil "/usr/bin/gnome-flashback")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gnome-settings-daemon")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-power")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-print-notifications")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-rfkill")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-screensaver-proxy")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sharing")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-smartcard")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-xsettings")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-wacom")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sound")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-a11y-settings")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-clipboard")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-color")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-datetime")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-housekeeping")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-keyboard")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-media-keys")
-  (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-mouse")
-  (start-process "" nil "/usr/lib/gnome-disk-utility/gsd-disk-utility-(not )otify")
-  (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
-  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/(insert )ndicator-messages-service")
-  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
-  (start-process "" nil "zeitgeist-datahub")
-  (start-process "" nil "update-notifier")
-  (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")
-
-  (start-process "" nil "/usr/bin/nm-applet")
-  (start-process "" nil "/usr/bin/blueman-applet")
-  (start-process "" nil "/snap/bin/pa-applet")
-  (start-process "" nil "/usr/bin/redshift-gtk")
-  (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600"))
-(es/set-up-gnome-desktop)
-
-(use-package exwm
-  :ensure t
-  :pin gnu
-  :init
-  (require 'exwm-config)
-  (require 'exwm-randr)
-  (require 'exwm-systemtray)
-  (exwm-config-default)
-  (exwm-enable)
-  (exwm-randr-enable)
-  (exwm-systemtray-enable)
-
-  :hook
-  (('exwm-update-class .
-                       (lambda ()
-                         (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
-                                     (string= "gimp" exwm-instance-name))
-                           (exwm-workspace-rename-buffer exwm-class-name))))
-   ('exwm-update-title-hook .
-                            (lambda ()
-                              (when (or (not exwm-instance-name)
-                                        (string-prefix-p "sun-awt-X11-" exwm-instance-name)
-                                        (string= "gimp" exwm-instance-name))
-                               (exwm-workspace-rename-buffer exwm-title)))))
-
-  :config
-  (setq exwm-workspace-number 10)
-
-  ;; create space
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (fringe-mode 1)
-
-  ;; applications
-  (exwm-input-set-key (kbd "s-l") 'es/lock-screen)
-  (exwm-input-set-key (kbd "s-g") 'es/app-browser)
-  (exwm-input-set-key (kbd "s-t") 'es/app-terminal)
-  (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
-  (exwm-input-set-key (kbd "s-e") 'treemacs)
-  ;; window move
-  (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
-  (exwm-input-set-key (kbd "s-<down>") 'windmove-down)
-  (exwm-input-set-key (kbd "s-<up>") 'windmove-up)
-  (exwm-input-set-key (kbd "s-<right>") 'windmove-right)
-  ;; window resize
-  (exwm-input-set-key (kbd "s-S-<right>")
-                      (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 50)))
-  (exwm-input-set-key (kbd "s-S-<left>")
-                      (lambda () (interactive) (exwm-layout-shrink-window-horizontally 50)))
-  (exwm-input-set-key (kbd "s-S-<up>")
-                      (lambda () (interactive) (exwm-layout-enlarge-window             50)))
-  (exwm-input-set-key (kbd "s-S-<down>")
-                      (lambda () (interactive) (exwm-layout-shrink-window              50)))
-    ;; window splits
-  (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally)
-  (exwm-input-set-key (kbd "s-]") 'split-window-vertically)
-  (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
-  (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
-  (exwm-input-set-key (kbd "s-b") 'ivy-switch-buffer)
-
-  ;; window undo
-  (exwm-input-set-key (kbd "s-u") 'winner-undo)
-  (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
-  (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
-  (setq exwm-input-global-keys
-        `(
-          ,@(mapcar (lambda (i)
-                      `(,(kbd (format "s-%d" i)) .
-                        (lambda ()
-                          (interactive)
-                          (exwm-workspace-switch ,i))))
-                    (number-sequence 0 9))
-          ([?\s-&] . (lambda (command)
-                       (interactive (list (read-shell-command "$ ")))
-                       (start-process-shell-command command nil command))))))
-
 (use-package unicode-fonts :ensure t)
 (use-package all-the-icons-dired :ensure t)
 (use-package all-the-icons
@@ -598,13 +605,15 @@ Git gutter:
   :config
   (when (not (member "all-the-icons" (font-family-list)))
     (all-the-icons-install-fonts t)))
-(use-package kaolin-themes
+
+(use-package spaceline :ensure t
   :config
-  (kaolin-treemacs-theme)
-  (load-theme 'kaolin-bubblegum t))
-(use-package powerline-evil :ensure t
-  :init
-  (powerline-center-theme))
+  (setq-default mode-line-format '("%e" (:eval (spaceline-ml-main)))))
+
+(use-package spaceline-config :ensure spaceline
+  :config
+  (spaceline-helm-mode 1)
+  (spaceline-emacs-theme))
 
 (use-package auto-complete :ensure t :defer t)
 (use-package auto-complete-config
@@ -667,8 +676,6 @@ Git gutter:
 ;; GO Lang
 
 
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Setup common variables across packages ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -685,7 +692,7 @@ Git gutter:
  '(compilation-scroll-output (quote first-error))
  '(custom-safe-themes
    (quote
-    ("c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "855eb24c0ea67e3b64d5d07730b96908bac6f4cd1e5a5986493cbac45e9d9636" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" default)))
+    ("f11e219c9d043cbd5f4b2e01713c2c24a948a98bed48828dc670bd64ae771aa1" "09cadcc2784baa744c6a7c5ebf2a30df59c275414768b0719b800cabd8d1b842" "a70b47c87e9b0940f6fece46656200acbfbc55e129f03178de8f50934ac89f58" "b69323309e5839676409607f91c69da2bf913914321c995f63960c3887224848" "53993d7dc1db7619da530eb121aaae11c57eaf2a2d6476df4652e6f0bd1df740" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "855eb24c0ea67e3b64d5d07730b96908bac6f4cd1e5a5986493cbac45e9d9636" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" default)))
  '(dabbrev-case-fold-search nil)
  '(global-hl-line-mode t)
  '(ido-mode t nil (ido))
@@ -710,7 +717,7 @@ Git gutter:
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
@@ -750,9 +757,7 @@ Git gutter:
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(lsp-ui-doc-background ((t (:background nil))))
- '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
- '(powerline-active0 ((t (:background "dark orange" :foreground "black")))))
-
+ '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic))))))
 
 ;;;;;;;;;;;;;;;
 ;;Workarounds;;
@@ -1552,3 +1557,5 @@ d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
   (get-buffer-create "EmacsDesktopSplash"))
 
 ;;(setf initial-buffer-choice 'EmacsDesktopGetSplash)
+
+
