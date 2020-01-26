@@ -158,10 +158,15 @@
 ;; Package Setup     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 (use-package kaolin-themes
+  :disabled
+  :config
+  ;;(load-theme 'kaolin-bubblegum t)
+  (kaolin-treemacs-theme))
+
+(use-package monokai-pro-theme
   :config
   (kaolin-treemacs-theme)
-  (load-theme 'kaolin-bubblegum t))
-
+  (load-theme 'monokai-pro t))
 
 ;; Load EXWM.
 (defun es/set-up-gnome-desktop()
@@ -379,8 +384,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setq ivy-display-style 'fancy)
   (setq ivy-wrap t)
   (setq ivy-re-builders-alist
-        '((swiper . ivy--regex-plus)
-          (t      . ivy--regex-fuzzy))))
+        '((swiper . ivy--regex)
+          (t      . ivy--regex-plus))))
 
 (use-package ivy-hydra)
 
