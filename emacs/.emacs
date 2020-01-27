@@ -6,16 +6,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; Code:
-(defun check-version()
+(defun es/check-version()
   "Check that Emacs version is at the least supported version."
   (if (version< emacs-version  "24.4")
       (error "Script depends on Emacs version being greater than 24.4")
     (message "Version greater or equal to 24.4")))
-(check-version)
+(es/check-version)
 
 
 ;; Package Mgmt and EOS installation
-(defun setup-package-mgmt()
+(defun es/setup-package-mgmt()
   "Setup the package management for EOS."
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                            ("marmalade" . "http://marmalade-repo.org/packages/")
@@ -29,12 +29,25 @@
      (lambda (s)
        (end-of-buffer)
        (eval-print-last-sexp))))
-  (package-initialize))
+  (package-initialize)
+  (message "es/setup-package-mgmt"))
 
-(defun install-packages ()
+(defun es/unsafe-signature-override()
+  (package-initialize)
+  (unless (package-installed-p 'gnu-elpa-keyring-update)
+    (progn
+      (setq package-check-signature nil)
+      (es/setup-package-mgmt)
+      (package-install 'gnu-elpa-keyring-update)
+      (setq package-check-signature t)))
+  (message "es/setup-package-mgmt"))
+(es/unsafe-signature-override)
+
+(defun es/install-packages ()
   "Install all required packages."
   (interactive)
   (message "installing missing packages")
+  (package-refresh-contents)
   (setq package-selected-packages
         '(auto-complete
           auto-complete-c-headers
@@ -135,35 +148,38 @@
     (unless (package-installed-p package)
       (package-install package)))
 
-  (write-region "" "" "~/.eosinstall"))
+  (write-region "" "" "~/.eosinstall")
+  (message "es/setup-package-mgmt"))
 
 (defvar
   es/eosinstallation nil
   "Are we in installation mode.  In installation mode all you are doing in downloading and setting up the packages.")
 
-(defun install-if-needed()
+(defun es/install-if-needed()
   "Check if Emacs is being invoked in the installation mode."
   (interactive)
   (when (or (member "-eosinstall" command-line-args)
             (eq package-archive-contents nil)
             (not (file-exists-p "~/.eosinstall")))
     (progn
-     (install-packages)
+     (es/install-packages)
      (setq es/eosinstallation t))))
 
-(setup-package-mgmt)
-(install-if-needed)
+(es/setup-package-mgmt)
+(es/install-if-needed)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package Setup     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 (use-package kaolin-themes
   :disabled
+  :ensure t
   :config
   ;;(load-theme 'kaolin-bubblegum t)
   (kaolin-treemacs-theme))
 
 (use-package monokai-pro-theme
+  :ensure t
   :config
   (kaolin-treemacs-theme)
   (load-theme 'monokai-pro t))
@@ -202,8 +218,8 @@
   (start-process "" nil "/usr/bin/nm-applet")
   (start-process "" nil "/usr/bin/blueman-applet")
   (start-process "" nil "/snap/bin/pa-applet")
-  (start-process "" nil "/usr/bin/redshift-gtk")
-  (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600"))
+  (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
+  (message "es/setup-up-gnome-desktop"))
 (es/set-up-gnome-desktop)
 
 (use-package exwm-config
@@ -287,9 +303,10 @@
   (exwm-randr-enable)
   (exwm-enable)
 
-  ;; hack to refresh screen size
+  ;; workaround to refresh screen size
   (exwm-workspace-delete)
-  (exwm-workspace-add))
+  (exwm-workspace-add)
+  (message "es/use-package/exwm"))
 
 
 
@@ -351,6 +368,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
         centaur-tabs-close-button " × "
         centaur-tabs-show-navigation-buttons t)
   (centaur-tabs-group-by-custom)
+  (message "es/setup-package-centaur-tabs")
   :bind
   ("C-S-<tab>" . centaur-tabs-backward)
   ("C-<tab>" . centaur-tabs-forward)
@@ -389,6 +407,20 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package ivy-hydra)
 
+
+(defun ivy-fix()
+  "Fix ivy prefix its a work around there is unwanted interacttion in variable settings due to use package"
+  (interactive)
+  (message "fixing ivy prefixes")
+  (setq ivy-initial-inputs-alist
+                        '((counsel-minor . "^+")
+                          (counsel-package . "^+")
+                          (counsel-org-capture . "^")
+                          (counsel-M-x . "^")
+                          (counsel-describe-function . "^")
+                          (counsel-describe-variable . "^"))))
+
+
 (use-package swiper
   :ensure t
   :bind (("C-s" . swiper-isearch)
@@ -398,6 +430,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 	 ("C-x C-f" . counsel-find-file)
          ("C-x C-j" . counsel-fzf)
          ("s-d" . counsel-linux-app))
+  :hook (window-setup . ivy-fix)
   :config
   (progn
     (ivy-mode 1)
@@ -405,6 +438,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
     (setq ivy-display-style 'fancy)
     (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
     ))
+
+
 
 (use-package whitespace
   :hook
@@ -477,9 +512,9 @@ Git gutter:
   :init
   (yas-global-mode 1))
 
-(use-package yasnippet-snippets  :ensure t :defer t)
-(use-package yasnippet-classic-snippets :ensure t :defer t)
-(use-package popup  :ensure t :defer t)
+(use-package yasnippet-snippets  :ensure t )
+(use-package yasnippet-classic-snippets :ensure t )
+(use-package popup  :ensure t )
 (use-package function-args
   :config
   (fa-config-default))
@@ -588,7 +623,9 @@ Git gutter:
       (`(t . t)
        (treemacs-git-mode 'deferred))
       (`(t . _)
-       (treemacs-git-mode 'simple))))
+       (treemacs-git-mode 'simple)))
+    (message "es/use-package-treemacs"))
+  :hook (after-init . treemacs)
   :bind
   (:map global-map
         ("M-0"       . treemacs-select-window)
@@ -608,6 +645,7 @@ Git gutter:
   :hook
   (dired-mode . all-the-icons-dired-mode)
   :config
+  (message "es/use-package-all-the-icons")
   (when (not (member "all-the-icons" (font-family-list)))
     (all-the-icons-install-fonts t)))
 
@@ -620,15 +658,16 @@ Git gutter:
   (spaceline-helm-mode 1)
   (spaceline-emacs-theme))
 
-(use-package auto-complete :ensure t :defer t)
+(use-package auto-complete :ensure t)
 (use-package auto-complete-config
   :disabled
   :requires auto-complete
   :ensure t
-  :defer t)
+  )
 
-(use-package company :ensure t :defer t
+(use-package company :ensure t
   :config
+  (message "es/use-package-company")
    (setq company-idle-delay 0
          company-tooltip-align-annotations t
          company-tooltip-idle-delay 0
@@ -642,13 +681,13 @@ Git gutter:
 ;; Python
 (use-package elpy
   :ensure t
-  :defer t
   :init
   (advice-add 'python-mode :before 'elpy-enable)
   (add-hook 'python-mode-hook 'elpy-mode)
   (add-hook 'python-mode-hook 'jedi:setup)
   (add-hook 'elpy-mode-hook 'flycheck-mode)
   :config
+  (message "es/use-package-elpy")
   (setq elpy-rpc-python-command "python3"
         elpy-rpc-backend "jedi"
         jedi:setup-keys t                      ; optional
@@ -658,16 +697,15 @@ Git gutter:
 ;; enable autopep8 formatting on save
 (use-package py-autopep8
   :ensure t
-  :defer t
   :init
   (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save))
 
 ;; C/C++
-(use-package company-c-headers :ensure t :defer t)
+(use-package company-c-headers :ensure t )
 (use-package ccls
-  :ensure t
   :diminish
   :config
+  (message "es/use-package-ccls")
   (setq ccls-executable "/snap/bin/ccls")
   (setq lsp-prefer-flymake nil)
   (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
@@ -675,9 +713,10 @@ Git gutter:
                                       (next-error-follow-minor-mode t)))
   :hook ((c-mode c++-mode objc-mode) .
          (lambda () (require 'ccls) (lsp))))
-(use-package ggtags :ensure t :defer t :diminish)
-(use-package company-c-headers :ensure t :defer t :diminish)
+(use-package ggtags :ensure t  :diminish)
+(use-package company-c-headers :ensure t :diminish)
 
+(message "es/packages-loaded")
 ;; GO Lang
 
 
@@ -708,21 +747,21 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
+ '(lsp-ui-doc-border "black" t)
+ '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position (quote bottom))
- '(lsp-ui-sideline-enable t)
- '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-doc-header t t)
+ '(lsp-ui-doc-include-signature t t)
+ '(lsp-ui-doc-position (quote bottom) t)
+ '(lsp-ui-sideline-enable t t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t)
+ '(lsp-ui-sideline-show-code-actions t t)
  '(lsp-ui-sideline-update-mode (quote line))
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
@@ -751,7 +790,7 @@ Git gutter:
  '(which-function-mode t)
  '(whitespace-style (quote (face empty tabs lines-tail whitespace)) t)
  '(winner-mode t))
-
+(message "es/customizations-applied")
 
 ;;;;;;;;;;;;;;;;;;;
 ;; Coloring      ;;
@@ -763,6 +802,7 @@ Git gutter:
  ;; If there is more than one, they won't work right.
  '(lsp-ui-doc-background ((t (:background nil))))
  '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic))))))
+(message "es/custom-set-faces")
 
 ;;;;;;;;;;;;;;;
 ;;Workarounds;;
@@ -903,7 +943,7 @@ mouse-2: EXWM Workspace menu.
 (add-hook 'ediff-before-setup-hook 'my-ediff-bsh)
 (add-hook 'ediff-after-setup-windows-hook 'my-ediff-ash 'append)
 (add-hook 'ediff-quit-hook 'my-ediff-qh)
-
+(message "es/workarounds")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -982,7 +1022,7 @@ mouse-2: EXWM Workspace menu.
         '((propertize (concat dayname "-" monthname "-" day " " 12-hours ":" minutes " " am-pm)
                       'face 'egoge-display-time))))
 (es/mode-line-time)
-
+(message "es/helper-utilities")
 
 
 
@@ -1085,7 +1125,7 @@ mouse-2: EXWM Workspace menu.
 ;;(rustModeSetup)
 
 (put 'downcase-region 'disabled nil)
-
+(message "es/legacy-lang-setup")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Project Specific Setup                   ;;
@@ -1218,13 +1258,13 @@ mouse-2: EXWM Workspace menu.
 
 
 ;; Swap monitors
-(defun MonitorMoveLeft()
+(defun es/monitor-monitor-move-left()
   (interactive)
   (setq commandMoveLeft
         "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --left-of /;s/^/xrandr --output /'`")
   (shell-command commandMoveLeft))
 
-(defun MonitorMoveRight()
+(defun es/monitor-move-right()
   (interactive)
   (setq commandMoveRight
         "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --right-of /;s/^/xrandr --output /'`")
@@ -1270,7 +1310,7 @@ mouse-2: EXWM Workspace menu.
   (exwm-workspace-add)
   (es/app-terminal)
   (exwm-workspace-add))
-
+(message "es/app-setup")
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Keyboard Setup  ;;
@@ -1344,16 +1384,6 @@ mouse-2: EXWM Workspace menu.
 (global-set-key (kbd "C-F") 'rgrep)
 (global-set-key (kbd "C-f") 'ag)
 
-
-
-
-
-
-
-
-
-
-
 ;; To add a key binding only available in line-mode, simply define it in
 ;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.
 ;; (define-key exwm-mode-map [?\C-q] #'exwm-input-send-next-key)
@@ -1384,7 +1414,7 @@ mouse-2: EXWM Workspace menu.
         ([?\C-y] . [?\C-v])
         ;; search
         ([?\C-s] . [?\C-f])))
-
+(message "es/keyboard-setup")
 
 
 
@@ -1447,8 +1477,7 @@ mouse-2: EXWM Workspace menu.
   (exwm-input-set-key (kbd "M-<iso-lefttab>") 'timed-iflipb-previous-buffer))
 
 (setupIFlipb)
-(server-start)
-(treemacs)
+(message "es/alt-tab")
 
 ;; HELP DOCUMENTATION AND OTHER STUFF
 (defvar emacsDesktopHelp
@@ -1563,4 +1592,7 @@ d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
 
 ;;(setf initial-buffer-choice 'EmacsDesktopGetSplash)
 
-
+(server-start)
+(message "es/load-complete")
+(provide '.emacs)
+;;;
