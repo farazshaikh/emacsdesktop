@@ -30,6 +30,12 @@
        (end-of-buffer)
        (eval-print-last-sexp))))
   (package-initialize)
+
+  ;; quelpa
+  (unless (require 'quelpa nil t)
+    (with-temp-buffer
+      (url-insert-file-contents "https://github.com/quelpa/quelpa/raw/master/bootstrap.el")
+      (eval-buffer)))
   (message "es/setup-package-mgmt"))
 
 (defun es/unsafe-signature-override()
@@ -184,6 +190,21 @@
   (kaolin-treemacs-theme)
   (load-theme 'monokai-pro t))
 
+(use-package dashboard
+  :ensure t
+  :config
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  (setq dashboard-banner-logo-title "Cogito, ergo sum")
+  (setq dashboard-center-content t)
+  (setq dashboard-items '((recents  . 5)
+                        (bookmarks . 5)
+                        (projects . 5)
+                        (agenda . 5)
+                        (registers . 5)))
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (dashboard-setup-startup-hook))
+
 ;; Load EXWM.
 (defun es/set-up-gnome-desktop()
   "GNOME is used for mosto of the system settings."
@@ -284,6 +305,7 @@
   (exwm-input-set-key (kbd "s-u") 'winner-undo)
   (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
   (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
+  (global-unset-key (kbd "C-z"))
   (setq exwm-input-global-keys
         `(
           ,@(mapcar (lambda (i)
@@ -363,10 +385,11 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setq centaur-tabs-set-modified-marker t
         centaur-tabs-modified-marker " ● "
         centaur-tabs-cycle-scope 'tabs
-        centaur-tabs-height 30
+        centaur-tabs-height 10
         centaur-tabs-set-icons t
         centaur-tabs-close-button " × "
         centaur-tabs-show-navigation-buttons t)
+  (centaur-tabs-change-fonts "ubuntu-mono" 100)
   (centaur-tabs-group-by-custom)
   (message "es/setup-package-centaur-tabs")
   :bind
@@ -409,7 +432,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 
 (defun ivy-fix()
-  "Fix ivy prefix its a work around there is unwanted interacttion in variable settings due to use package"
+  "Fix ivy prefix its a work around there is unwanted interacttion in variable settings due to use package."
   (interactive)
   (message "fixing ivy prefixes")
   (setq ivy-initial-inputs-alist
@@ -566,6 +589,23 @@ Git gutter:
     (setq mode-line-format nil)))
 
 
+(defun es/after-init-hook-windowsetup()
+  "After init hook for setting up windows."
+  (treemacs)
+  (customize-set-variable
+   'display-buffer-base-action
+   '((display-buffer-reuse-window display-buffer-same-window
+                                  display-buffer-in-previous-window
+                                  display-buffer-use-some-window)))
+
+  ;; (customize-set-variable
+  ;;  'display-buffer-base-action
+  ;;  '((display-buffer-reuse-window display-buffer-pop-up-frame)
+  ;;    (reusable-frames . 0)))
+  (switch-to-buffer "*dashboard*")
+  (delete-other-windows))
+
+
 (use-package treemacs
   :ensure t
   :defer t
@@ -625,7 +665,7 @@ Git gutter:
       (`(t . _)
        (treemacs-git-mode 'simple)))
     (message "es/use-package-treemacs"))
-  :hook (after-init . treemacs)
+  :hook (after-init . es/after-init-hook-windowsetup)
   :bind
   (:map global-map
         ("M-0"       . treemacs-select-window)
@@ -761,7 +801,7 @@ Git gutter:
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
