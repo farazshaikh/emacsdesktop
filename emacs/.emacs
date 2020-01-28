@@ -185,10 +185,16 @@
   (kaolin-treemacs-theme))
 
 (use-package monokai-pro-theme
+  :disabled
   :ensure t
   :config
   (kaolin-treemacs-theme)
   (load-theme 'monokai-pro t))
+
+(use-package doom-themes
+  :ensure t
+  :config
+  (load-theme 'doom-molokai t))
 
 (use-package dashboard
   :ensure t
@@ -196,11 +202,11 @@
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   (setq dashboard-banner-logo-title "Cogito, ergo sum")
   (setq dashboard-center-content t)
-  (setq dashboard-items '((recents  . 5)
-                        (bookmarks . 5)
-                        (projects . 5)
-                        (agenda . 5)
-                        (registers . 5)))
+  (setq dashboard-items '((recents  . 10)
+                          (bookmarks . 5)
+                          (projects . 5)
+                          (agenda . 5)
+                          (registers . 5)))
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (dashboard-setup-startup-hook))
@@ -551,7 +557,8 @@ Git gutter:
   (lsp-auto-guess-root nil)
   (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
   :bind (:map lsp-mode-map ("C-c C-f" . lsp-format-buffer))
-  :hook ((prog-mode) . lsp))
+  :hook (((prog-mode) . 'display-line-numbers-mode)
+         ((prog-mode) . lsp)))
 
 (use-package lsp-ui
   :ensure t
@@ -582,7 +589,11 @@ Git gutter:
   (setq lsp-ui-doc-use-webkit nil
         lsp-ui-peek-enable t
         lsp-ui-imenu-enable t
-        lsp-ui-flycheck-enable t)
+        lsp-ui-flycheck-enable t
+        lsp-file-watch-threshold 2000
+        gc-cons-threshold 100000000)
+  (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\result???$")
+  (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\target???$")
   ;;WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
   ;;https://github.com/emacs-lsp/lsp-ui/issues/243
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
@@ -691,6 +702,7 @@ Git gutter:
 
 (use-package spaceline :ensure t
   :config
+  (setq powerline-default-separator 'slant)
   (setq-default mode-line-format '("%e" (:eval (spaceline-ml-main)))))
 
 (use-package spaceline-config :ensure spaceline
@@ -716,7 +728,9 @@ Git gutter:
 (use-package company-lsp
   :ensure t
   :commands company-lsp
-  :config (push 'company-lsp company-backends))
+  :config
+  (push 'company-lsp company-backends)
+  (setq company-lsp-cache-cadidates 'auto))
 
 ;; Python
 (use-package elpy
@@ -776,8 +790,11 @@ Git gutter:
  '(compilation-scroll-output (quote first-error))
  '(custom-safe-themes
    (quote
-    ("f11e219c9d043cbd5f4b2e01713c2c24a948a98bed48828dc670bd64ae771aa1" "09cadcc2784baa744c6a7c5ebf2a30df59c275414768b0719b800cabd8d1b842" "a70b47c87e9b0940f6fece46656200acbfbc55e129f03178de8f50934ac89f58" "b69323309e5839676409607f91c69da2bf913914321c995f63960c3887224848" "53993d7dc1db7619da530eb121aaae11c57eaf2a2d6476df4652e6f0bd1df740" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "855eb24c0ea67e3b64d5d07730b96908bac6f4cd1e5a5986493cbac45e9d9636" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" default)))
+    ("1d50bd38eed63d8de5fcfce37c4bb2f660a02d3dff9cbfd807a309db671ff1af" "e1ef2d5b8091f4953fe17b4ca3dd143d476c106e221d92ded38614266cea3c8b" "9743d1941d0559264aa21a542e55043c032d779024cd70468d1123c320699fd1" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "1c8171893a9a0ce55cb7706766e57707787962e43330d7b0b6b0754ed5283cda" "d5d2ab76985738c142adbe6a35dc51c8d15baf612fdf6745c901856457650314" "f11e219c9d043cbd5f4b2e01713c2c24a948a98bed48828dc670bd64ae771aa1" "09cadcc2784baa744c6a7c5ebf2a30df59c275414768b0719b800cabd8d1b842" "a70b47c87e9b0940f6fece46656200acbfbc55e129f03178de8f50934ac89f58" "b69323309e5839676409607f91c69da2bf913914321c995f63960c3887224848" "53993d7dc1db7619da530eb121aaae11c57eaf2a2d6476df4652e6f0bd1df740" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "855eb24c0ea67e3b64d5d07730b96908bac6f4cd1e5a5986493cbac45e9d9636" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" default)))
  '(dabbrev-case-fold-search nil)
+ '(display-buffer-base-action
+   (quote
+    ((display-buffer-reuse-window display-buffer-same-window display-buffer-in-previous-window display-buffer-use-some-window))))
  '(global-hl-line-mode t)
  '(ido-mode t nil (ido))
  '(ido-vertical-define-keys (quote C-n-and-C-p-only))
@@ -787,21 +804,21 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black" t)
- '(lsp-ui-doc-enable t t)
+ '(lsp-ui-doc-border "black")
+ '(lsp-ui-doc-enable t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t t)
- '(lsp-ui-doc-include-signature t t)
- '(lsp-ui-doc-position (quote bottom) t)
- '(lsp-ui-sideline-enable t t)
- '(lsp-ui-sideline-ignore-duplicate t t)
+ '(lsp-ui-doc-header t)
+ '(lsp-ui-doc-include-signature t)
+ '(lsp-ui-doc-position (quote bottom))
+ '(lsp-ui-sideline-enable t)
+ '(lsp-ui-sideline-ignore-duplicate t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t t)
+ '(lsp-ui-sideline-show-code-actions t)
  '(lsp-ui-sideline-update-mode (quote line))
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
@@ -818,6 +835,7 @@ Git gutter:
                                (quote mode-line)
                                fg))
                             orig-fg))))
+ '(safe-local-variable-values (quote ((buffer-reado-only . t))))
  '(savehist-mode 1)
  '(scroll-step 1)
  '(set-fill-column 80)
@@ -828,7 +846,7 @@ Git gutter:
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
  '(which-function-mode t)
- '(whitespace-style (quote (face empty tabs lines-tail whitespace)) t)
+ '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
  '(winner-mode t))
 (message "es/customizations-applied")
 
