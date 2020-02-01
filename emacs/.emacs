@@ -200,6 +200,7 @@
   :ensure t
   :config
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  (setq dashboard-startup-banner "~/acme.png")
   (setq dashboard-banner-logo-title "Cogito, ergo sum")
   (setq dashboard-center-content t)
   (setq dashboard-items '((recents  . 10)
