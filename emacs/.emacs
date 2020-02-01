@@ -38,7 +38,7 @@
       (eval-buffer)))
   (message "es/setup-package-mgmt"))
 
-(defun es/unsafe-signature-override()
+(defun es/unsafe-signature-override() 
   (package-initialize)
   (unless (package-installed-p 'gnu-elpa-keyring-update)
     (progn
@@ -47,7 +47,7 @@
       (package-install 'gnu-elpa-keyring-update)
       (setq package-check-signature t)))
   (message "es/setup-package-mgmt"))
-(es/unsafe-signature-override)
+;;(es/unsafe-signature-override)
 
 (defun es/install-packages ()
   "Install all required packages."
@@ -328,7 +328,7 @@
   (require 'exwm-systemtray)
   (exwm-systemtray-enable)
   (require 'exwm-randr)
-  (setq exwm-randr-workspace-output-plist '(1 "Virtual1"))
+  (setq exwm-randr-workspace-output-plist '(1 "eDP-1"))
   (exwm-randr-enable)
   (exwm-enable)
 

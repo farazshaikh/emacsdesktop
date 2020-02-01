@@ -47,6 +47,7 @@ packageInstall() {
     sudo apt-get install tmux -y
     sudo apt-get install gnome-flashback -y
     sudo apt-get install fonts-noto
+    sudo apt-get install gnome-screensaver
 }
 
 checkoutCode() {
@@ -120,7 +121,7 @@ main() {
 
     echo InstallID ${installTime}
     packageInstall
-    checkoutCode ${installLoc}
+#checkoutCode ${installLoc}
     linkupFiles ${installLoc} ${installTime}
     disable_greeter
 }
