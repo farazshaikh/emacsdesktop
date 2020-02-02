@@ -199,7 +199,7 @@
 (use-package dashboard
   :ensure t
   :config
-  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  ;;(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   (setq dashboard-startup-banner "~/acme.png")
   (setq dashboard-banner-logo-title "Cogito, ergo sum")
   (setq dashboard-center-content t)
@@ -327,8 +327,17 @@
 
   (require 'exwm-systemtray)
   (exwm-systemtray-enable)
+
   (require 'exwm-randr)
+  ;; Per host setup
   (setq exwm-randr-workspace-output-plist '(1 "eDP-1"))
+  (when (string= system-name "faraz-dfn-x1")
+    (progn
+      (setq exwm-randr-workspace-output-plist '(0 "DP-1" 1 "eDP-1"))
+      (add-hook 'exwm-randr-screen-change-hook
+      (lambda ()
+        (start-process-shell-command
+         "xrandr" nil "xrandr --output HDMI-2 --output eDP-1 --auto")))))
   (exwm-randr-enable)
   (exwm-enable)
 
@@ -446,7 +455,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                         '((counsel-minor . "^+")
                           (counsel-package . "^+")
                           (counsel-org-capture . "^")
-                          (counsel-M-x . "^")
+                          (counsel-M-x . "")
                           (counsel-describe-function . "^")
                           (counsel-describe-variable . "^"))))
 
@@ -572,6 +581,7 @@ Git gutter:
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
               ([remap xref-find-references] . lsp-ui-peek-find-references)
+              ([remap xref-find-apropos] . lsp-ui-find-workspace-symbol)
               ("C-c u" . lsp-ui-imenu))
   :custom
   (lsp-ui-doc-enable t)
@@ -703,13 +713,29 @@ Git gutter:
 
 (use-package spaceline :ensure t
   :config
-  (setq powerline-default-separator 'slant)
-  (setq-default mode-line-format '("%e" (:eval (spaceline-ml-main)))))
+  (use-package fancy-battery :ensure t
+    :config
+    (setq fancy-battery-show-percentage t)
+    (fancy-battery-mode))
+  (use-package spaceline-config
+    :config
+    (spaceline-toggle-minor-modes-off)
+    (spaceline-toggle-buffer-encoding-off)
+    (spaceline-toggle-buffer-encoding-abbrev-off)
+    (setq powerline-default-separator 'slant)
+    (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+    (spaceline-define-segment line-column
+      "The current line and column numbers."
+      "l:%l c:%2c")
+    (spaceline-define-segment time
+      "The current time."
+      (format-time-string "%H:%M"))
+    (spaceline-define-segment date
+      "The current date."
+      (format-time-string "%h %d"))
+    (spaceline-toggle-time-on)
+    (spaceline-emacs-theme 'date 'time)))
 
-(use-package spaceline-config :ensure spaceline
-  :config
-  (spaceline-helm-mode 1)
-  (spaceline-emacs-theme))
 
 (use-package auto-complete :ensure t)
 (use-package auto-complete-config
@@ -805,21 +831,21 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
+ '(lsp-ui-doc-border "black" t)
+ '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position (quote bottom))
- '(lsp-ui-sideline-enable t)
- '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-doc-header t t)
+ '(lsp-ui-doc-include-signature t t)
+ '(lsp-ui-doc-position (quote bottom) t)
+ '(lsp-ui-sideline-enable t t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t)
+ '(lsp-ui-sideline-show-code-actions t t)
  '(lsp-ui-sideline-update-mode (quote line))
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag exwm iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
@@ -1062,25 +1088,6 @@ mouse-2: EXWM Workspace menu.
   (interactive)
   (start-process-shell-command
    "/usr/bin/adb" nil  "adb shell input keyevent 82"))
-
-(defun es/mode-line-time()
-  ;; Turn on `display-time-mode' if you don't use an external bar.
-  (setq display-time-default-load-average nil)
-  (display-time-mode t)
-  (display-battery-mode t)
-  (defface egoge-display-time
-    '((((type x w32 mac))
-       ;; #060525 is the background colour of my default face.
-       (:foreground "white" :inherit bold))
-      (((type tty))
-       (:foreground "white")))
-    "Face used to display the time in the mode line.")
-  ;; This causes the current time in the mode line to be displayed in
-  ;; `egoge-display-time-face' to make it stand out visually.
-  (setq display-time-string-forms
-        '((propertize (concat dayname "-" monthname "-" day " " 12-hours ":" minutes " " am-pm)
-                      'face 'egoge-display-time))))
-(es/mode-line-time)
 (message "es/helper-utilities")
 
 
@@ -1099,7 +1106,7 @@ mouse-2: EXWM Workspace menu.
                                    587
                                    "faraz@email.com"
                                    nil)))
-
+(message "es/email")
 
 
 ;;;;;;;;;;;;;
@@ -1311,19 +1318,22 @@ mouse-2: EXWM Workspace menu.
   )
 
 (defun es/lock-screen()
+  "Lock Screen command for es."
   (interactive)
   (start-process-shell-command
-   "/usr/bin/slock" nil  "/usr/bin/slock"))
+   "/usr/bin/gnome-screensaver-command" nil  "/usr/bin/gnome-screensaver-command -l"))
 
 
 ;; Swap monitors
 (defun es/monitor-monitor-move-left()
+  "Move primary monitor to left."
   (interactive)
   (setq commandMoveLeft
         "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --left-of /;s/^/xrandr --output /'`")
   (shell-command commandMoveLeft))
 
 (defun es/monitor-move-right()
+  "Move primary monitor to right."
   (interactive)
   (setq commandMoveRight
         "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --right-of /;s/^/xrandr --output /'`")
@@ -1331,6 +1341,7 @@ mouse-2: EXWM Workspace menu.
 
 ;; Scale/Descale gdm
 (defun es/gdm-set-scale(scale-factor)
+  "Set gnome desktop scaling factor to SCALE-FACTOR."
   (interactive "scale-factor: ")
   (setq gsettings-binary "/usr/bin/gsettings")
   (setq gsettings-invocation
@@ -1652,6 +1663,6 @@ d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
 ;;(setf initial-buffer-choice 'EmacsDesktopGetSplash)
 
 (server-start)
-(message "es/load-complete")
+(message "!!!es/load-complete!!!")
 (provide '.emacs)
 ;;;
