@@ -108,6 +108,7 @@ linkupFiles() {
 disable_greeter() {
     sudo systemctl set-default multi-user.target --force
     sudo systemctl set-default multi-user.target
+   # sudo systemctl set-default graphical.target
 }
 
 main() {

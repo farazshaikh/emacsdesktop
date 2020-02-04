@@ -12,6 +12,10 @@ xsetroot -cursor_name left_ptr
 # Set keyboard repeat rate.
 xset r rate 300 40
 
+# enable keyring
+#eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
+#export SSH_AUTH_SOCK
+
 # If Emacs is started in server mode, `emacsclient` is a convenient way to
 # edit files in place (used by e.g. `git commit`).
 export VISUAL=emacsclient

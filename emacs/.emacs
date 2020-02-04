@@ -6,6 +6,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; Code:
+(set-background-color "#1c1e1f")
+(menu-bar-mode -1)
+(tool-bar-mode -1)
+(scroll-bar-mode -1)
+(fringe-mode 1)
+
 (defun es/check-version()
   "Check that Emacs version is at the least supported version."
   (if (version< emacs-version  "24.4")
@@ -18,7 +24,7 @@
 (defun es/setup-package-mgmt()
   "Setup the package management for EOS."
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                           ("marmalade" . "http://marmalade-repo.org/packages/")
+                           ("marmalade" . "http://marmalade-repo.packages/org/")
                            ("melpa" . "http://melpa.milkbox.net/packages/")
                            ("elpy" . "http://jorgenschaefer.github.io/packages/")))
   ;;elget
@@ -38,7 +44,8 @@
       (eval-buffer)))
   (message "es/setup-package-mgmt"))
 
-(defun es/unsafe-signature-override() 
+(defun es/unsafe-signature-override()
+  'Override package signature check requirements.'
   (package-initialize)
   (unless (package-installed-p 'gnu-elpa-keyring-update)
     (progn
@@ -185,7 +192,6 @@
   (kaolin-treemacs-theme))
 
 (use-package monokai-pro-theme
-  :disabled
   :ensure t
   :config
   (kaolin-treemacs-theme)
@@ -193,24 +199,175 @@
 
 (use-package doom-themes
   :ensure t
+  :disabled
   :config
   (load-theme 'doom-molokai t))
 
+(use-package treemacs
+  :ensure t
+  :demand
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay      0.5
+          treemacs-directory-name-transformer    #'identity
+          treemacs-display-in-side-window        t
+          treemacs-eldoc-display                 nil
+          treemacs-file-event-delay              5000
+          treemacs-file-extension-regex          treemacs-last-period-regex-value
+          treemacs-file-follow-delay             0.2
+          treemacs-file-name-transformer         #'identity
+          treemacs-follow-after-init             t
+          treemacs-git-command-pipe              ""
+          treemacs-goto-tag-strategy             'refetch-index
+          treemacs-indentation                   1
+          treemacs-indentation-string            " "
+          treemacs-is-never-other-window         nil
+          treemacs-max-git-entries               5000
+          treemacs-missing-project-action        'ask
+          treemacs-no-png-images                 nil
+          treemacs-no-delete-other-windows       t
+          treemacs-project-follow-cleanup        nil
+          treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                      'left
+          treemacs-recenter-distance             0.1
+          treemacs-recenter-after-file-follow    nil
+          treemacs-recenter-after-tag-follow     nil
+          treemacs-recenter-after-project-jump   'always
+          treemacs-recenter-after-project-expand 'on-distance
+          treemacs-show-cursor                   nil
+          treemacs-show-hidden-files             t
+          treemacs-silent-filewatch              nil
+          treemacs-silent-refresh                nil
+          treemacs-sorting                       'alphabetic-asc
+          treemacs-space-between-root-nodes      t
+          treemacs-tag-follow-cleanup            t
+          treemacs-tag-follow-delay              1.5
+          treemacs-width                         20)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;; (treemacs-resize-icons 10)
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode t)
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple)))
+    (message "es/use-package-treemacs"))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+
+(defun centaur-tabs-custom-buffer-groups ()
+  "`centaur-tabs-buffer-groups' control buffers' group rules.
+Group centaur-tabs with mode if buffer is derived from
+`eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
+All buffer name start with * will group to \"Emacs\".
+Other buffer group by `centaur-tabs-get-group-name' with project name."
+  (list
+   (cond
+    ((or (string-equal "*" (substring (buffer-name) 0 1))
+         (memq major-mode '(magit-process-mode
+                            magit-status-mode
+                            magit-diff-mode
+                            magit-log-mode
+                            magit-file-mode
+                            magit-blob-mode
+                            magit-blame-mode
+                            )))
+     "Emacs")
+    ((derived-mode-p 'prog-mode)
+     "Editing")
+    ((derived-mode-p 'dired-mode)
+     "Dired")
+    ((memq major-mode '(helpful-mode
+                        help-mode))
+     "Help")
+    ((memq major-mode '(org-mode
+                        org-agenda-clockreport-mode
+                        org-src-mode
+                        org-agenda-mode
+                        org-beamer-mode
+                        org-indent-mode
+                        org-bullets-mode
+                        org-cdlatex-mode
+                        org-agenda-log-mode
+                        diary-mode))
+     "OrgMode")
+    (t "Editing"))))
+
+(defun centaur-tabs-group-by-custom ()
+  "Custom grouping for Centaur tabs."
+  (interactive)
+  (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
+  (centaur-tabs-force-update))
+
+(use-package centaur-tabs
+  :demand
+  :init (setq centaur-tabs-set-bar 'over)
+  :config
+  (centaur-tabs-mode +1)
+  (centaur-tabs-headline-match)
+  (setq centaur-tabs-set-modified-marker t
+        centaur-tabs-modified-marker " ● "
+        centaur-tabs-cycle-scope 'tabs
+        centaur-tabs-height 10
+        centaur-tabs-set-icons t
+        centaur-tabs-close-button " × "
+        centaur-tabs-show-navigation-buttons t)
+  (centaur-tabs-change-fonts "ubuntu-mono" 100)
+  (centaur-tabs-group-by-custom)
+  (message "es/setup-package-centaur-tabs")
+  :bind
+  ("C-S-<tab>" . centaur-tabs-backward)
+  ("C-<tab>" . centaur-tabs-forward)
+  :hook
+  (dired-mode . centaur-tabs-local-mode))
+
+
+(defun es/windowsetup()
+  "After init hook for setting up windows."
+  (interactive)
+  ;; (customize-set-variable
+  ;;  'display-buffer-base-action
+  ;;  '((display-buffer-reuse-window display-buffer-pop-up-frame)
+  ;;    (reusable-frames . 0)))
+  (customize-set-variable
+   'display-buffer-base-action
+   '((display-buffer-reuse-window display-buffer-same-window
+                                  display-buffer-in-previous-window
+                                  display-buffer-use-some-window))))
+
 (use-package dashboard
   :ensure t
+  :demand
   :config
   ;;(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   (setq dashboard-startup-banner "~/acme.png")
   (setq dashboard-banner-logo-title "Cogito, ergo sum")
   (setq dashboard-center-content t)
-  (setq dashboard-items '((recents  . 10)
+  (setq dashboard-items '((recents  . 20)
                           (bookmarks . 5)
                           (projects . 5)
                           (agenda . 5)
                           (registers . 5)))
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
-  (dashboard-setup-startup-hook))
+  (dashboard-setup-startup-hook)
+  :hook (window-setup . es/windowsetup))
 
 ;; Load EXWM.
 (defun es/set-up-gnome-desktop()
@@ -346,75 +503,6 @@
   (exwm-workspace-add)
   (message "es/use-package/exwm"))
 
-
-
-(defun centaur-tabs-custom-buffer-groups ()
-  "`centaur-tabs-buffer-groups' control buffers' group rules.
-Group centaur-tabs with mode if buffer is derived from
-`eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
-All buffer name start with * will group to \"Emacs\".
-Other buffer group by `centaur-tabs-get-group-name' with project name."
-  (list
-   (cond
-    ((or (string-equal "*" (substring (buffer-name) 0 1))
-         (memq major-mode '(magit-process-mode
-                            magit-status-mode
-                            magit-diff-mode
-                            magit-log-mode
-                            magit-file-mode
-                            magit-blob-mode
-                            magit-blame-mode
-                            )))
-     "Emacs")
-    ((derived-mode-p 'prog-mode)
-     "Editing")
-    ((derived-mode-p 'dired-mode)
-     "Dired")
-    ((memq major-mode '(helpful-mode
-                        help-mode))
-     "Help")
-    ((memq major-mode '(org-mode
-                        org-agenda-clockreport-mode
-                        org-src-mode
-                        org-agenda-mode
-                        org-beamer-mode
-                        org-indent-mode
-                        org-bullets-mode
-                        org-cdlatex-mode
-                        org-agenda-log-mode
-                        diary-mode))
-     "OrgMode")
-    (t "Editing"))))
-
-(defun centaur-tabs-group-by-custom ()
-  "Custom grouping for Centaur tabs."
-  (interactive)
-  (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
-  (centaur-tabs-force-update))
-
-(use-package centaur-tabs
-  :demand
-  :init (setq centaur-tabs-set-bar 'over)
-  :config
-  (centaur-tabs-mode +1)
-  (centaur-tabs-headline-match)
-  (setq centaur-tabs-set-modified-marker t
-        centaur-tabs-modified-marker " ● "
-        centaur-tabs-cycle-scope 'tabs
-        centaur-tabs-height 10
-        centaur-tabs-set-icons t
-        centaur-tabs-close-button " × "
-        centaur-tabs-show-navigation-buttons t)
-  (centaur-tabs-change-fonts "ubuntu-mono" 100)
-  (centaur-tabs-group-by-custom)
-  (message "es/setup-package-centaur-tabs")
-  :bind
-  ("C-S-<tab>" . centaur-tabs-backward)
-  ("C-<tab>" . centaur-tabs-forward)
-  :hook
-  (dired-mode . centaur-tabs-local-mode))
-
-
 (use-package general
   :init
   (defalias 'gsetq #'general-setq)
@@ -539,12 +627,30 @@ Git gutter:
        :color blue))
 
 (use-package magit
-    :ensure t
-    :init
-    (progn
-    (bind-key "C-x g" 'magit-status)
-    ))
-
+  :ensure t
+  :init
+  (progn
+    (bind-key "C-x g" 'magit-status))
+  :config
+  (setq magit-auto-revert-mode nil
+        magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C"))
+        magit-diff-refine-hunk t
+        magit-expand-staged-on-commit (quote full)
+        magit-fetch-arguments (quote ("--prune"))
+        magit-log-auto-more t
+        magit-log-cutoff-length 20
+        magit-no-confirm (quote (stage-all-changes unstage-all-changes))
+        magit-process-connection-type nil
+        magit-push-always-verify nil
+        magit-push-arguments (quote ("--set-upstream"))
+        magit-refresh-file-buffer-hook nil
+        magit-save-some-buffers nil
+        magit-set-upstream-on-push (quote askifnotset)
+        magit-stage-all-confirm nil
+        magit-status-verbose-untracked nil
+        magit-unstage-all-confirm nil
+        magithub-message-confirm-cancellation nil
+        magithub-use-ssl t))
 
 (use-package yasnippet
   :ensure t
@@ -610,95 +716,6 @@ Git gutter:
   ;;https://github.com/emacs-lsp/lsp-ui/issues/243
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
     (setq mode-line-format nil)))
-
-
-(defun es/after-init-hook-windowsetup()
-  "After init hook for setting up windows."
-  (treemacs)
-  (customize-set-variable
-   'display-buffer-base-action
-   '((display-buffer-reuse-window display-buffer-same-window
-                                  display-buffer-in-previous-window
-                                  display-buffer-use-some-window)))
-
-  ;; (customize-set-variable
-  ;;  'display-buffer-base-action
-  ;;  '((display-buffer-reuse-window display-buffer-pop-up-frame)
-  ;;    (reusable-frames . 0)))
-  (switch-to-buffer "*dashboard*")
-  (delete-other-windows))
-
-
-(use-package treemacs
-  :ensure t
-  :defer t
-  :diminish
-  :init
-  (with-eval-after-load 'winum
-    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-  :config
-  (progn
-    (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
-          treemacs-deferred-git-apply-delay      0.5
-          treemacs-directory-name-transformer    #'identity
-          treemacs-display-in-side-window        t
-          treemacs-eldoc-display                 t
-          treemacs-file-event-delay              5000
-          treemacs-file-extension-regex          treemacs-last-period-regex-value
-          treemacs-file-follow-delay             0.2
-          treemacs-file-name-transformer         #'identity
-          treemacs-follow-after-init             t
-          treemacs-git-command-pipe              ""
-          treemacs-goto-tag-strategy             'refetch-index
-          treemacs-indentation                   1
-          treemacs-indentation-string            " "
-          treemacs-is-never-other-window         nil
-          treemacs-max-git-entries               5000
-          treemacs-missing-project-action        'ask
-          treemacs-no-png-images                 nil
-          treemacs-no-delete-other-windows       t
-          treemacs-project-follow-cleanup        nil
-          treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-          treemacs-position                      'left
-          treemacs-recenter-distance             0.1
-          treemacs-recenter-after-file-follow    nil
-          treemacs-recenter-after-tag-follow     nil
-          treemacs-recenter-after-project-jump   'always
-          treemacs-recenter-after-project-expand 'on-distance
-          treemacs-show-cursor                   nil
-          treemacs-show-hidden-files             t
-          treemacs-silent-filewatch              nil
-          treemacs-silent-refresh                nil
-          treemacs-sorting                       'alphabetic-asc
-          treemacs-space-between-root-nodes      t
-          treemacs-tag-follow-cleanup            t
-          treemacs-tag-follow-delay              1.5
-          treemacs-width                         20)
-
-    ;; The default width and height of the icons is 22 pixels. If you are
-    ;; using a Hi-DPI display, uncomment this to double the icon size.
-    (treemacs-resize-icons 10)
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
-    (treemacs-fringe-indicator-mode t)
-    (pcase (cons (not (null (executable-find "git")))
-                 (not (null treemacs-python-executable)))
-      (`(t . t)
-       (treemacs-git-mode 'deferred))
-      (`(t . _)
-       (treemacs-git-mode 'simple)))
-    (message "es/use-package-treemacs"))
-  :hook (after-init . es/after-init-hook-windowsetup)
-  :bind
-  (:map global-map
-        ("M-0"       . treemacs-select-window)
-        ("C-x t 1"   . treemacs-delete-other-windows)
-        ("C-x t t"   . treemacs)
-        ("C-x t B"   . treemacs-bookmark)
-        ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)))
-
-
 
 (use-package unicode-fonts :ensure t)
 (use-package all-the-icons-dired :ensure t)
@@ -846,7 +863,7 @@ Git gutter:
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (exwm fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (rust-playground exwm fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
@@ -1127,9 +1144,9 @@ mouse-2: EXWM Workspace menu.
   (setenv "GOPATH" _gopath)
   )
 
-(require 'go-eldoc)
+;;(require 'go-eldoc)
 (add-hook 'go-mode-hook 'ac-go-mode-setup)
-(add-hook 'go-mode-hook 'go-eldoc-setup)
+;;(add-hook 'go-mode-hook 'go-eldoc-setup)
 (add-hook 'go-mode-hook 'ac-go-mode-setup)
 
 
@@ -1175,7 +1192,7 @@ mouse-2: EXWM Workspace menu.
   (ac-racer-setup)
   (auto-complete-mode t)
   (add-hook 'rust-mode-hook 'racer-mode)
-  (add-hook 'racer-mode-hook 'eldoc-mode)
+;;  (add-hook 'racer-mode-hook 'eldoc-mode)
 
   ;; Company mode
   (add-hook 'racer-mode-hook 'company-mode)
@@ -1310,8 +1327,6 @@ mouse-2: EXWM Workspace menu.
   (setq term-bufname "Gnome-terminal")
   (setq term-binary "/usr/bin/gnome-terminal")
   (setq term-invocation term-binary)
-
-  (setq terminal (find-named-buffer term-bufname))
   (progn
     (message "Opening terminal")
     (start-process-shell-command
@@ -1538,14 +1553,22 @@ mouse-2: EXWM Workspace menu.
   )
 
 (defun setupIFlipb()
+  "Alt-tab Super-tab for window switch."
   (interactive)
   (setq iflipb-wrap-around t)
   (setq iflipb-ignore-buffers 'iflipb-ignore-windowed-buffers)
   (setq iflipb-always-ignore-buffers "^[ *]")
   (global-set-key (kbd "<M-<tab>>") 'timed-iflipb-next-buffer)
+  (global-set-key (kbd "C-M-i") 'timed-iflipb-next-buffer)
   (global-set-key (kbd "<M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
   (exwm-input-set-key (kbd "M-<tab>") 'timed-iflipb-next-buffer)
-  (exwm-input-set-key (kbd "M-<iso-lefttab>") 'timed-iflipb-previous-buffer))
+  (exwm-input-set-key (kbd "M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+
+
+  (global-set-key (kbd "<s-<tab>>") 'timed-iflipb-next-buffer)
+  (global-set-key (kbd "<s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+  (exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
+  (exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer))
 
 (setupIFlipb)
 (message "es/alt-tab")

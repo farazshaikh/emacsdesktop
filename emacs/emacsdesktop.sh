@@ -31,5 +31,6 @@ detectEmacs
 echo "Using Emacs: $EMACS"
 echo "Using Emacsclient: $EMACSCLIENT"
 killall ${EMACS}
-${EMACS} -rv --daemon -f exwm-enable
-${EMACSCLIENT} -a '' -c
+${EMACS}
+#${EMACS} -rv --daemon -f exwm-enable
+#${EMACSCLIENT} -a '' -c
