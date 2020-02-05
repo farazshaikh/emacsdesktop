@@ -26,10 +26,17 @@ linkup() {
 #EXWM Installation#
 ###################
 packageInstall() {
+    sudo apt-get install wget -y
+    ## ppa's
+    echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list/google-chrome.list
+    wget https://dl.google.com/linux/linux_signing_key.pub
+    sudo apt-key add linux_signing_key.pub
     sudo add-apt-repository ppa:kelleyk/emacs
     sudo apt-get update
+
     sudo apt install emacs26 -y
     sudo apt-get install emacs25 -y
+
     sudo apt-get install git -y
     sudo apt-get install curl -y
     sudo apt-get install openssh-server -y
