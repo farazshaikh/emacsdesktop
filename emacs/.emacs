@@ -67,8 +67,7 @@
           auto-complete-chunk
           auto-complete-clang
           auto-complete-clang-async
-          auto-complete-etags
-          auto-complete-exuberant-ctags
+	  auto-complete-exuberant-ctags
           auto-complete-nxml
 
           ;; COMPANY & ITS BACKENDS
@@ -76,7 +75,7 @@
           company-lsp
           company-quickhelp
           company-c-headers
-          company-cmake
+          ;;company-cmake
           company-irony
           company-irony-c-headers
           company-go
@@ -107,7 +106,7 @@
           go-eldoc
           go-errcheck
           go-mode
-          go-play
+          ;;go-play
           go-projectile
           go-snippets
           go-stacktracer

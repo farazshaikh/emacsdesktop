@@ -26,8 +26,14 @@ linkup() {
 #EXWM Installation#
 ###################
 packageInstall() {
+    sudo add-apt-repository ppa:kelleyk/emacs
+    sudo apt-get update
+    sudo apt install emacs26 -y
     sudo apt-get install emacs25 -y
-    sudo apt-get install emacs26 -y
+    sudo apt-get install git -y
+    sudo apt-get install curl -y
+    sudo apt-get install openssh-server -y
+
     sudo apt-get install suckless-tools -y
     sudo apt-get install git -y
     sudo apt-get install chromium-browser -y
@@ -46,8 +52,13 @@ packageInstall() {
     sudo apt-get install redshift-gtk -y
     sudo apt-get install tmux -y
     sudo apt-get install gnome-flashback -y
-    sudo apt-get install fonts-noto
-    sudo apt-get install gnome-screensaver
+    sudo apt-get install fonts-noto -y
+    sudo apt-get install gnome-screensaver -y
+
+    pushd
+    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    ~/.fzf/install
+    popd
 }
 
 checkoutCode() {
@@ -88,7 +99,7 @@ linkupFiles() {
 
     linkup ${ts} ~/.gitconfig `pwd`/emacs/.gitconfig
     linkup ${ts} ~/.emacs `pwd`/emacs/.emacs
-    linkup ${ts} ~/.acnme.png `pwd`/emacs/.acme.png
+    linkup ${ts} ~/.acme.png `pwd`/emacs/acme.png
     linkup ${ts} ~/.xinitrc `pwd`/emacs/.xinitrc
     linkup ${ts} ~/.Xresources `pwd`/emacs/.Xresources
     linkup ${ts} ~/ediff.sh `pwd`/emacs/ediff.sh
