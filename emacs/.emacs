@@ -352,6 +352,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package dashboard
   :ensure t
+  :if window-system
   :demand
   :config
   ;;(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
@@ -404,7 +405,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (start-process "" nil "/snap/bin/pa-applet")
   (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
   (message "es/setup-up-gnome-desktop"))
-(es/set-up-gnome-desktop)
+(if window-system (es/set-up-gnome-desktop))
 
 (use-package exwm-config
   :disabled
@@ -412,6 +413,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-config-default))
 
 (use-package exwm
+  :if window-system
   :ensure t
   :pin gnu
   :init
@@ -663,6 +665,11 @@ Git gutter:
   :config
   (fa-config-default))
 
+(defun lsp-clear-session-blacklist()
+  "Clear the list of blacklisted folders."
+  (interactive)
+  (setf (lsp-session-folders-blacklist (lsp-session)) nil)
+  (lsp--persist-session (lsp-session)))
 
 (use-package lsp-mode
   :ensure t
@@ -671,7 +678,9 @@ Git gutter:
 
   (lsp-auto-guess-root nil)
   (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
-  :bind (:map lsp-mode-map ("C-c C-f" . lsp-format-buffer))
+  :bind (:map lsp-mode-map
+              ("C-c C-l" . hydra-lsp/body)
+              ("C-c C-f" . lsp-format-buffer))
   :hook (((prog-mode) . 'display-line-numbers-mode)
          ((prog-mode) . lsp)))
 
@@ -716,8 +725,35 @@ Git gutter:
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
     (setq mode-line-format nil)))
 
-(use-package unicode-fonts :ensure t)
-(use-package all-the-icons-dired :ensure t)
+(defhydra hydra-lsp (:exit t :hint nil)
+  "
+ Buffer^^               Server^^                   Symbol
+-------------------------------------------------------------------------------------
+ [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
+ [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
+ [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature       [_c_] clear blacklist
+ [_e_] descirbe ession"
+  ("d" lsp-find-declaration)
+  ("D" lsp-ui-peek-find-definitions)
+  ("R" lsp-ui-peek-find-references)
+  ("i" lsp-ui-peek-find-implementation)
+  ("t" lsp-find-type-definition)
+  ("s" lsp-signature-help)
+  ("o" lsp-describe-thing-at-point)
+  ("r" lsp-rename)
+  ("e" lsp-describe-session)
+  ("c" lsp-clear-session-blacklist)
+
+  ("f" lsp-format-buffer)
+  ("m" lsp-ui-imenu)
+  ("x" lsp-execute-code-action)
+
+  ("M-s" lsp-describe-session)
+  ("M-r" lsp-restart-workspace)
+  ("S" lsp-shutdown-workspace))
+
+(use-package unicode-fonts :if window-system :ensure t)
+(use-package all-the-icons-dired :if window-system :ensure t)
 (use-package all-the-icons
   :if window-system
   :ensure t

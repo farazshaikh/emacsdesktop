@@ -13,7 +13,7 @@ export GIT_PS1_SHOWUNTRACKEDFILES=true
 export GIT_PS1_SHOWUPSTREAM=true
 export PS1='[\033[1m\033[34m \u@\h:`pwd` \[\033[00m\]][$(__git_ps1)]\n'
 export HISTCONTROL=ignoredups
-
+export FRZ=/usr/share/faraz/Misc
 
 __git_ps1 ()
 {
