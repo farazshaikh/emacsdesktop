@@ -1,9 +1,21 @@
-;;; package -- Summary EOS
+;;; package -- Summary EOS_DESKTOP
 ;;         EXWM/Gnome based Desktop Environment using Emacs.
+;;
 ;;; Commentary:
-;;         Use EXWM to as a window manager and gnome and the desktop to provide a development
-;;         friendly desktop.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;   Use EXWM to as a window manager and gnome and the desktop to provide a development
+;;   friendly desktop.
+;;
+;;  -> Environment variable EOS_DESKTOP must be set run Emacs in a
+;;  window manager/Desktop replacement mode.
+;;
+;; -> ~/.eosinstall file indicates the the installation of EOS_DESKTOP
+;;  has been completed Removin this file will trigger an
+;;  re-installation.  During installation packages will downloaded
+;;  and installed only if they are not found on the system.
+;;
+;;  -> To do a full reinstallation remove the file ~/.eosinstall AND
+;;  remove all the packages from ~/.emacs.d
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; Code:
 (set-background-color "#1c1e1f")
@@ -369,6 +381,13 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (dashboard-setup-startup-hook)
   :hook (window-setup . es/windowsetup))
 
+(use-package winner-mode-enable
+  :ensure t
+  :demand
+  :config
+  :hook
+)
+
 ;; Load EXWM.
 (defun es/set-up-gnome-desktop()
   "GNOME is used for mosto of the system settings."
@@ -405,7 +424,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (start-process "" nil "/snap/bin/pa-applet")
   (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
   (message "es/setup-up-gnome-desktop"))
-(if window-system (es/set-up-gnome-desktop))
+(if (and window-system (getenv "EOS_DESKTOP")) (es/set-up-gnome-desktop))
 
 (use-package exwm-config
   :disabled
@@ -413,7 +432,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-config-default))
 
 (use-package exwm
-  :if window-system
+  :if (and
+       window-system
+       (getenv "EOS_DESKTOP"))
   :ensure t
   :pin gnu
   :init
@@ -504,6 +525,10 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-workspace-add)
   (message "es/use-package/exwm"))
 
+(use-package ag
+  :bind (("C-F" . rgrep)
+         ("C-f" . ag)))
+
 (use-package general
   :init
   (defalias 'gsetq #'general-setq)
@@ -522,7 +547,26 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package ivy
   :ensure t
   :diminish (ivy-mode)
-  :bind (("C-x b" . ivy-switch-buffer))
+  :bind (("C-x b" . ivy-switch-buffer)
+         ("s-b" . 'ivy-switch-buffer)
+          ;; splits
+         ("s-\\" . 'split-window-horizontally)
+         ("s-]" . 'split-window-vertically)
+         ("s-<backspace>" . 'delete-window)
+         ("s-[" . 'delete-other-windows)
+         ("s-u" . 'winner-undo)
+
+         ;; windmove keys
+         ("M-<left>" . 'windmove-left)
+         ("M-<right>" .'windmove-right)
+         ("M-<up>" .  'windmove-up)
+         ("M-<down>" . 'windmove-down)
+
+         ("C-<left>". backward-word)
+         ("C-<right>". forward-word)
+         ("C-<up>". backward-paragraph)
+         ("C-<down>" . forward-paragraph)
+         ("<find>" . beginning-of-line))
   :config
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
@@ -884,16 +928,16 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
+ '(lsp-ui-doc-border "black" t)
+ '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position (quote bottom))
- '(lsp-ui-sideline-enable t)
- '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-doc-header t t)
+ '(lsp-ui-doc-include-signature t t)
+ '(lsp-ui-doc-position (quote bottom) t)
+ '(lsp-ui-sideline-enable t t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t)
+ '(lsp-ui-sideline-show-code-actions t t)
  '(lsp-ui-sideline-update-mode (quote line))
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
@@ -1204,45 +1248,6 @@ mouse-2: EXWM Workspace menu.
 (add-hook 'js2-mode-hook 'js2-mode-setup)
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 
-
-
-
-
-
-;;;;;;;;;;;;;;;
-;;    rust   ;;
-;;;;;;;;;;;;;;;
-;;http://julienblanchard.com/2016/fancy-rust-development-with-emacs/
-;;packages rustic cargo racer
-(defun rustModeSetup()
-  (interactive)
-  ;; # cargo install rustfmt
-  (add-hook 'rust-mode-hook
-            (lambda ()
-              (local-set-key (kbd "C-c <tab>") #'rust-format-buffer)))
-  ;; # rustup default nightly
-  ;; # cargo install racer
-  ;; # rustup component add rust-src
-  (ac-config-default)
-  (ac-racer-setup)
-  (auto-complete-mode t)
-  (add-hook 'rust-mode-hook 'racer-mode)
-;;  (add-hook 'racer-mode-hook 'eldoc-mode)
-
-  ;; Company mode
-  (add-hook 'racer-mode-hook 'company-mode)
-  (add-hook 'racer-mode-hook 'company-quickhelp-mode)
-
-  ;; Auto complete mode
-  ;;(add-hook 'racer-mode-hook 'auto-complete-mode)
-  ;;(add-hook 'racer-mode-hook 'ac-racer-setup)
-
-  (add-hook 'racer-mode-hook 'flycheck-mode)
-  (add-hook 'flycheck-mode-hook 'flycheck-rust-setup)
-  (define-key rust-mode-map (kbd "TAB") #'company-indent-or-complete-common)
-  )
-;;(rustModeSetup)
-
 (put 'downcase-region 'disabled nil)
 (message "es/legacy-lang-setup")
 
@@ -1466,10 +1471,6 @@ mouse-2: EXWM Workspace menu.
   )
 
 (add-hook 'tty-setup-hook 'es/input-decode-map-xterm-compatibility)
-(global-set-key [(meta up)] 'windmove-up)
-(global-set-key [(meta down)] 'windmove-down)
-(global-set-key [(meta right)] 'windmove-right)
-(global-set-key [(meta left)] 'windmove-left)
 
 ;; windmove gnome terminal keys
 (defvar real-keyboard-keys
@@ -1491,19 +1492,6 @@ mouse-2: EXWM Workspace menu.
       (or (cdr (assoc desc real-keyboard-keys))
           (read-kbd-macro desc))))
 
-(global-set-key (key "M-<left>") 'windmove-left)          ; move to left windnow
-(global-set-key (key "M-<right>") 'windmove-right)        ; move to right window
-(global-set-key (key "M-<up>") 'windmove-up)              ; move to upper window
-(global-set-key (key "M-<down>") 'windmove-down)          ; move to downer window
-(global-set-key (key "C-<left>") 'backward-word)          ; move forward word
-(global-set-key (key "C-<right>") 'forward-word)          ; move backward word
-(global-set-key (key "C-<up>") 'backward-paragraph)       ; move forward word
-(global-set-key (key "C-<down>") 'forward-paragraph)      ; move backward word
-(global-set-key (kbd "<find>") 'beginning-of-line)        ; beginning of line
-(define-key global-map [select] 'end-of-line)             ; end of line
-
-(global-set-key (kbd "C-F") 'rgrep)
-(global-set-key (kbd "C-f") 'ag)
 
 ;; To add a key binding only available in line-mode, simply define it in
 ;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.

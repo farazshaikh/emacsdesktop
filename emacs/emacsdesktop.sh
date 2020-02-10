@@ -19,6 +19,7 @@ detectEmacsClient() {
     elif hash emacsclient25 2>/dev/null; then
 	EMACSCLIENT=emacsclient25
     elif hash emacsclient.emacs25 2> /dev/null; then
+
 	EMACSCLIENT=emacsclient.emacs25
     else
 	EMACSCLIENT=emacsclient
@@ -30,6 +31,7 @@ detectEmacs
 
 echo "Using Emacs: $EMACS"
 echo "Using Emacsclient: $EMACSCLIENT"
+export EOS_DESKTOP=true
 killall ${EMACS}
 ${EMACS}
 #${EMACS} -rv --daemon -f exwm-enable

@@ -63,7 +63,7 @@ packageInstall() {
     sudo apt-get install gnome-screensaver -y
 
     pushd
-    git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    git clone --depth 1 https://github.com/farazshaikh/fzf.git ~/.fzf
     ~/.fzf/install
     popd
 }
