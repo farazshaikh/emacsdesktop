@@ -382,10 +382,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :hook (window-setup . es/windowsetup))
 
 (use-package winner-mode-enable
+  :disabled
   :ensure t
-  :demand
-  :config
-  :hook
 )
 
 ;; Load EXWM.
@@ -481,11 +479,12 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-input-set-key (kbd "s-S-<down>")
                       (lambda () (interactive) (exwm-layout-shrink-window              50)))
     ;; window splits
-  (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally)
-  (exwm-input-set-key (kbd "s-]") 'split-window-vertically)
+  (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally-and-follow)
+  (exwm-input-set-key (kbd "s-]") 'split-window-vertically-and-follow)
   (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
   (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
   (exwm-input-set-key (kbd "s-b") 'ivy-switch-buffer)
+  (exwm-input-set-key (kbd "s-d") 'counsel-linux-app)
 
   ;; window undo
   (exwm-input-set-key (kbd "s-u") 'winner-undo)
@@ -550,8 +549,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :bind (("C-x b" . ivy-switch-buffer)
          ("s-b" . 'ivy-switch-buffer)
           ;; splits
-         ("s-\\" . 'split-window-horizontally)
-         ("s-]" . 'split-window-vertically)
+         ("s-\\" . 'split-window-horizontally-and-follow)
+         ("s-]" . 'split-window-vertically-and-follow)
          ("s-<backspace>" . 'delete-window)
          ("s-[" . 'delete-other-windows)
          ("s-u" . 'winner-undo)
@@ -617,7 +616,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :hook
   (prog-mode-hook . whitespace-mode)
   :init
-  (setq whitespace-global-modes '(not exwm-mode treemacs-mode))
+  (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode))
   :custom
   (whitespace-style (quote (face empty tabs lines-tail whitespace))))
 
@@ -1125,6 +1124,20 @@ mouse-2: EXWM Workspace menu.
 (add-hook 'ediff-before-setup-hook 'my-ediff-bsh)
 (add-hook 'ediff-after-setup-windows-hook 'my-ediff-ash 'append)
 (add-hook 'ediff-quit-hook 'my-ediff-qh)
+
+(defun split-window-horizontally-and-follow()
+  "Focus follows the newly created window."
+  (interactive)
+  (split-window-horizontally)
+  (other-window 1))
+
+(defun split-window-vertically-and-follow()
+  "Focus follows the newly created window."
+  (interactive)
+  (split-window-vertically)
+  (other-window 1))
+
+
 (message "es/workarounds")
 
 

@@ -40,7 +40,7 @@ if [ "${TERM}" = "linux" ]; then
     unset DISPLAY
     _EMACSCLIENTOPTS=" -t "
 else
-    _EMACSCLIENTOPTS=" -t "
+    _EMACSCLIENTOPTS=" -n "
 fi
 
 # run emacsclient
