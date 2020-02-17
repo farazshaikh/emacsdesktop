@@ -2,7 +2,7 @@
 	email = faraz.shaikh@gmail.com
 	name = Faraz Shaikh
 [core]
-	editor = "emacsclient -n"
+	editor = "emacsclient "
 [user]
         name = faraz
         email = faraz.shaikh@gmail.com
