@@ -66,6 +66,12 @@ packageInstall() {
     git clone --depth 1 https://github.com/farazshaikh/fzf.git ~/.fzf
     ~/.fzf/install
     popd
+
+    pushd
+       git clone https://github.com/farazshaikh/powerline-shell ~/.powerline-shell
+       cd ~/.powerline-shell
+       python setup.py install
+    popd
 }
 
 checkoutCode() {
@@ -102,7 +108,8 @@ linkupFiles() {
     linkup ${ts} ~/.tmux.conf `pwd`/.tmux.conf
     linkup ${ts} ~/.i3/config `pwd`/.i3/config
     linkup ${ts} ~/.i3/.inputrc `pwd`/.inputrc
-
+    mkdir -p  ~/.config/powerline-shell
+    linkup ${ts} ~/.config/powerline-shell/config.json `pwd`/config_powerline-shell_config.json
 
     linkup ${ts} ~/.gitconfig `pwd`/emacs/.gitconfig
     linkup ${ts} ~/.gitignore `pwd`/emacs/.gitignore

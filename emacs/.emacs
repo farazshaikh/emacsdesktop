@@ -508,10 +508,10 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
   (require 'exwm-randr)
   ;; Per host setup
-  (setq exwm-randr-workspace-output-plist '(1 "eDP-1"))
+  (setq exwm-randr-workspace-output-plist '(0 "eDP-1"))
   (when (string= system-name "faraz-dfn-x1")
     (progn
-      (setq exwm-randr-workspace-output-plist '(0 "DP-1" 1 "eDP-1"))
+      (setq exwm-randr-workspace-output-plist '(9 "DP-1" 0 "eDP-1"))
       (add-hook 'exwm-randr-screen-change-hook
       (lambda ()
         (start-process-shell-command
@@ -613,6 +613,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package ivy-posframe
   :ensure t
   :config
+  :disabled
   (setq ivy-posframe-parameters '((parent-frame nil)))
 ;;  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
 ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
@@ -952,7 +953,7 @@ Git gutter:
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (ivy-posframe rust-playground exwm fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (vterm mini-modeline ivy-posframe rust-playground exwm fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let

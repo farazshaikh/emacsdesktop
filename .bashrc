@@ -6,15 +6,16 @@ alias ee='emacsclient -n '
 alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
 export EDITOR='emacsclient -n'
+export HISTCONTROL=ignoredups
+export FRZ=/usr/share/faraz/Misc
 
+
+# Fallback command prompt if powerline-shell isn't available
 export GIT_PS1_SHOWDIRTYSTATE=true
 export GIT_PS1_SHOWSTASHSTATE=true
 export GIT_PS1_SHOWUNTRACKEDFILES=true
 export GIT_PS1_SHOWUPSTREAM=true
 export PS1='[\033[1m\033[34m \u@\h:`pwd` \[\033[00m\]][$(__git_ps1)]\n'
-export HISTCONTROL=ignoredups
-export FRZ=/usr/share/faraz/Misc
-
 __git_ps1 ()
 {
     local b="$(git symbolic-ref HEAD 2>/dev/null)";
@@ -23,6 +24,15 @@ __git_ps1 ()
     fi
 }
 
+# powerline-shell integration
+# https://github.com/b-ryan/powerline-shell
+function _update_ps1() {
+    PS1=$(powerline-shell $?)
+}
+
+if [[ $TERM != linux && ! $PROMPT_COMMAND =~ _update_ps1 ]]; then
+    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
+fi
 
 untarall ()
 {
@@ -103,3 +113,4 @@ esac
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
 export WRK="/home/faraz/dfn/dfinity/./"
+
