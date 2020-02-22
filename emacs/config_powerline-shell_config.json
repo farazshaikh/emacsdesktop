@@ -1,7 +1,8 @@
 {
+  "theme": "~/powerline-shell/powerline_shell/themes/default.py",
   "segments": [
     "virtual_env", 
-    "username", 
+    "username",
     "hostname", 
     "ssh", 
     "cwd", 
@@ -9,6 +10,12 @@
     "hg", 
     "jobs", 
     "root",
-    "newline"
+    "newline",
+    {
+	    "type": "stdout",
+	    "command": ["echo", "$"],
+	    "bg_color":226,
+	    "fg_color":240
+    }
   ]
 }
