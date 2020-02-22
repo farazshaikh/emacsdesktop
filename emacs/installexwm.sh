@@ -8,7 +8,7 @@ linkup() {
     if ! [ -e "${src}" ]; then
         ## source doesn't exists
         echo -n "Link "
-        ln -s ${dst} ${src}
+        ln -snf ${dst} ${src}
     elif ! [ "${src}" -ef "${dst}" ]; then
         ## source exists and differs from destinaton
         mv ${src} ${src}.${ts}.exwm.bkup
@@ -28,7 +28,7 @@ linkup() {
 packageInstall() {
     sudo apt-get install wget -y
     ## ppa's
-    echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' > /etc/apt/sources.list/google-chrome.list
+    echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee -a /etc/apt/sources.list.d/google-chrome.list > /dev/null
     wget https://dl.google.com/linux/linux_signing_key.pub
     sudo apt-key add linux_signing_key.pub
     sudo add-apt-repository ppa:kelleyk/emacs
@@ -61,35 +61,29 @@ packageInstall() {
     sudo apt-get install gnome-flashback -y
     sudo apt-get install fonts-noto -y
     sudo apt-get install gnome-screensaver -y
-
-    pushd
-    git clone --depth 1 https://github.com/farazshaikh/fzf.git ~/.fzf
-    ~/.fzf/install
-    popd
-
-    pushd
-       git clone https://github.com/farazshaikh/powerline-shell ~/.powerline-shell
-       cd ~/.powerline-shell
-       python setup.py install
-    popd
+    sudo apt-get install fonts-powerline -y
 }
 
 checkoutCode() {
     pushd `pwd`
     local installLoc=${1}
-    if [ -d ${installLoc} ]; then
-        cd ${installLoc}/Misc
+    local repo_url=${2}
+    local dirname=`basename $repo_url`
+    local extension="${dirname##*.}"
+    local dirname="${dirname%.*}"
+
+    echo "Install/fetch ${repo_url} into folder ${installLoc}/${dirname}"
+    if [ -d ${installLoc}/${dirname} ]; then
+        cd ${installLoc}/${dirname}
         git fetch
         git rebase
+        git config core.fileMode false
         cd ..
     else
         mkdir -p ${installLoc}
         cd ${installLoc}
-        git clone http://github.com/farazshaikh/Misc
-    fi
-    chmod -R 0777 ./Misc
-    cd ./Misc
-    git config core.fileMode false
+        git clone ${repo_url} ${dirname}
+     fi
     popd
 }
 
@@ -108,13 +102,14 @@ linkupFiles() {
     linkup ${ts} ~/.tmux.conf `pwd`/.tmux.conf
     linkup ${ts} ~/.i3/config `pwd`/.i3/config
     linkup ${ts} ~/.i3/.inputrc `pwd`/.inputrc
+
     mkdir -p  ~/.config/powerline-shell
-    linkup ${ts} ~/.config/powerline-shell/config.json `pwd`/config_powerline-shell_config.json
+    linkup ${ts} ~/.config/powerline-shell/config.json `pwd`/emacs/config_powerline-shell_config.json
 
     linkup ${ts} ~/.gitconfig `pwd`/emacs/.gitconfig
     linkup ${ts} ~/.gitignore `pwd`/emacs/.gitignore
     linkup ${ts} ~/.emacs `pwd`/emacs/.emacs
-    linkup ${ts} ~/.acme.png `pwd`/emacs/acme.png
+    linkup ${ts} ~/acme.png `pwd`/emacs/acme.png
     linkup ${ts} ~/.xinitrc `pwd`/emacs/.xinitrc
     linkup ${ts} ~/.Xresources `pwd`/emacs/.Xresources
     linkup ${ts} ~/ediff.sh `pwd`/emacs/ediff.sh
@@ -134,22 +129,37 @@ linkupFiles() {
 disable_greeter() {
     sudo systemctl set-default multi-user.target --force
     sudo systemctl set-default multi-user.target
-   # sudo systemctl set-default graphical.target
+    sudo systemctl set-default graphical.target
 }
 
 main() {
     installTime=`date | sed -e "s/ /_/g"`
-    installLoc=/usr/share/faraz
+    installLoc=${HOME}/.eos
+    gitRepoInstallLoc=${installLoc}/third_party_git_repos
 
     if [ "$EUID" -ne 0 ]
-    then echo "Please run as root or sudo"
-         exit
+    then echo "During the installation you might be prompted for credentials required to install packages"
+#         exit
     fi
 
+    # Get an install ID for this install
     echo InstallID ${installTime}
-    packageInstall
-#checkoutCode ${installLoc}
+
+    # Checkout code that comes out of git-repos
+    # /Misc
+    checkoutCode ${installLoc} https://github.com/farazshaikh/Misc
+
+    # /site_eos
+    checkoutCode ${gitRepoInstallLoc} http://github.com/farazshaikh/fzf.git
+    ${gitRepoInstallLoc}/fzf/install
+
+    checkoutCode ${gitRepoInstallLoc}  https://github.com/farazshaikh/powerline-shell
+
+
+
     linkupFiles ${installLoc} ${installTime}
+    packageInstall
+
     disable_greeter
 }
 

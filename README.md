@@ -1,21 +1,24 @@
-Desktop Setup for Emacs Window Manager
+ACME a desktop enviroment with gnome and emacs window-manager
 ====
 
 ```
-wget -qO- https://raw.githubusercontent.com/farazshaikh/Misc/master/emacs/installexwm.sh | sudo bash -x
+wget -qO- https://raw.githubusercontent.com/farazshaikh/Misc/master/emacs/installexwm.sh | bash -x
 ```
 
-Logout and login forever into emacs :)
+NOTE: Single user installation.
 
-Misc
-====
+Does an installation for a specific USER.  For example if user SCOTT
+installs the desktop, only user SCOTT can login into the ACME desktop.
+Other user can login into existing DESKTOP session like ubuntu, gnome,
+kde etc
 
-Miscellaneous Code Written Over time
 
-Splitter: splitter/README.md
-========
-   Multi-thread file splitting and reconcile tool. Similar to UNIX split, but configurable in terms of
-   1. number of threads
-   2. IO size used by thread for doing the split
-   3. Reconcile is restart-able i.e the splitted shards can arrive at destination in any order/time,
-      reconciliation can continue as and when shards arrive.
+Login Details:
+
+UI Login:
+GDM/LigthDM login will start showing up a session entry named
+EmacsDesktop.
+
+Login from the Terminal:
+Also provided is a ~/.xinitrc, using this one can start the desktop
+under the X server by invoking [#] startx from the command prompt.

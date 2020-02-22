@@ -8,7 +8,7 @@ alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
 export EDITOR='emacsclient -n'
 export HISTCONTROL=ignoredups
-export FRZ=/usr/share/faraz/Misc
+export EOS=~/.eos
 
 
 # Fallback command prompt if powerline-shell isn't available
