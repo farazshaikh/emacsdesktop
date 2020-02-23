@@ -143,11 +143,12 @@ main() {
     set +e
     # 2. Checkout code that comes out of git-repos
     # /Misc
-    checkoutCode ${installLoc} https://github.com/farazshaikh/Misc
+    checkoutCode ${installLoc} git@github.com:farazshaikh/Misc.git
     # /site_eos
-    checkoutCode ${gitRepoInstallLoc} http://github.com/farazshaikh/fzf.git
+    checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/fzf.git
     ${gitRepoInstallLoc}/fzf/install
-    checkoutCode ${gitRepoInstallLoc}  https://github.com/farazshaikh/powerline-shell
+    checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/powerline-shell.git
+    checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/Gogh.git
     set -e
 
     # 3. Linkup the files from the git checkout
