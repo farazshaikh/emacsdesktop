@@ -4,16 +4,24 @@ linkup() {
     local ts=${1}
     local src=${2}
     local dst=${3}
+
+    ln_cmd="ln"
+    mv_cm="mv"
+    if [ -n ${4} ]; then
+        ln_cmd="sudo ln"
+        mv_cmd="sudo mv"
+    fi
+
     [ -d `dirname ${src}` ] || mkdir `dirname ${src}`
     if ! [ -e "${src}" ]; then
         ## source doesn't exists
         echo -n "Link "
-        ln -snf ${dst} ${src}
+        ${ln_cmd} -snf ${dst} ${src}
     elif ! [ "${src}" -ef "${dst}" ]; then
         ## source exists and differs from destinaton
-        mv ${src} ${src}.${ts}.exwm.bkup
+        ${mv_cmd} ${src} ${src}.${ts}.exwm.bkup
         echo -n "Backup and Link "
-        ln -s ${dst} ${src}
+        ${ln_cmd} -s ${dst} ${src}
     else
         ## source exists and is same as destination
         echo -n "Skipping Link "
@@ -26,7 +34,8 @@ linkup() {
 #EXWM Installation#
 ###################
 packageInstall() {
-    sudo apt-get install wget -y
+     sudo apt-get install wget -y
+
     ## ppa's
     echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee -a /etc/apt/sources.list.d/google-chrome.list > /dev/null
     wget https://dl.google.com/linux/linux_signing_key.pub
@@ -34,34 +43,17 @@ packageInstall() {
     sudo add-apt-repository ppa:kelleyk/emacs
     sudo apt-get update
 
-    sudo apt install emacs26 -y
-    sudo apt-get install emacs25 -y
-
-    sudo apt-get install git -y
-    sudo apt-get install curl -y
-    sudo apt-get install openssh-server -y
-
-    sudo apt-get install suckless-tools -y
-    sudo apt-get install git -y
+    sudo apt install emacs26 emacs25 vim -y
     sudo apt-get install chromium-browser -y
-    set +e
-    sudo apt-get install chromium-ublock-origin -y
-    set -e
-    sudo apt-get install screen -y
-    sudo apt-get install xsel -y
-    sudo apt-get install vlc -y
-    sudo apt-get install feh -y
-    sudo apt-get install xterm -y
-    sudo apt-get install vim -y
+    sudo apt-get install git curl openssh-server -y
+    sudo apt-get install suckless-tools -y
+    sudo apt-get install xsel xterm -y
+    sudo apt-get install vlc feh -y
+    sudo apt-get install tmux screen -y
     sudo apt-get install mame -y
-    sudo apt-get install blueman -y
-    sudo apt-get install cheese -y
-    sudo apt-get install redshift-gtk -y
-    sudo apt-get install tmux -y
-    sudo apt-get install gnome-flashback -y
-    sudo apt-get install fonts-noto -y
-    sudo apt-get install gnome-screensaver -y
-    sudo apt-get install fonts-powerline -y
+    sudo apt-get install blueman cheese -y
+    sudo apt-get install gnome-flashback gnome-screensaver -y
+    sudo apt-get install fonts-noto fonts-powerline -y
 }
 
 checkoutCode() {
@@ -115,14 +107,14 @@ linkupFiles() {
     linkup ${ts} ~/ediff.sh `pwd`/emacs/ediff.sh
     linkup ${ts} ~/wallpaper.jpg `pwd`/emacs/wallpaper.jpg
 
-    sudo linkup ${ts} /etc/X11/Xsession.d/10-retina-display `pwd`/emacs/etc_X11_Xsession.d_10-retina-display
-    sudo linkup ${ts} /etc/X11/Xresources/retina-display `pwd`/emacs/etc_X11_Xresources_retina-display
-    sudo linkup ${ts} /etc/apt/apt.conf.d/90aptforceyes `pwd`/emacs/90aptforceyes
+    linkup ${ts} /etc/X11/Xsession.d/10-retina-display `pwd`/emacs/etc_X11_Xsession.d_10-retina-display +
+    linkup ${ts} /etc/X11/Xresources/retina-display `pwd`/emacs/etc_X11_Xresources_retina-display +
+    #linkup ${ts} /etc/apt/apt.conf.d/90aptforceyes `pwd`/emacs/90aptforceyes +
     touch ~/.gitmessage
 
     ## Optional integrate with DM
-    linkup ${ts} /usr/share/xsessions/emacsdesktop.sh `pwd`/emacs/emacsdesktop.sh
-    linkup ${ts} /usr/share/xsessions/emacs.desktop `pwd`/emacs/usr_share_xsessions_emacs.desktop
+    linkup ${ts} /usr/share/xsessions/emacsdesktop.sh `pwd`/emacs/emacsdesktop.sh +
+    linkup ${ts} /usr/share/xsessions/emacs.desktop `pwd`/emacs/usr_share_xsessions_emacs.desktop +
     popd
 }
 
@@ -145,21 +137,23 @@ main() {
     # Get an install ID for this install
     echo InstallID ${installTime}
 
-    # Checkout code that comes out of git-repos
+    #1. install packages first as we need git for the next step
+    packageInstall
+
+    set +e
+    # 2. Checkout code that comes out of git-repos
     # /Misc
     checkoutCode ${installLoc} https://github.com/farazshaikh/Misc
-
     # /site_eos
     checkoutCode ${gitRepoInstallLoc} http://github.com/farazshaikh/fzf.git
     ${gitRepoInstallLoc}/fzf/install
-
     checkoutCode ${gitRepoInstallLoc}  https://github.com/farazshaikh/powerline-shell
+    set -e
 
-
-
+    # 3. Linkup the files from the git checkout
     linkupFiles ${installLoc} ${installTime}
-    packageInstall
 
+    # 4. Nop
     disable_greeter
 }
 
