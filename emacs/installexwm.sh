@@ -54,6 +54,7 @@ packageInstall() {
     sudo apt-get install blueman cheese -y
     sudo apt-get install gnome-flashback gnome-screensaver -y
     sudo apt-get install fonts-noto fonts-powerline -y
+    sudo snap install ripgrep --classic
 }
 
 checkoutCode() {
@@ -148,6 +149,7 @@ main() {
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/fzf.git
     ${gitRepoInstallLoc}/fzf/install
     checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/powerline-shell.git
+    ${gitRepoInstallLoc}/powerline-shell/setup.py install
     checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/Gogh.git
     set -e
 

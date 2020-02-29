@@ -525,8 +525,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (message "es/use-package/exwm"))
 
 (use-package ag
-  :bind (("C-F" . rgrep)
-         ("C-f" . ag)))
+  :bind (("C-F" . counsel-ag)
+         ("C-f" . counsel-rg)))
 
 ;; magit on ssh-protected git repos
 (use-package ssh-agency
@@ -943,17 +943,17 @@ Git gutter:
  '(inhibit-startup-screen t)
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
- '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black" t)
- '(lsp-ui-doc-enable t t)
+ '(lsp-prefer-flymake nil t)
+ '(lsp-ui-doc-border "black")
+ '(lsp-ui-doc-enable t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t t)
- '(lsp-ui-doc-include-signature t t)
- '(lsp-ui-doc-position (quote bottom) t)
- '(lsp-ui-sideline-enable t t)
- '(lsp-ui-sideline-ignore-duplicate t t)
+ '(lsp-ui-doc-header t)
+ '(lsp-ui-doc-include-signature t)
+ '(lsp-ui-doc-position (quote bottom))
+ '(lsp-ui-sideline-enable t)
+ '(lsp-ui-sideline-ignore-duplicate t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t t)
+ '(lsp-ui-sideline-show-code-actions t)
  '(lsp-ui-sideline-update-mode (quote line))
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
@@ -986,7 +986,7 @@ Git gutter:
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
  '(which-function-mode t)
- '(whitespace-style (quote (face empty tabs lines-tail whitespace)) t)
+ '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
  '(winner-mode t))
 (message "es/customizations-applied")
 
