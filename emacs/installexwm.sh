@@ -100,7 +100,7 @@ linkupFiles() {
     linkup ${ts} ~/.config/powerline-shell/config.json `pwd`/emacs/config_powerline-shell_config.json
 
     linkup ${ts} ~/.gitconfig `pwd`/emacs/.gitconfig
-    linkup ${ts} ~/.gitignore `pwd`/emacs/.gitignore
+    linkup ${ts} ~/.gitignore `pwd`/.gitignore
     linkup ${ts} ~/.emacs `pwd`/emacs/.emacs
     linkup ${ts} ~/acme.png `pwd`/emacs/acme.png
     linkup ${ts} ~/.xinitrc `pwd`/emacs/.xinitrc

@@ -511,7 +511,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setq exwm-randr-workspace-output-plist '(0 "eDP-1"))
   (when (string= system-name "faraz-dfn-x1")
     (progn
-      (setq exwm-randr-workspace-output-plist '(9 "DP-1" 0 "eDP-1"))
+      (setq exwm-randr-workspace-output-plist '(8 "HDMI-1" 9 "DP-1" 0 "eDP-1"))
       (add-hook 'exwm-randr-screen-change-hook
       (lambda ()
         (start-process-shell-command
@@ -986,8 +986,9 @@ Git gutter:
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
  '(which-function-mode t)
- '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
- '(winner-mode t))
+ '(whitespace-style (quote (face empty tabs lines-tail whitespace)) t)
+ '(winner-mode t)
+ '(select-enable-clipboard t))
 (message "es/customizations-applied")
 
 ;;;;;;;;;;;;;;;;;;;
