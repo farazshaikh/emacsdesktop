@@ -430,6 +430,67 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :init
   (exwm-config-default))
 
+
+;;;;;;;;;;;;;;;;;;;;;;
+;;Setup alt-tab     ;;
+;;;;;;;;;;;;;;;;;;;;;;
+(use-package iflipb
+  :config
+  (setq iflipbTimerObj nil)
+  (setq alt-tab-selection-hover-time "3 sec")
+  (defun timed-iflipb-auto-off ()
+    (setq last-command 'message))
+
+  (defun timed-iflipb-next-buffer (arg)
+    "Flip to next buffer"
+    (interactive "P")
+    (iflipb-next-buffer arg)
+    (when iflipbTimerObj
+      (cancel-timer iflipbTimerObj)
+      (setq iflipbTimerObj nil))
+    (setq iflipbTimerObj
+          (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+
+  (defun timed-iflipb-previous-buffer ()
+    "Flip to previous buffer"
+    (interactive)
+    (iflipb-previous-buffer)
+    (when iflipbTimerObj
+      (cancel-timer iflipbTimerObj)
+      (setq iflipbTimerObj nil))
+    (setq iflipbTimerObj
+          (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+
+  (defun iflipb-first-iflipb-buffer-switch-command ()
+    "Determines whether this is the first invocation of
+iflipb-next-buffer or iflipb-previous-buffer this round."
+    (not (and (or (eq last-command 'timed-iflipb-next-buffer)
+                  (eq last-command 'timed-iflipb-previous-buffer)))))
+
+  ;; in iflip just flip with candidate windows that are not currently
+  ;; being displayed in a window and include the current buffer not
+  ;; doing so can jumble up the entire layout at other windows will
+  ;; swap buffers with current window
+  (defun iflipb-ignore-windowed-buffers(buffer)
+    (if
+        (or (eq (get-buffer-window buffer "visible") nil)
+            (string= (buffer-name) buffer)
+            )
+        nil t)
+    )
+
+  :init
+  (setq iflipb-wrap-around t)
+  (setq iflipb-ignore-buffers 'iflipb-ignore-windowed-buffers)
+  (setq iflipb-always-ignore-buffers "^[ *]")
+
+  :bind (("M-<tab>" .  timed-iflipb-next-buffer)
+         ("M-<iso-lefttab>" .  timed-iflipb-previous-buffer)
+         ("s-<tab>" . timed-iflipb-next-buffer)
+         ("s-<iso-lefttab>" . timed-iflipb-previous-buffer)))
+(message "es/alt-tab")
+
+
 (use-package exwm
   :if (and
        window-system
@@ -458,6 +519,12 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
   (fringe-mode 1)
+
+  ;; setup alt-tab
+  (exwm-input-set-key (kbd "<M-tab>") 'timed-iflipb-next-buffer)
+  (exwm-input-set-key (kbd "<M-S-iso-lefttab>") 'timed-iflipb-previous-buffer)
+  (exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
+  (exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
 
   ;; applications
   (exwm-input-set-key (kbd "s-l") 'es/lock-screen)
@@ -626,7 +693,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
           (left-fringe . 30)
           (right-fringe . 30)
           (ivy-posframe-border-width 1)))
-  ;; (Setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
+  ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-center)))
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-bottom-left)))
@@ -840,6 +907,8 @@ Git gutter:
     (all-the-icons-install-fonts t)))
 
 (use-package spaceline :ensure t
+  :custom-face
+  (spaceline-highlight-face ((t (:foreground "black"))))
   :config
   (use-package fancy-battery :ensure t
     :config
@@ -851,7 +920,7 @@ Git gutter:
     (spaceline-toggle-buffer-encoding-off)
     (spaceline-toggle-buffer-encoding-abbrev-off)
     (setq powerline-default-separator 'slant)
-    (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+    ;;(setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
     (spaceline-define-segment line-column
       "The current line and column numbers."
       "l:%l c:%2c")
@@ -945,7 +1014,7 @@ Git gutter:
  '(compilation-scroll-output (quote first-error))
  '(custom-safe-themes
    (quote
-    ("845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" "a7928e99b48819aac3203355cbffac9b825df50d2b3347ceeec1e7f6b592c647" "1ed5c8b7478d505a358f578c00b58b430dde379b856fbcb60ed8d345fc95594e" "774aa2e67af37a26625f8b8c86f4557edb0bac5426ae061991a7a1a4b1c7e375" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "1d50bd38eed63d8de5fcfce37c4bb2f660a02d3dff9cbfd807a309db671ff1af" "e1ef2d5b8091f4953fe17b4ca3dd143d476c106e221d92ded38614266cea3c8b" "9743d1941d0559264aa21a542e55043c032d779024cd70468d1123c320699fd1" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "1c8171893a9a0ce55cb7706766e57707787962e43330d7b0b6b0754ed5283cda" "d5d2ab76985738c142adbe6a35dc51c8d15baf612fdf6745c901856457650314" "f11e219c9d043cbd5f4b2e01713c2c24a948a98bed48828dc670bd64ae771aa1" "09cadcc2784baa744c6a7c5ebf2a30df59c275414768b0719b800cabd8d1b842" "a70b47c87e9b0940f6fece46656200acbfbc55e129f03178de8f50934ac89f58" "b69323309e5839676409607f91c69da2bf913914321c995f63960c3887224848" "53993d7dc1db7619da530eb121aaae11c57eaf2a2d6476df4652e6f0bd1df740" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "855eb24c0ea67e3b64d5d07730b96908bac6f4cd1e5a5986493cbac45e9d9636" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" default)))
+    ("615123f602c56139c8170c153208406bf467804785007cdc11ba73d18c3a248b" "845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" "a7928e99b48819aac3203355cbffac9b825df50d2b3347ceeec1e7f6b592c647" "1ed5c8b7478d505a358f578c00b58b430dde379b856fbcb60ed8d345fc95594e" "774aa2e67af37a26625f8b8c86f4557edb0bac5426ae061991a7a1a4b1c7e375" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "1d50bd38eed63d8de5fcfce37c4bb2f660a02d3dff9cbfd807a309db671ff1af" "e1ef2d5b8091f4953fe17b4ca3dd143d476c106e221d92ded38614266cea3c8b" "9743d1941d0559264aa21a542e55043c032d779024cd70468d1123c320699fd1" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "1c8171893a9a0ce55cb7706766e57707787962e43330d7b0b6b0754ed5283cda" "d5d2ab76985738c142adbe6a35dc51c8d15baf612fdf6745c901856457650314" "f11e219c9d043cbd5f4b2e01713c2c24a948a98bed48828dc670bd64ae771aa1" "09cadcc2784baa744c6a7c5ebf2a30df59c275414768b0719b800cabd8d1b842" "a70b47c87e9b0940f6fece46656200acbfbc55e129f03178de8f50934ac89f58" "b69323309e5839676409607f91c69da2bf913914321c995f63960c3887224848" "53993d7dc1db7619da530eb121aaae11c57eaf2a2d6476df4652e6f0bd1df740" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "855eb24c0ea67e3b64d5d07730b96908bac6f4cd1e5a5986493cbac45e9d9636" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" default)))
  '(dabbrev-case-fold-search nil)
  '(display-buffer-base-action
    (quote
@@ -1207,6 +1276,12 @@ mouse-2: EXWM Workspace menu.
   "Make the current window always display this buffer."
   nil " sticky" nil
   (set-window-dedicated-p (selected-window) es/sticky-buffer-mode))
+
+(define-minor-mode es/sticky-buffer-mode-clear
+  "Make the current window always display this buffer."
+  nil " sticky" nil
+  (set-window-dedicated-p (selected-window) nil))
+
 
 (defun es/mark-directory-readonly(name)
   "Mark a directory NAME to be opened readonly under Emacs."
@@ -1504,14 +1579,12 @@ mouse-2: EXWM Workspace menu.
 ;; Keyboard Setup  ;;
 ;;;;;;;;;;;;;;;;;;;;;
 (defun es/input-decode-map-putty()
+  "Keys for iterm2.  You have to edit corresponding entries in iterm."
   (interactive)
-  ;; keys for iterm2 - you have to edit the default keys for the profile for [option][direction]
-  ;; xterm.defaults presets
   (define-key input-decode-map "\e[A" [(meta up)])
   (define-key input-decode-map "\e[B" [(meta down)])
   (define-key input-decode-map "\ef" [(meta right)])
   (define-key input-decode-map "\eb" [(meta left)])
-
   ;; putty sends escape sequences
   (define-key input-decode-map "\e\eOA" [(meta up)])
   (define-key input-decode-map "\e\eOB" [(meta down)])
@@ -1519,8 +1592,8 @@ mouse-2: EXWM Workspace menu.
   (define-key input-decode-map "\e\eOD" [(meta left)]))
 
 (defun es/input-decode-map-xterm-compatibility()
+  "Key bindinds based on xterm.defaullts presets set by iterm2."
   (interactive)
-  ;; key bindinds based on xterm.defaullts presets set by iterm2
   (define-key input-decode-map "\e[1;5A" [(ctrl up)])
   (define-key input-decode-map "\e[1;5B" [(ctrl down)])
   (define-key input-decode-map "\e[1;5C" [(ctrl right)])
@@ -1529,8 +1602,7 @@ mouse-2: EXWM Workspace menu.
   (define-key input-decode-map "\e[1;3A" [(meta up)])
   (define-key input-decode-map "\e[1;3B" [(meta down)])
   (define-key input-decode-map "\e[1;3C" [(meta right)])
-  (define-key input-decode-map "\e[1;3D" [(meta left)])
-  )
+  (define-key input-decode-map "\e[1;3D" [(meta left)]))
 
 (add-hook 'tty-setup-hook 'es/input-decode-map-xterm-compatibility)
 
@@ -1584,82 +1656,12 @@ mouse-2: EXWM Workspace menu.
         ([?\M-w] . [?\C-c])
         ([?\C-y] . [?\C-v])
         ;; search
-        ([?\C-s] . [?\C-f])))
+        ([?\C-s] . (?\C-f))))
 (message "es/keyboard-setup")
 
 
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;
-;;Setup alt-tab     ;;
-;;;;;;;;;;;;;;;;;;;;;;
-(require 'iflipb)
-(setq iflipbTimerObj nil)
-(setq alt-tab-selection-hover-time "1 sec")
-(defun timed-iflipb-auto-off ()
-  (message ">")
-  (setq last-command 'message))
-
-(defun timed-iflipb-next-buffer (arg)
-  (interactive "P")
-  (iflipb-next-buffer arg)
-
-  (when iflipbTimerObj
-    (cancel-timer iflipbTimerObj)
-    (setq iflipbTimerObj nil))
-
-  (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
-
-(defun timed-iflipb-previous-buffer ()
-  (interactive)
-  (iflipb-previous-buffer)
-  (when iflipbTimerObj
-    (cancel-timer iflipbTimerObj)
-    (setq iflipbTimerObj nil))
-  (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
-
-(defun iflipb-first-iflipb-buffer-switch-command ()
-  "Determines whether this is the first invocation of iflipb-next-buffer or iflipb-previous-buffer this round."
-  ;; (message "FR %s" last-command)
-  (not (and (or (eq last-command 'timed-iflipb-next-buffer)
-                (eq last-command 'timed-iflipb-previous-buffer)))))
-
-;; in iflip just flip with candidate windows that are not currently being displayed in a window
-;; and include the current buffer
-;; not doing so can jumble up the entire layout at other windows will swap buffers with current window
-(defun iflipb-ignore-windowed-buffers(buffer)
-  ;;(message buffer)
-  (if
-      (or (eq (get-buffer-window buffer "visible") nil)
-          (string= (buffer-name) buffer)
-          )
-      nil t)
-  )
-
-(defun setupIFlipb()
-  "Alt-tab Super-tab for window switch."
-  (interactive)
-  (setq iflipb-wrap-around t)
-  (setq iflipb-ignore-buffers 'iflipb-ignore-windowed-buffers)
-  (setq iflipb-always-ignore-buffers "^[ *]")
-  (global-set-key (kbd "<M-<tab>>") 'timed-iflipb-next-buffer)
-  (global-set-key (kbd "C-M-i") 'timed-iflipb-next-buffer)
-  (global-set-key (kbd "<M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
-  (exwm-input-set-key (kbd "M-<tab>") 'timed-iflipb-next-buffer)
-  (exwm-input-set-key (kbd "M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
-
-
-  (global-set-key (kbd "<s-<tab>>") 'timed-iflipb-next-buffer)
-  (global-set-key (kbd "<s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
-  (exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
-  (exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer))
-
-(setupIFlipb)
-(message "es/alt-tab")
-
 ;; HELP DOCUMENTATION AND OTHER STUFF
-(defvar emacsDesktopHelp
+(defvar es/emacsDesktopHelp
 "
  .ooooo.  ooo. .oo.  .oo.    .oooo.    .ooooo.   .oooo.o
 d88. .88b .888P.Y88bP.Y88b  .P  )88b  d88. ..Y8 d88(  .8
@@ -1763,9 +1765,10 @@ d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
 
 
 (defun  EmacsDesktopGetSplash ()
+  "Display the EOS intro help buffer."
   (with-current-buffer
       (get-buffer-create "EmacsDesktopSplash")
-    (insert emacsDesktopHelp)
+    (insert es/emacsDesktopHelp)
     (goto-char (point-min)))
   (get-buffer-create "EmacsDesktopSplash"))
 
@@ -1773,5 +1776,6 @@ d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
 
 (server-start)
 (message "!!!es/load-complete!!!")
+
 (provide '.emacs)
-;;;
+;;; .emacs ends here
