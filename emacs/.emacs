@@ -775,6 +775,10 @@ Git gutter:
   (progn
     (bind-key "C-x g" 'magit-status))
   :config
+  (with-eval-after-load 'magit-log
+    (define-key magit-log-mode-map (kbd "<M-tab>") nil))
+  (with-eval-after-load 'magit-status
+    (define-key magit-status-mode-map (kbd "<M-tab>") nil))
   (setq magit-auto-revert-mode nil
         magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C"))
         magit-diff-refine-hunk t
