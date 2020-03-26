@@ -437,7 +437,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (use-package iflipb
   :config
   (setq iflipbTimerObj nil)
-  (setq alt-tab-selection-hover-time "3 sec")
+  (setq alt-tab-selection-hover-time "2 sec")
   (defun timed-iflipb-auto-off ()
     (setq last-command 'message))
 
@@ -596,8 +596,10 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
   (message "es/use-package/exwm"))
 
 (use-package ag
-  :bind (("C-F" . counsel-ag)
-         ("C-f" . counsel-rg)))
+  :bind (("C-F" . counsel-ag)))   ;; for expanded results use ag command
+
+(use-package rg
+  :bind (("C-f" . counsel-rg)))    ;; for expanded results use rg command
 
 ;; magit on ssh-protected git repos
 (use-package ssh-agency
@@ -673,6 +675,7 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
 	 ("C-r" . swiper-isearch)
 	 ("C-c C-r" . ivy-resume)
 	 ("M-x" . counsel-M-x)
+         ("s-x" . counsel-M-x)
 	 ("C-x C-f" . counsel-find-file)
          ("C-x C-j" . counsel-fzf)
          ("s-d" . counsel-linux-app))
@@ -725,6 +728,17 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
   :init
   (global-flycheck-mode t)
   (setq flycheck-global-modes '(not exwm-mode treemacs-mode)))
+
+(use-package flyspell
+  :hook
+  (prog-mode-hook . flyspell-prog-mode))
+
+(use-package flyspell-correct-ivy
+  :bind ("C-;" . flyspell-correct-wrapper)
+  :init
+  (global-eldoc-mode -1)
+  (setq flyspell-correct-interface #'flyspell-correct-ivy))
+
 
 (use-package hydra :ensure t)
 (use-package git-gutter
@@ -779,6 +793,8 @@ Git gutter:
     (define-key magit-log-mode-map (kbd "<M-tab>") nil))
   (with-eval-after-load 'magit-status
     (define-key magit-status-mode-map (kbd "<M-tab>") nil))
+  (with-eval-after-load 'magit-diff
+    (define-key magit-diff-mode-map (kbd "<M-tab>") nil))
   (setq magit-auto-revert-mode nil
         magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C"))
         magit-diff-refine-hunk t
@@ -798,6 +814,11 @@ Git gutter:
         magit-unstage-all-confirm nil
         magithub-message-confirm-cancellation nil
         magithub-use-ssl t))
+
+;; persistent-scratch
+(use-package persistent-scratch
+  :config
+  (persistent-scratch-setup-default))
 
 (use-package yasnippet
   :ensure t
@@ -870,6 +891,8 @@ Git gutter:
   ;;https://github.com/emacs-lsp/lsp-ui/issues/243
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
     (setq mode-line-format nil)))
+
+
 
 (defhydra hydra-lsp (:exit t :hint nil)
   "
@@ -1024,7 +1047,7 @@ Git gutter:
    (quote
     ((display-buffer-reuse-window display-buffer-same-window display-buffer-in-previous-window display-buffer-use-some-window))))
  '(exwm-layout-show-all-buffers t)
- '(global-eldoc-mode -1)
+ '(global-eldoc-mode nil)
  '(global-hl-line-mode t)
  '(ido-mode t nil (ido))
  '(ido-vertical-define-keys (quote C-n-and-C-p-only))
@@ -1034,21 +1057,21 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black" t)
- '(lsp-ui-doc-enable t t)
+ '(lsp-ui-doc-border "black")
+ '(lsp-ui-doc-enable t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t t)
- '(lsp-ui-doc-include-signature t t)
- '(lsp-ui-doc-position (quote bottom) t)
- '(lsp-ui-sideline-enable t t)
- '(lsp-ui-sideline-ignore-duplicate t t)
+ '(lsp-ui-doc-header t)
+ '(lsp-ui-doc-include-signature t)
+ '(lsp-ui-doc-position (quote bottom))
+ '(lsp-ui-sideline-enable t)
+ '(lsp-ui-sideline-ignore-duplicate t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t t)
+ '(lsp-ui-sideline-show-code-actions t)
  '(lsp-ui-sideline-update-mode (quote line))
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-projectile go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (rg ripgrep lsp-ivy eglot persistent-scratch flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
@@ -1092,7 +1115,8 @@ Git gutter:
  '(ivy-current-match ((t (:background "#2d2e2e" :box (:line-width 2 :color "grey75" :style released-button)))))
  '(ivy-posframe-border ((t (:inherit internal-border :background "white" :foreground "white"))))
  '(lsp-ui-doc-background ((t (:background nil))))
- '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic))))))
+ '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
+ '(spaceline-highlight-face ((t (:foreground "black")))))
 (message "es/custom-set-faces")
 
 ;;;;;;;;;;;;;;;
