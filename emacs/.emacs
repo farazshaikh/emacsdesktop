@@ -36,7 +36,6 @@
 (defun es/setup-package-mgmt()
   "Setup the package management for EOS."
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                           ("marmalade" . "http://marmalade-repo.packages/org/")
                            ("melpa" . "http://melpa.milkbox.net/packages/")
                            ("elpy" . "http://jorgenschaefer.github.io/packages/")))
   ;;elget
@@ -45,7 +44,7 @@
     (url-retrieve
      "https://raw.github.com/dimitri/el-get/master/el-get-install.el"
      (lambda (s)
-       (end-of-buffer)
+       (goto-char (point-max))
        (eval-print-last-sexp))))
   (package-initialize)
 
@@ -130,7 +129,6 @@
           flycheck
           flycheck-irony
           py-autopep8
-          spaceline
 
           ;; javascript setup from emacs.cafe Nicolas Petton
           company-tern
@@ -140,31 +138,10 @@
           ;; emacs goodies
           free-keys
           ido-vertical-mode
-          ag
-          exwm
-          iflipb
-	  kaolin-themes
           diminish
 
           ;; emacs next gen
-          use-package
-          general
-          centaur-tabs
-          treemacs
-          flx
-          swiper
-          ivy
-          ivy-hydra
-          counsel
-          hydra
-          lsp-ui
-          lsp-mode
-          lsp-treemacs
-
-          ;;
-          git-gutter
-          git-timemachine
-          magit))
+          use-package))
   (unless package-archive-contents
     (package-refresh-contents))
 
@@ -320,16 +297,12 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
      "OrgMode")
     (t "Editing"))))
 
-(defun centaur-tabs-group-by-custom ()
-  "Custom grouping for Centaur tabs."
-  (interactive)
-  (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
-  (centaur-tabs-force-update))
 
 (use-package centaur-tabs
   :disabled
   :demand
   :init (setq centaur-tabs-set-bar 'over)
+  :function centaur-tabs-force-update
   :config
   (centaur-tabs-mode +1)
   (centaur-tabs-headline-match)
@@ -341,6 +314,13 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
         centaur-tabs-close-button " × "
         centaur-tabs-show-navigation-buttons t)
   (centaur-tabs-change-fonts "ubuntu-mono" 100)
+
+  (defun centaur-tabs-group-by-custom ()
+    "Custom grouping for Centaur tabs."
+    (interactive)
+    (defvar centaur-tabs-buffer-groups-function)
+    (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
+    (centaur-tabs-force-update))
   (centaur-tabs-group-by-custom)
   (message "es/setup-package-centaur-tabs")
   :bind
@@ -384,8 +364,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package winner-mode-enable
   :disabled
-  :ensure t
-)
+  :ensure t)
 
 ;; Load EXWM.
 (defun es/set-up-gnome-desktop()
@@ -435,8 +414,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 ;;Setup alt-tab     ;;
 ;;;;;;;;;;;;;;;;;;;;;;
 (use-package iflipb
+  :functions iflipb-next-buffer iflipb-previous-buffer
+  :defines alt-tab-selection-hover-time
   :config
-  (setq iflipbTimerObj nil)
   (setq alt-tab-selection-hover-time "2 sec")
   (defun timed-iflipb-auto-off ()
     (setq last-command 'message))
@@ -445,20 +425,24 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
     "Flip to next buffer"
     (interactive "P")
     (iflipb-next-buffer arg)
-    (when iflipbTimerObj
-      (cancel-timer iflipbTimerObj)
-      (setq iflipbTimerObj nil))
-    (setq iflipbTimerObj
+    (defvar es/iflipbTimerObj)
+    (when es/iflipbTimerObj
+      (cancel-timer es/iflipbTimerObj)
+      (setq es/iflipbTimerObj nil))
+    (setq es/iflipbTimerObj
           (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
 
   (defun timed-iflipb-previous-buffer ()
-    "Flip to previous buffer"
+    "Flip to previous buffer."
     (interactive)
     (iflipb-previous-buffer)
-    (when iflipbTimerObj
-      (cancel-timer iflipbTimerObj)
-      (setq iflipbTimerObj nil))
-    (setq iflipbTimerObj
+    (defvar es/iflipbTimerObj)
+    (when es/iflipbTimerObj
+      (cancel-timer es/iflipbTimerObj)
+      (setq es/iflipbTimerObj nil))
+    (defvar es/iflipbTimerObj)
+    (defvar alt-tab-selection-hover-time)
+    (setq es/iflipbTimerObj ;noflycheck
           (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
 
   (defun iflipb-first-iflipb-buffer-switch-command ()
@@ -491,13 +475,50 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
 (message "es/alt-tab")
 
 
+(use-package windmove
+  :ensure t
+  :demand t
+  :pin gnu
+  :functions split-window-horizontally-and-follow split-window-vertically-and-follow winner-undo
+  :config
+  (defun split-window-horizontally-and-follow()
+    "Focus follows the newly created window."
+    (interactive)
+    (split-window-horizontally)
+    (other-window 1))
+  (defun split-window-vertically-and-follow()
+    "Focus follows the newly created window."
+    (interactive)
+    (split-window-vertically)
+    (other-window 1))
+  :bind
+  (("M-<left>" . 'windmove-left)
+   ("M-<right>" .'windmove-right)
+   ("M-<up>" .  'windmove-up)
+   ("M-<down>" . 'windmove-down))
+
+  ;; splits
+  ("s-\\" . 'split-window-horizontally-and-follow)
+  ("s-]" . 'split-window-vertically-and-follow)
+  ("s-<backspace>" . 'delete-window)
+  ("s-[" . 'delete-other-windows)
+  ("s-u" . 'winner-undo)
+
+  ;; fast moves
+  ("C-<left>". backward-word)
+  ("C-<right>". forward-word)
+  ("C-<up>". backward-paragraph)
+  ("C-<down>" . forward-paragraph)
+  ("<find>" . beginning-of-line))
+
+
 (use-package exwm
   :if (and
        window-system
        (getenv "EOS_DESKTOP"))
-  :ensure t
+  :ensure windmove
   :pin gnu
-  :init
+  :functions exwm-workspace-rename-buffer
   :hook
   (('exwm-update-class .
                        (lambda ()
@@ -510,15 +531,66 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
                                         (string-prefix-p "sun-awt-X11-" exwm-instance-name)
                                         (string= "gimp" exwm-instance-name))
                                (exwm-workspace-rename-buffer exwm-title)))))
-
   :config
-  (setq exwm-workspace-number 4)
-
   ;; create space
   (menu-bar-mode -1)
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
   (fringe-mode 1)
+
+  ;; Disable dialog boxes since they are unusable in EXWM
+  (setq use-dialog-box nil)
+
+  ;; Set floating window border
+  (setq exwm-floating-border-width 3)
+  (setq exwm-floating-border-color "orange")
+
+  (setq exwm-workspace-number 4)
+  ;; Per host dual monitor setup.
+  ;; Map workspace 0 to the primary monitor. i.e. the attached monitor.
+  ;; This is because the system tray is attached to the main workspace.
+  ;; DP-1 HDMI-1 are usually the attached monitors.
+  (defvar exwm-randr-workspace-monitor-plist)
+  (setq exwm-randr-workspace-monitor-plist '(0 "DP-1" 0 "HDMI-1"))
+  (when (string= (system-name) "faraz-dfn-x1")
+    (progn
+      (setq exwm-randr-workspace-monitor-plist '(1 "eDP-1" 0 "DP-1" 0 "HDMI-1"))
+      (add-hook 'exwm-randr-screen-change-hook
+      (lambda ()
+        (start-process-shell-command
+         "xrandr" nil "xrandr --output eDP-1 --output DP-1 --output HDMI-1 --auto")))))
+
+  ;; Access buffers from all workspaces
+  (setq exwm-workspace-show-all-buffers t)
+  (setq exwm-layout-show-all-buffers t)
+
+  ;; The following example demonstrates how to use simulation keys to mimic
+  ;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
+  ;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
+  ;; and DEST is what EXWM actually sends to application.  Note that both SRC
+  ;; and DEST should be key sequences (vector or string).
+  (setq exwm-input-simulation-keys
+   '(
+     ;; movement
+     ([?\C-b] . [left])
+     ([?\M-b] . [C-left])
+     ([?\C-f] . [right])
+     ([?\M-f] . [C-right])
+     ([?\C-p] . [up])
+     ([?\C-n] . [down])
+     ([?\C-a] . [home])
+     ([?\C-e] . [end])
+     ([?\M-v] . [prior])
+     ([?\C-v] . [next])
+     ([?\C-d] . [delete])
+     ([?\C-k] . [S-end delete])
+     ;; cut/paste.
+     ([?\C-w] . [?\C-x])  ;; Cut
+     ([?\M-w] . [?\C-c])  ;; copy
+     ([?\C-y] . [?\C-v])  ;; paste
+     ;; search
+     ([?\C-s] . (?\C-f))))
+  (message "es/keyboard-setup")
 
   ;; setup alt-tab
   (exwm-input-set-key (kbd "<M-tab>") 'timed-iflipb-next-buffer)
@@ -532,6 +604,8 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
   (exwm-input-set-key (kbd "s-t") 'es/app-terminal)
   (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
   (exwm-input-set-key (kbd "s-e") 'treemacs)
+  (exwm-input-set-key (kbd "s-r") 'exwm-reset)
+
   ;; window move
   (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
   (exwm-input-set-key (kbd "s-<down>") 'windmove-down)
@@ -571,28 +645,27 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
                        (interactive (list (read-shell-command "$ ")))
                        (start-process-shell-command command nil command)))))
 
-  (require 'exwm-systemtray)
-  (exwm-systemtray-enable)
+  (use-package exwm-systemtray
+    :pin gnu
+    :demand t
+    :functions exwm-systemtray-enable
+    :init
+    (exwm-systemtray-enable))
 
-  (require 'exwm-randr)
-  ;; Per host setup
-  (setq exwm-randr-workspace-output-plist '(1 "eDP-1"))
-  (setq exwm-workspace-show-all-buffers t)
-  (setq exwm-layout-show-all-buffers t)
+  (use-package exwm-randr
+    :pin gnu
+    :demand t
+    :functions exwm-randr-enable
+    :init
+    (exwm-randr-enable))
 
-  (when (string= system-name "faraz-dfn-x1")
-    (progn
-      (setq exwm-randr-workspace-output-plist '(3 "HDMI-1" 2 "DP-1" 1 "eDP-1"))
-      (add-hook 'exwm-randr-screen-change-hook
-      (lambda ()
-        (start-process-shell-command
-         "xrandr" nil "xrandr --output HDMI-2 --output eDP-1 --auto")))))
-  (exwm-randr-enable)
+  ;; start the emacs x'window manager.
   (exwm-enable)
 
   ;; workaround to refresh screen size
   (exwm-workspace-delete)
   (exwm-workspace-add)
+  :init
   (message "es/use-package/exwm"))
 
 (use-package ag
@@ -604,12 +677,6 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
 ;; magit on ssh-protected git repos
 (use-package ssh-agency
   :ensure t)
-
-(use-package general
-  :init
-  (defalias 'gsetq #'general-setq)
-  (defalias 'gsetq-local #'general-setq-local)
-  (defalias 'gsetq-default #'general-setq-default))
 
 (use-package flx :ensure t)
 
@@ -624,25 +691,7 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
   :ensure t
   :diminish (ivy-mode)
   :bind (("C-x b" . ivy-switch-buffer)
-         ("s-b" . 'ivy-switch-buffer)
-          ;; splits
-         ("s-\\" . 'split-window-horizontally-and-follow)
-         ("s-]" . 'split-window-vertically-and-follow)
-         ("s-<backspace>" . 'delete-window)
-         ("s-[" . 'delete-other-windows)
-         ("s-u" . 'winner-undo)
-
-         ;; windmove keys
-         ("M-<left>" . 'windmove-left)
-         ("M-<right>" .'windmove-right)
-         ("M-<up>" .  'windmove-up)
-         ("M-<down>" . 'windmove-down)
-
-         ("C-<left>". backward-word)
-         ("C-<right>". forward-word)
-         ("C-<up>". backward-paragraph)
-         ("C-<down>" . forward-paragraph)
-         ("<find>" . beginning-of-line))
+         ("s-b" . 'ivy-switch-buffer))
   :config
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
@@ -652,6 +701,7 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
   (setq ivy-re-builders-alist
         '((swiper . ivy--regex)
           (t      . ivy--regex-plus))))
+
 
 (use-package ivy-hydra)
 
@@ -756,7 +806,7 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
 
 
 (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
-                            :hint nil)
+                                      :hint nil)
   "
 Git gutter:
   _j_: next hunk        _s_tage hunk     _q_uit
@@ -765,23 +815,22 @@ Git gutter:
   _h_: first hunk
   _l_: last hunk        set start _R_evision
 "
-  ("j" git-gutter:next-hunk)
-  ("k" git-gutter:previous-hunk)
-  ("h" (progn (goto-char (point-min))
-              (git-gutter:next-hunk 1)))
-  ("l" (progn (goto-char (point-min))
-              (git-gutter:previous-hunk 1)))
-  ("s" git-gutter:stage-hunk)
-  ("r" git-gutter:revert-hunk)
-  ("p" git-gutter:popup-hunk)
-  ("R" git-gutter:set-start-revision)
-  ("q" nil :color blue)
-  ("Q" (progn (git-gutter-mode -1)
-              ;; git-gutter-fringe doesn't seem to
-              ;; clear the markup right away
-              (sit-for 0.1)
-              (git-gutter:clear))
-       :color blue))
+  (("j" git-gutter:next-hunk)
+   ("k" git-gutter:previous-hunk)
+   ("h" (progn (goto-char (point-min))
+               (git-gutter:next-hunk 1)))
+   ("l" (progn (goto-char (point-min))
+               (git-gutter:previous-hunk 1)))
+   ("s" git-gutter:stage-hunk)
+   ("r" git-gutter:revert-hunk)
+   ("p" git-gutter:popup-hunk)
+   ("R" git-gutter:set-start-revision)
+   ("q" nil :color blue)
+   ("Q" (progn (git-gutter-mode -1)
+               ;; git-gutter-fringe doesn't seem to
+               ;; clear the markup right away
+               (sit-for 0.1))
+    :color blue)))
 
 (use-package magit
   :ensure t
@@ -795,25 +844,26 @@ Git gutter:
     (define-key magit-status-mode-map (kbd "<M-tab>") nil))
   (with-eval-after-load 'magit-diff
     (define-key magit-diff-mode-map (kbd "<M-tab>") nil))
-  (setq magit-auto-revert-mode nil
-        magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C"))
-        magit-diff-refine-hunk t
-        magit-expand-staged-on-commit (quote full)
-        magit-fetch-arguments (quote ("--prune"))
-        magit-log-auto-more t
-        magit-log-cutoff-length 20
-        magit-no-confirm (quote (stage-all-changes unstage-all-changes))
-        magit-process-connection-type nil
-        magit-push-always-verify nil
-        magit-push-arguments (quote ("--set-upstream"))
-        magit-refresh-file-buffer-hook nil
-        magit-save-some-buffers nil
-        magit-set-upstream-on-push (quote askifnotset)
-        magit-stage-all-confirm nil
-        magit-status-verbose-untracked nil
-        magit-unstage-all-confirm nil
-        magithub-message-confirm-cancellation nil
-        magithub-use-ssl t))
+  :custom
+  ((magit-auto-revert-mode nil)
+   (magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")))
+   (magit-diff-refine-hunk t)
+   (magit-expand-staged-on-commit (quote full))
+   (magit-fetch-arguments (quote ("--prune")))
+   (magit-log-auto-more t)
+   (magit-log-cutoff-length 20)
+   (magit-no-confirm (quote (stage-all-changes unstage-all-changes)))
+   (magit-process-connection-type nil)
+   (magit-push-always-verify nil)
+   (magit-push-arguments (quote ("--set-upstream")))
+   (magit-refresh-file-buffer-hook nil)
+   (magit-save-some-buffers nil)
+   (magit-set-upstream-on-push (quote askifnotset))
+   (magit-stage-all-confirm nil)
+   (magit-status-verbose-untracked nil)
+   (magit-unstage-all-confirm nil)
+   (magithub-message-confirm-cancellation nil)
+   (magithub-use-ssl t)))
 
 ;; persistent-scratch
 (use-package persistent-scratch
@@ -831,18 +881,17 @@ Git gutter:
 (use-package function-args
   :config
   (fa-config-default))
-
-(defun lsp-clear-session-blacklist()
-  "Clear the list of blacklisted folders."
-  (interactive)
-  (setf (lsp-session-folders-blacklist (lsp-session)) nil)
-  (lsp--persist-session (lsp-session)))
-
 (use-package lsp-mode
   :ensure t
   :commands lsp
+  :functions lsp-session lsp--persist-session
+  :config
+  (defun lsp-clear-session-blacklist()
+    "Clear the list of blacklisted folders."
+    (interactive)
+    (setf (lsp-session-folders-blacklist (lsp-session)) nil)
+    (lsp--persist-session (lsp-session)))
   :custom
-
   (lsp-auto-guess-root nil)
   (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
   :bind (:map lsp-mode-map
@@ -902,24 +951,24 @@ Git gutter:
  [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
  [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature       [_c_] clear blacklist
  [_e_] descirbe ession"
-  ("d" lsp-find-declaration)
-  ("D" lsp-ui-peek-find-definitions)
-  ("R" lsp-ui-peek-find-references)
-  ("i" lsp-ui-peek-find-implementation)
-  ("t" lsp-find-type-definition)
-  ("s" lsp-signature-help)
-  ("o" lsp-describe-thing-at-point)
-  ("r" lsp-rename)
-  ("e" lsp-describe-session)
-  ("c" lsp-clear-session-blacklist)
+  (("d" lsp-find-declaration)
+   ("D" lsp-ui-peek-find-definitions)
+   ("R" lsp-ui-peek-find-references)
+   ("i" lsp-ui-peek-find-implementation)
+   ("t" lsp-find-type-definition)
+   ("s" lsp-signature-help)
+   ("o" lsp-describe-thing-at-point)
+   ("r" lsp-rename)
+   ("e" lsp-describe-session)
+   ("c" lsp-clear-session-blacklist)
 
-  ("f" lsp-format-buffer)
-  ("m" lsp-ui-imenu)
-  ("x" lsp-execute-code-action)
+   ("f" lsp-format-buffer)
+   ("m" lsp-ui-imenu)
+   ("x" lsp-execute-code-action)
 
-  ("M-s" lsp-describe-session)
-  ("M-r" lsp-restart-workspace)
-  ("S" lsp-shutdown-workspace))
+   ("M-s" lsp-describe-session)
+   ("M-r" lsp-workspace-restart)
+   ("S" lsp-workspace-shutdown)))
 
 (use-package unicode-fonts :if window-system :ensure t)
 (use-package all-the-icons-dired :if window-system :ensure t)
@@ -940,33 +989,38 @@ Git gutter:
   (use-package fancy-battery :ensure t
     :config
     (setq fancy-battery-show-percentage t)
-    (fancy-battery-mode))
-  (use-package spaceline-config
-    :config
-    (spaceline-toggle-minor-modes-off)
-    (spaceline-toggle-buffer-encoding-off)
-    (spaceline-toggle-buffer-encoding-abbrev-off)
-    (setq powerline-default-separator 'slant)
-    ;;(setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
-    (spaceline-define-segment line-column
-      "The current line and column numbers."
-      "l:%l c:%2c")
-    (spaceline-define-segment time
-      "The current time."
-      (format-time-string "%H:%M"))
-    (spaceline-define-segment date
-      "The current date."
-      (format-time-string "%h %d"))
-    (spaceline-toggle-time-on)
-    (spaceline-emacs-theme 'date 'time)))
+    (fancy-battery-mode)))
 
+(use-package spaceline-config
+  :ensure spaceline
+  :functions
+  spaceline-toggle-minor-modes-off
+  spaceline-toggle-buffer-encoding-off
+  spaceline-toggle-buffer-encoding-abbrev-off
+  spaceline-toggle-time-on
+  :config
+  (spaceline-toggle-minor-modes-off)
+  (spaceline-toggle-buffer-encoding-off)
+  (spaceline-toggle-buffer-encoding-abbrev-off)
+  (setq powerline-default-separator 'slant)
+  ;;(setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+  (spaceline-define-segment line-column
+    "The current line and column numbers."
+    "l:%l c:%2c")
+  (spaceline-define-segment time
+    "The current time."
+    (format-time-string "%H:%M"))
+  (spaceline-define-segment date
+    "The current date."
+    (format-time-string "%h %d"))
+  (spaceline-toggle-time-on)
+  (spaceline-emacs-theme 'date 'time))
 
 (use-package auto-complete :ensure t)
 (use-package auto-complete-config
   :disabled
   :requires auto-complete
-  :ensure t
-  )
+  :ensure t)
 
 (use-package company :ensure t
   :config
@@ -981,7 +1035,8 @@ Git gutter:
   :commands company-lsp
   :config
   (push 'company-lsp company-backends)
-  (setq company-lsp-cache-cadidates 'auto))
+  :custom
+  (company-lsp-cache-cadidates 'auto))
 
 ;; Python
 (use-package elpy
@@ -993,11 +1048,12 @@ Git gutter:
   (add-hook 'elpy-mode-hook 'flycheck-mode)
   :config
   (message "es/use-package-elpy")
-  (setq elpy-rpc-python-command "python3"
-        elpy-rpc-backend "jedi"
-        jedi:setup-keys t                      ; optional
-        jedi:complete-on-dot t
-        python-python-command "/usr/bin/ipython"))
+  :custom
+  ((elpy-rpc-python-command "python3")
+   (elpy-rpc-backend "jedi")
+   (jedi:setup-keys t)                      ; optional
+   (jedi:complete-on-dot t)
+   (python-python-command "/usr/bin/ipython")))
 
 ;; enable autopep8 formatting on save
 (use-package py-autopep8
@@ -1021,8 +1077,64 @@ Git gutter:
 (use-package ggtags :ensure t  :diminish)
 (use-package company-c-headers :ensure t :diminish)
 
-(message "es/packages-loaded")
-;; GO Lang
+
+;; Some custom configuration to ediff
+(use-package ediff
+  :ensure t
+  :functions
+  ediff-janitor ediff-cleanup-mess
+  :custom
+  ((ediff-split-window-function 'split-window-horizontally)
+   (ediff-window-setup-function 'ediff-setup-windows-plain)
+   (ediff-keep-variants nil))
+  :config
+
+  (defvar my-ediff-bwin-config nil "Window configuration before ediff.")
+  (defcustom my-ediff-bwin-reg ?b
+    "*Register to be set up to hold `my-ediff-bwin-config' configuration."
+    :type 'integer ;; supress linter
+    :group 'ediff)
+  (defvar my-ediff-bwin-reg)
+
+  (defvar my-ediff-awin-config nil "Window configuration after ediff.")
+  (defcustom my-ediff-awin-reg ?e
+    "*Register to be used to hold `my-ediff-awin-config' window configuration."
+    :type 'integer    ;; supress linter
+    :group 'ediff)
+  (defvar my-ediff-awin-reg)
+
+  (defun my-ediff-bsh ()
+    "Function to be called before any buffers or window setup for ediff."
+    (setq my-ediff-bwin-config (current-window-configuration))
+    (when (characterp my-ediff-bwin-reg)
+      (set-register my-ediff-bwin-reg
+                    (list my-ediff-bwin-config (point-marker)))))
+
+  (defun my-ediff-ash ()
+    "Function to be called after buffers and window setup for ediff."
+    (setq my-ediff-awin-config (current-window-configuration))
+    (when (characterp my-ediff-awin-reg)
+      (set-register my-ediff-awin-reg
+                    (list my-ediff-awin-config (point-marker)))))
+
+  (defun my-ediff-qh ()
+    "Function to be called when ediff quits."
+    (ediff-janitor nil nil)
+    (ediff-cleanup-mess)
+    (when my-ediff-bwin-config
+      (set-window-configuration my-ediff-bwin-config)))
+
+  ;; FRZ: TODO hooks cannot be placed in :hook section
+  (add-hook 'ediff-before-setup-hook 'my-ediff-bsh)
+  (add-hook 'ediff-after-setup-windows-hook 'my-ediff-ash 'append)
+  (add-hook 'ediff-quit-hook 'my-ediff-qh)
+  (message "es/workarounds"))
+
+
+
+
+(message "!!es/packages-loaded!!")
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1057,21 +1169,22 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
+ '(lsp-ui-doc-border "black" t)
+ '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position (quote bottom))
- '(lsp-ui-sideline-enable t)
- '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-doc-header t t)
+ '(lsp-ui-doc-include-signature t t)
+ '(lsp-ui-doc-position (quote bottom) t)
+ '(lsp-ui-sideline-enable t t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t)
+ '(lsp-ui-sideline-show-code-actions t t)
  '(lsp-ui-sideline-update-mode (quote line))
+ '(message-send-mail-function (quote smtpmail-send-it))
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (rg ripgrep lsp-ivy eglot persistent-scratch flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (spaceline-config golden-ratio rg ripgrep lsp-ivy eglot persistent-scratch flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
@@ -1092,9 +1205,15 @@ Git gutter:
  '(savehist-mode 1)
  '(scroll-step 1)
  '(select-enable-clipboard t)
+ '(send-mail-function (quote smtpmail-send-it))
  '(set-fill-column 80)
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
+ '(smtpmail-auth-credentials (quote (("smtp.gmail.com" 587 "faraz@email.com" nil))))
+ '(smtpmail-default-smtp-server "smtp.gmail.com")
+ '(smtpmail-smtp-server "smtp.gmail.com")
+ '(smtpmail-smtp-service 587)
+ '(smtpmail-starttls-credentials (quote (("smtp.gmail.com" 587 nil nil))))
  '(speedbar-default-position (quote left))
  '(standard-indent 3)
  '(transient-mark-mode t)
@@ -1123,7 +1242,7 @@ Git gutter:
 ;;Workarounds;;
 ;;;;;;;;;;;;;;;
 (defun exwm-workspace-ui()
-  (interactive)
+  "Workspace UI for exwm."
   (easy-menu-define exwm-workspace-menu nil
     "Menu for Exwm Workspace.
 Also used in `exwm-mode-line-workspace-map'."
@@ -1154,6 +1273,7 @@ Also used in `exwm-mode-line-workspace-map'."
       map)
     "Local keymap for EXWM mode line string.  See `exwm-mode-line-format'.")
 
+  (defvar exwm-mode-line-format)
   (defcustom exwm-mode-line-format
     `("["
       (:propertize (:eval (format "WS-%d" exwm-workspace-current-index))
@@ -1165,7 +1285,8 @@ mouse-2: EXWM Workspace menu.
 ")
       "]")
     "EXWM workspace in the mode line."
-    :type 'sexp)
+    :type 'sexp
+    :group 'exwm)
   (add-to-list 'mode-line-misc-info exwm-mode-line-format t))
 (exwm-workspace-ui)
 
@@ -1216,63 +1337,6 @@ mouse-2: EXWM Workspace menu.
       (setq term-buffer-maximum-size 0)
       (setq-default show-trailing-whitespace f)
       ))
-
-
-;; Some custom configuration to ediff
-(setq ediff-split-window-function 'split-window-horizontally)
-(setq ediff-window-setup-function 'ediff-setup-windows-plain)
-(setq ediff-keep-variants nil)
-
-(defvar my-ediff-bwin-config nil "Window configuration before ediff.")
-(defcustom my-ediff-bwin-reg ?b
-  "*Register to be set up to hold `my-ediff-bwin-config'
-    configuration.")
-
-(defvar my-ediff-awin-config nil "Window configuration after ediff.")
-(defcustom my-ediff-awin-reg ?e
-  "*Register to be used to hold `my-ediff-awin-config' window
-    configuration.")
-
-(defun my-ediff-bsh ()
-  "Function to be called before any buffers or window setup for
-    ediff."
-  (setq my-ediff-bwin-config (current-window-configuration))
-  (when (characterp my-ediff-bwin-reg)
-    (set-register my-ediff-bwin-reg
-                  (list my-ediff-bwin-config (point-marker)))))
-
-(defun my-ediff-ash ()
-  "Function to be called after buffers and window setup for ediff."
-  (setq my-ediff-awin-config (current-window-configuration))
-  (when (characterp my-ediff-awin-reg)
-    (set-register my-ediff-awin-reg
-                  (list my-ediff-awin-config (point-marker)))))
-
-(defun my-ediff-qh ()
-  "Function to be called when ediff quits."
-  (ediff-janitor nil nil)
-  (ediff-cleanup-mess)
-  (when my-ediff-bwin-config
-    (set-window-configuration my-ediff-bwin-config)))
-
-(add-hook 'ediff-before-setup-hook 'my-ediff-bsh)
-(add-hook 'ediff-after-setup-windows-hook 'my-ediff-ash 'append)
-(add-hook 'ediff-quit-hook 'my-ediff-qh)
-
-(defun split-window-horizontally-and-follow()
-  "Focus follows the newly created window."
-  (interactive)
-  (split-window-horizontally)
-  (other-window 1))
-
-(defun split-window-vertically-and-follow()
-  "Focus follows the newly created window."
-  (interactive)
-  (split-window-vertically)
-  (other-window 1))
-
-
-(message "es/workarounds")
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1344,33 +1408,15 @@ mouse-2: EXWM Workspace menu.
 (message "es/helper-utilities")
 
 
-
-;;;;;;;;;;;;;;;;;;;
-;; Emacs email   ;;
-;;;;;;;;;;;;;;;;;;;
-;; Tools
-(setq smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil))
-      smtpmail-smtp-server "smtp.gmail.com"
-      smtpmail-default-smtp-server "smtp.gmail.com"
-      send-mail-function 'smtpmail-send-it
-      message-send-mail-function 'smtpmail-send-it
-      smtpmail-smtp-service 587
-      smtpmail-auth-credentials '(("smtp.gmail.com"
-                                   587
-                                   "faraz@email.com"
-                                   nil)))
-(message "es/email")
-
-
 ;;;;;;;;;;;;;
 ;; GO LANG ;;
 ;;;;;;;;;;;;;
 (require 'go-autocomplete)
 (require 'auto-complete-config)
-(defconst _goroot "/home/farazl/excubito_workspace/scratch/go/golang/go"  "Go toolchain root.")
+(defconst es/_goroot "/home/farazl/excubito_workspace/scratch/go/golang/go"  "Go toolchain root.")
 (defun ac-go-mode-setup()
   "Auto complete setup for go."
-  ;;(setenv "PATH" (concat (getenv "PATH") ":" (concat _goroot "/bin")))
+  ;;(setenv "PATH" (concat (getenv "PATH") ":" (concat es/_goroot "/bin")))
   (local-set-key (kbd "M-.") 'godef-jump)
 )
 
@@ -1393,6 +1439,7 @@ mouse-2: EXWM Workspace menu.
 (require 'company)
 (require 'company-tern)
 (defun js2-mode-setup()
+  "Setup Tern mode for javascript."
   (tern-mode)
   (company-mode)
   (add-to-list 'company-backends 'company-tern)
@@ -1445,7 +1492,8 @@ mouse-2: EXWM Workspace menu.
 
 ;; Application invocations
 (defun find-named-buffer(buffPrefix)
-  (interactive)
+  "Find a named buffer BUFFPREFIX."
+  (defvar named-buffer)
   (setq named-buffer nil)
   (cl-loop for buf in (buffer-list)  do
            (when (string-prefix-p buffPrefix (buffer-name buf))
@@ -1460,82 +1508,101 @@ mouse-2: EXWM Workspace menu.
 
 
 (defun es/app-netflix()
+  "Start Netflix."
   (interactive)
-  (setq browser-binary "/usr/bin/google-chrome")
-  (setq browser-invocation (concat browser-binary))
-  (setq browser-invocation (concat browser-invocation "  --app=http://netflix.com"))
+  (defvar es/browser-bufname)
+  (defvar es/browser-binary)
+  (defvar es/browser-invocation)
+
+  (setq es/browser-binary "/usr/bin/google-chrome")
+  (setq es/browser-invocation (concat es/browser-binary))
+  (setq es/browser-invocation (concat es/browser-invocation "  --app=http://netflix.com"))
   (message "Opening Web browser")
   (start-process-shell-command
-   browser-binary nil  browser-invocation))
+   es/browser-binary nil  es/browser-invocation))
 
 (defun es/volumeset()
   "Workaround for low sound an X1, allow you set the volume to more that 100%."
   (interactive)
-  (setq pulse-cmd-binary "/usr/bin/pactl")
+  (defvar es/pulse-cmd-binary)
+  (setq es/pulse-cmd-binary "/usr/bin/pactl")
   (start-process-shell-command
-   pulse-cmd-binary nil "/usr/bin/pactl list | grep -oP \'Sink #\K([0-9]+)\' | while read -r i ; /usr/bin/pactl -- set-sink-volume $i 200"))
+   es/pulse-cmd-binary nil "/usr/bin/pactl list | grep -oP \'Sink #\K([0-9]+)\' | while read -r i ; /usr/bin/pactl -- set-sink-volume $i 200"))
 
 (defun es/app-browser()
   "Find existing or open a new browser window."
   (interactive)
-  (setq browser-bufname "Google-chrome")
-  (setq browser-binary "/usr/bin/google-chrome")
-  (setq browser-invocation (concat browser-binary))
+  (defvar es/browser-bufname)
+  (defvar es/browser-binary)
+  (defvar es/browser-invocation)
+  (setq es/browser-bufname "Google-chrome")
+  (setq es/browser-binary "/usr/bin/google-chrome")
+  (setq es/browser-invocation (concat es/browser-binary))
 
-  (setq browser (find-named-buffer browser-bufname))
-  (if (eq browser nil)
+  (defvar es/browser)
+  (setq es/browser (find-named-buffer es/browser-bufname))
+  (if (eq es/browser nil)
       (progn
         (message "Opening Web browser")
         (start-process-shell-command
-         browser-binary nil  browser-invocation))
+         es/browser-binary nil  es/browser-invocation))
     (progn
       (message "Web browser")
-      (switch-to-buffer browser))
+      (switch-to-buffer es/browser))
     ))
-
 
 (defun es/app-terminal()
   "Find existing or open a new terminal window."
   (interactive)
-  (setq term-bufname "Gnome-terminal")
-  (setq terminal (find-named-buffer term-bufname))
-  (if (eq terminal nil)
+  (defvar es/terminal)
+  (defvar es/termbufname)
+  (setq es/termbufname "Gnome-terminal")
+  (setq es/terminal (find-named-buffer es/termbufname))
+  (if (eq es/terminal nil)
       (progn
         (message "Opening terminal")
         (es/app-terminal-new))
     (progn
       (message "terminal")
-      (switch-to-buffer terminal))
+      (switch-to-buffer es/terminal))
     ))
 
 (defun es/app-splash()
+  "EOS Splash screen."
   (interactive)
-  (setq term-bufname "feh")
-  (setq term-binary "feh")
-  (setq term-invocation (concat term-binary
-                                " ~/wallpaper.jpg"
-                                ))
-
-  (setq terminal (find-named-buffer term-bufname))
-  (if (eq terminal nil)
+  (defvar es/splashbufname)
+  (setq es/splashbufname "feh")
+  (defvar es/splash)
+  (setq es/splash (find-named-buffer es/splashbufname))
+  (if (eq es/splash nil)
       (progn
-        (message "Opening terminal")
+        (defvar es/splashbinary)
+        (defvar es/splashinvocation)
+        (setq es/splashbinary "feh")
+        (setq es/splashinvocation (concat es/splashbinary
+                                      " ~/acme.png"
+                                      ))
+        (message "Opening splash")
         (start-process-shell-command
-         term-binary nil term-invocation))
+         es/splashbinary nil es/splashinvocation))
     (progn
-      (message "terminal")
-      (switch-to-buffer terminal))
+      (message "splash")
+      (switch-to-buffer es/splash))
     ))
 
 (defun es/app-terminal-new()
+  "Start a new terminal."
   (interactive)
-  (setq term-bufname "Gnome-terminal")
-  (setq term-binary "/usr/bin/gnome-terminal")
-  (setq term-invocation term-binary)
+  (defvar es/term-bufname)
+  (defvar es/term-binary)
+  (defvar es/term-invocation)
+  (setq es/term-bufname "Gnome-terminal")
+  (setq es/term-binary "/usr/bin/gnome-terminal")
+  (setq es/term-invocation es/term-binary)
   (progn
     (message "Opening terminal")
     (start-process-shell-command
-     term-binary nil term-invocation))
+     es/term-binary nil es/term-invocation))
   )
 
 (defun es/lock-screen()
@@ -1549,28 +1616,31 @@ mouse-2: EXWM Workspace menu.
 (defun es/monitor-monitor-move-left()
   "Move primary monitor to left."
   (interactive)
-  (setq commandMoveLeft
+  (defvar es/commandMoveLeft)
+  (setq es/commandMoveLeft
         "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --left-of /;s/^/xrandr --output /'`")
-  (shell-command commandMoveLeft))
+  (shell-command es/commandMoveLeft))
 
 (defun es/monitor-move-right()
   "Move primary monitor to right."
   (interactive)
-  (setq commandMoveRight
+  (defvar es/commandMoveRight)
+  (setq es/commandMoveRight
         "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --right-of /;s/^/xrandr --output /'`")
-  (shell-command commandMoveRight))
+  (shell-command es/commandMoveRight))
 
 ;; Scale/Descale gdm
 (defun es/gdm-set-scale(scale-factor)
   "Set gnome desktop scaling factor to SCALE-FACTOR."
   (interactive "scale-factor: ")
-  (setq gsettings-binary "/usr/bin/gsettings")
-  (setq gsettings-invocation
-        (concat gsettings-binary  " set org.gnome.desktop.interface text-scaling-factor "  scale-factor))
-  (message gsettings-invocation)
+  (defvar es/gsettings-binary)
+  (defvar es/gsettings-invocation)
+  (setq es/gsettings-binary "/usr/bin/gsettings")
+  (setq es/gsettings-invocation
+        (concat es/gsettings-binary  " set org.gnome.desktop.interface text-scaling-factor "  scale-factor))
+  (message es/gsettings-invocation)
   (start-process-shell-command
-   gsettings-binary nil gsettings-invocation)
-  )
+   es/gsettings-binary nil es/gsettings-invocation))
 
 (defun es/gdm-tweaks()
   "Open gnome tweaks."
@@ -1580,7 +1650,11 @@ mouse-2: EXWM Workspace menu.
 
 
 (defun es/ssh(hostName)
+  "SSH to a host HOSTNAME."
   (interactive "suserName@Host:")
+  (defvar ssh-bufname)
+  (defvar ssh-binary)
+  (defvar ssh-invocation)
   (setq ssh-bufname "XTerm")
   (setq ssh-binary "/usr/bin/xterm")
   (setq ssh-invocation (concat ssh-binary
@@ -1592,12 +1666,13 @@ mouse-2: EXWM Workspace menu.
 
 
 (defun es/workspace-setup()
+  "Setups a sample EOS workspace."
   (interactive)
   ;; setup workspaces in addition to the 0th workspace
   (exwm-workspace-add)
   (start-process-shell-command "" nil "/usr/bin/slack")
   (exwm-workspace-add)
-  (es/browser)
+  (es/app-browser)
   (exwm-workspace-add)
   (es/app-terminal)
   (exwm-workspace-add))
@@ -1653,39 +1728,6 @@ mouse-2: EXWM Workspace menu.
   (or (and window-system (read-kbd-macro desc))
       (or (cdr (assoc desc real-keyboard-keys))
           (read-kbd-macro desc))))
-
-
-;; To add a key binding only available in line-mode, simply define it in
-;; `exwm-mode-map'.  The following example shortens 'C-c q' to 'C-q'.
-;; (define-key exwm-mode-map [?\C-q] #'exwm-input-send-next-key)
-
-;; The following example demonstrates how to use simulation keys to mimic
-;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
-;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
-;; and DEST is what EXWM actually sends to application.  Note that both SRC
-;; and DEST should be key sequences (vector or string).
-(setq exwm-input-simulation-keys
-      '(
-        ;; movement
-        ([?\C-b] . [left])
-        ([?\M-b] . [C-left])
-        ([?\C-f] . [right])
-        ([?\M-f] . [C-right])
-        ([?\C-p] . [up])
-        ([?\C-n] . [down])
-        ([?\C-a] . [home])
-        ([?\C-e] . [end])
-        ([?\M-v] . [prior])
-        ([?\C-v] . [next])
-        ([?\C-d] . [delete])
-        ([?\C-k] . [S-end delete])
-        ;; cut/paste.
-        ([?\C-w] . [?\C-x])
-        ([?\M-w] . [?\C-c])
-        ([?\C-y] . [?\C-v])
-        ;; search
-        ([?\C-s] . (?\C-f))))
-(message "es/keyboard-setup")
 
 
 ;; HELP DOCUMENTATION AND OTHER STUFF
