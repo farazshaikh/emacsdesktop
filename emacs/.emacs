@@ -24,6 +24,11 @@
 (scroll-bar-mode -1)
 (fringe-mode 1)
 
+;; Make startup faster by reducing the frequency of garbage
+;; collection.  The default is 800 kilobytes.  Measured in bytes.
+;; Following setting saves 0.2 seconds an brings startup times down to 1.1sec
+(setq gc-cons-threshold (* 250 1000 1000))
+
 (defun es/check-version()
   "Check that Emacs version is at the least supported version."
   (if (version< emacs-version  "24.4")
@@ -172,6 +177,18 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package Setup     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
+
+(use-package auto-package-update
+  :disabled
+  :defines auto-package-update-delete-old-versions auto-package-update-hide-results
+  :config
+  (auto-package-update-delete-old-versions t)
+  (auto-package-update-hide-results t)
+  (auto-package-update-maybe))
+
+
 (use-package kaolin-themes
   :disabled
   :ensure t
@@ -518,7 +535,7 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
        (getenv "EOS_DESKTOP"))
   :ensure windmove
   :pin gnu
-  :functions exwm-workspace-rename-buffer
+  :functions exwm-workspace-rename-buffer exwm-systemtray-enable exwm-randr-enable
   :hook
   (('exwm-update-class .
                        (lambda ()
@@ -550,11 +567,14 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
   ;; Map workspace 0 to the primary monitor. i.e. the attached monitor.
   ;; This is because the system tray is attached to the main workspace.
   ;; DP-1 HDMI-1 are usually the attached monitors.
+  ;;
+  ;; XXX: A simpler display/workspace mapping policy is to have the
+  ;; highest/lowest resolution display host workspace 0
   (defvar exwm-randr-workspace-monitor-plist)
   (setq exwm-randr-workspace-monitor-plist '(0 "DP-1" 0 "HDMI-1"))
   (when (string= (system-name) "faraz-dfn-x1")
     (progn
-      (setq exwm-randr-workspace-monitor-plist '(1 "eDP-1" 0 "DP-1" 0 "HDMI-1"))
+      (setq exwm-randr-workspace-monitor-plist '(1 "eDP-1" 2 "DP-1" 0 "HDMI-1"))
       (add-hook 'exwm-randr-screen-change-hook
       (lambda ()
         (start-process-shell-command
@@ -645,19 +665,11 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
                        (interactive (list (read-shell-command "$ ")))
                        (start-process-shell-command command nil command)))))
 
-  (use-package exwm-systemtray
-    :pin gnu
-    :demand t
-    :functions exwm-systemtray-enable
-    :init
-    (exwm-systemtray-enable))
+  (require 'exwm-systemtray)
+  (exwm-systemtray-enable)
 
-  (use-package exwm-randr
-    :pin gnu
-    :demand t
-    :functions exwm-randr-enable
-    :init
-    (exwm-randr-enable))
+  (require 'exwm-randr)
+  (exwm-randr-enable)
 
   ;; start the emacs x'window manager.
   (exwm-enable)
@@ -683,7 +695,12 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
 (use-package counsel
   :ensure t
   :bind
-  (("M-y" . counsel-yank-pop)
+  (("M-x" . counsel-M-x)
+   ("s-x" . counsel-M-x)
+   ("C-x C-f" . counsel-find-file)
+   ("C-x C-j" . counsel-fzf)
+   ("s-d" . counsel-linux-app)
+   ("M-y" . counsel-yank-pop)
    :map ivy-minibuffer-map
    ("M-y" . ivy-next-line)))
 
@@ -692,15 +709,16 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
   :diminish (ivy-mode)
   :bind (("C-x b" . ivy-switch-buffer)
          ("s-b" . 'ivy-switch-buffer))
+  :custom
+  (ivy-use-virtual-buffers t)
+  (ivy-count-format "%d/%d ")
+  (ivy-display-style 'fancy)
+  (ivy-wrap t)
+  (ivy-re-builders-alist
+   '((swiper . ivy--regex)
+     (t      . ivy--regex-plus)))
   :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (setq ivy-count-format "%d/%d ")
-  (setq ivy-display-style 'fancy)
-  (setq ivy-wrap t)
-  (setq ivy-re-builders-alist
-        '((swiper . ivy--regex)
-          (t      . ivy--regex-plus))))
+  (ivy-mode 1))
 
 
 (use-package ivy-hydra)
@@ -718,25 +736,18 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
                           (counsel-describe-function . "^")
                           (counsel-describe-variable . "^"))))
 
-
 (use-package swiper
   :ensure t
   :bind (("C-s" . swiper-isearch)
 	 ("C-r" . swiper-isearch)
-	 ("C-c C-r" . ivy-resume)
-	 ("M-x" . counsel-M-x)
-         ("s-x" . counsel-M-x)
-	 ("C-x C-f" . counsel-find-file)
-         ("C-x C-j" . counsel-fzf)
-         ("s-d" . counsel-linux-app))
+	 ("C-c C-r" . ivy-resume))
   :hook (window-setup . ivy-fix)
+  :custom
+  ((ivy-use-virtual-buffers t)
+   (ivy-display-style 'fancy))
   :config
-  (progn
-    (ivy-mode 1)
-    (setq ivy-use-virtual-buffers t)
-    (setq ivy-display-style 'fancy)
-    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
-    ))
+  (ivy-mode 1)
+  (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
 
 (use-package ivy-posframe
   :ensure t
@@ -902,7 +913,6 @@ Git gutter:
 
 (use-package lsp-ui
   :ensure t
-  :after lsp-mode
   :diminish
   :commands lsp-ui-mode
   :custom-face
@@ -1184,7 +1194,7 @@ Git gutter:
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (spaceline-config golden-ratio rg ripgrep lsp-ivy eglot persistent-scratch flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot persistent-scratch flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
@@ -1846,6 +1856,10 @@ d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
 
 (server-start)
 (message "!!!es/load-complete!!!")
+
+;; Make gc pauses faster by decreasing the threshold.  This works in
+;; conjunction with gc setting set up in the starting of the file
+(setq gc-cons-threshold (* 128 1000 1000))
 
 (provide '.emacs)
 ;;; .emacs ends here
