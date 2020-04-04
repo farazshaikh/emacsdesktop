@@ -431,64 +431,73 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 ;;Setup alt-tab     ;;
 ;;;;;;;;;;;;;;;;;;;;;;
 (use-package iflipb
-  :functions iflipb-next-buffer iflipb-previous-buffer
-  :defines alt-tab-selection-hover-time
   :config
-  (setq alt-tab-selection-hover-time "2 sec")
+  (defvar iflipbTimerObj)
+  (setq iflipbTimerObj nil)
+  (defvar alt-tab-selection-hover-time)
+  (setq alt-tab-selection-hover-time "1 sec")
+
   (defun timed-iflipb-auto-off ()
+    (message ">")
     (setq last-command 'message))
 
+
   (defun timed-iflipb-next-buffer (arg)
-    "Flip to next buffer"
     (interactive "P")
     (iflipb-next-buffer arg)
-    (defvar es/iflipbTimerObj)
-    (when es/iflipbTimerObj
-      (cancel-timer es/iflipbTimerObj)
-      (setq es/iflipbTimerObj nil))
-    (setq es/iflipbTimerObj
-          (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+
+    (when iflipbTimerObj
+      (cancel-timer iflipbTimerObj)
+      (setq iflipbTimerObj nil))
+
+    (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+
 
   (defun timed-iflipb-previous-buffer ()
-    "Flip to previous buffer."
     (interactive)
     (iflipb-previous-buffer)
-    (defvar es/iflipbTimerObj)
-    (when es/iflipbTimerObj
-      (cancel-timer es/iflipbTimerObj)
-      (setq es/iflipbTimerObj nil))
-    (defvar es/iflipbTimerObj)
-    (defvar alt-tab-selection-hover-time)
-    (setq es/iflipbTimerObj ;noflycheck
-          (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+    (when iflipbTimerObj
+      (cancel-timer iflipbTimerObj)
+      (setq iflipbTimerObj nil))
+    (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
 
   (defun iflipb-first-iflipb-buffer-switch-command ()
-    "Determines whether this is the first invocation of
-iflipb-next-buffer or iflipb-previous-buffer this round."
+    "Determines whether this is the first invocation of iflipb-next-buffer or iflipb-previous-buffer this round."
+    ;; (message "FR %s" last-command)
     (not (and (or (eq last-command 'timed-iflipb-next-buffer)
                   (eq last-command 'timed-iflipb-previous-buffer)))))
 
-  ;; in iflip just flip with candidate windows that are not currently
-  ;; being displayed in a window and include the current buffer not
-  ;; doing so can jumble up the entire layout at other windows will
-  ;; swap buffers with current window
+
+  ;; in iflip just flip with candidate windows that are not currently being displayed in a window
+  ;; and include the current buffer
+  ;; not doing so can jumble up the entire layout at other windows will swap buffers with current window
   (defun iflipb-ignore-windowed-buffers(buffer)
+    ;;(message buffer)
     (if
         (or (eq (get-buffer-window buffer "visible") nil)
             (string= (buffer-name) buffer)
             )
-        nil t)
-    )
+        nil t))
 
-  :init
-  (setq iflipb-wrap-around t)
-  (setq iflipb-ignore-buffers 'iflipb-ignore-windowed-buffers)
-  (setq iflipb-always-ignore-buffers "^[ *]")
+  (defun setupIFlipb()
+    "Alt-tab Super-tab for window switch."
+    (interactive)
+    (setq iflipb-wrap-around t)
+    (setq iflipb-ignore-buffers 'iflipb-ignore-windowed-buffers)
+    (setq iflipb-always-ignore-buffers "^[ *]")
+    (global-set-key (kbd "<M-<tab>>") 'timed-iflipb-next-buffer)
+    (global-set-key (kbd "C-M-i") 'timed-iflipb-next-buffer)
+    (global-set-key (kbd "<M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+    (exwm-input-set-key (kbd "M-<tab>") 'timed-iflipb-next-buffer)
+    (exwm-input-set-key (kbd "M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
 
-  :bind (("M-<tab>" .  timed-iflipb-next-buffer)
-         ("M-<iso-lefttab>" .  timed-iflipb-previous-buffer)
-         ("s-<tab>" . timed-iflipb-next-buffer)
-         ("s-<iso-lefttab>" . timed-iflipb-previous-buffer)))
+
+    (global-set-key (kbd "<s-<tab>>") 'timed-iflipb-next-buffer)
+    (global-set-key (kbd "<s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+    (exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
+    (exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer))
+
+  (setupIFlipb))
 (message "es/alt-tab")
 
 
@@ -815,9 +824,8 @@ iflipb-next-buffer or iflipb-previous-buffer this round."
   ("C-c g" . hydra-git-gutter/body))
 
 
-
 (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
-                                      :hint nil)
+                            :hint nil)
   "
 Git gutter:
   _j_: next hunk        _s_tage hunk     _q_uit
@@ -826,22 +834,24 @@ Git gutter:
   _h_: first hunk
   _l_: last hunk        set start _R_evision
 "
-  (("j" git-gutter:next-hunk)
-   ("k" git-gutter:previous-hunk)
-   ("h" (progn (goto-char (point-min))
-               (git-gutter:next-hunk 1)))
-   ("l" (progn (goto-char (point-min))
-               (git-gutter:previous-hunk 1)))
-   ("s" git-gutter:stage-hunk)
-   ("r" git-gutter:revert-hunk)
-   ("p" git-gutter:popup-hunk)
-   ("R" git-gutter:set-start-revision)
-   ("q" nil :color blue)
-   ("Q" (progn (git-gutter-mode -1)
-               ;; git-gutter-fringe doesn't seem to
-               ;; clear the markup right away
-               (sit-for 0.1))
-    :color blue)))
+  ("j" git-gutter:next-hunk)
+  ("k" git-gutter:previous-hunk)
+  ("h" (progn (goto-char (point-min))
+              (git-gutter:next-hunk 1)))
+  ("l" (progn (goto-char (point-min))
+              (git-gutter:previous-hunk 1)))
+  ("s" git-gutter:stage-hunk)
+  ("r" git-gutter:revert-hunk)
+  ("p" git-gutter:popup-hunk)
+  ("R" git-gutter:set-start-revision)
+  ("q" nil :color blue)
+  ("Q" (progn (git-gutter-mode -1)
+              ;; git-gutter-fringe doesn't seem to
+              ;; clear the markup right away
+              (sit-for 0.1)
+              (git-gutter:clear))
+   :color blue))
+
 
 (use-package magit
   :ensure t
@@ -961,24 +971,24 @@ Git gutter:
  [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
  [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature       [_c_] clear blacklist
  [_e_] descirbe ession"
-  (("d" lsp-find-declaration)
-   ("D" lsp-ui-peek-find-definitions)
-   ("R" lsp-ui-peek-find-references)
-   ("i" lsp-ui-peek-find-implementation)
-   ("t" lsp-find-type-definition)
-   ("s" lsp-signature-help)
-   ("o" lsp-describe-thing-at-point)
-   ("r" lsp-rename)
-   ("e" lsp-describe-session)
-   ("c" lsp-clear-session-blacklist)
+  ("d" lsp-find-declaration)
+  ("D" lsp-ui-peek-find-definitions)
+  ("R" lsp-ui-peek-find-references)
+  ("i" lsp-ui-peek-find-implementation)
+  ("t" lsp-find-type-definition)
+  ("s" lsp-signature-help)
+  ("o" lsp-describe-thing-at-point)
+  ("r" lsp-rename)
+  ("e" lsp-describe-session)
+  ("c" lsp-clear-session-blacklist)
 
-   ("f" lsp-format-buffer)
-   ("m" lsp-ui-imenu)
-   ("x" lsp-execute-code-action)
+  ("f" lsp-format-buffer)
+  ("m" lsp-ui-imenu)
+  ("x" lsp-execute-code-action)
 
-   ("M-s" lsp-describe-session)
-   ("M-r" lsp-workspace-restart)
-   ("S" lsp-workspace-shutdown)))
+  ("M-s" lsp-describe-session)
+  ("M-r" lsp-workspace-restart)
+  ("S" lsp-workspace-shutdown))
 
 (use-package unicode-fonts :if window-system :ensure t)
 (use-package all-the-icons-dired :if window-system :ensure t)
@@ -1194,7 +1204,7 @@ Git gutter:
  '(normal-erase-is-backspace-mode 0)
  '(package-selected-packages
    (quote
-    (exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot persistent-scratch flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-gutter git-timemachine magit)))
+    (persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit)))
  '(ring-bell-function
    (lambda nil
      (let
