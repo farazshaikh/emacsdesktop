@@ -188,7 +188,6 @@
   (auto-package-update-hide-results t)
   (auto-package-update-maybe))
 
-
 (use-package kaolin-themes
   :disabled
   :ensure t
@@ -544,6 +543,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
        (getenv "EOS_DESKTOP"))
   :ensure windmove
   :pin gnu
+  :demand
   :functions exwm-workspace-rename-buffer exwm-systemtray-enable exwm-randr-enable
   :hook
   (('exwm-update-class .
@@ -632,7 +632,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-input-set-key (kbd "s-g") 'es/app-browser)
   (exwm-input-set-key (kbd "s-t") 'es/app-terminal)
   (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
-  (exwm-input-set-key (kbd "s-e") 'treemacs)
+  (exwm-input-set-key (kbd "s-e") 'hydra-eos/body)
   (exwm-input-set-key (kbd "s-r") 'exwm-reset)
 
   ;; window move
@@ -688,6 +688,60 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-workspace-add)
   :init
   (message "es/use-package/exwm"))
+
+(defhydra hydra-eos (:exit nil :hint nil)
+  "
+Emacs Deskop EOS: Binding ALSO accessible under Super key i.e. s-b switch buffer
+Apps^^                        EXWM^^                     Windows
+-------------------------------------------------------------------------------------
+[_d_] Linux application       [_w_] Workspace switch     [_<up>_] up
+[_g_] Browser                 [_r_] Reset                [_<down>_] down
+[_t_] Terminal                [_L_] Monitor Move left    [_<left>_] left
+[_T_] New Terminal            [_R_] Monitor Move right   [_<right>_] right
+[_E_] Treemacs Explorer       [_-_] Text size decrease   [_\\_] Vertical split
+[_l_] lock screen             [_=_] Text size increase   [_]_] Horizontal split
+[_s_] Splash                                             [<backspace>] delete win
+[_n_] netflix                                            [_[_] delete other win
+[_j_] ssh                                                [_u_] winner-undo
+[_v_] Volume 200pct                                      [_b_] switch buffer
+[_f_] rip grep                                           [_G_] GDM Tweaks
+[_F_] ag silver searcher                                 [_S_] GDM Set Scale
+
+"
+  ("d"  counsel-linux-app)
+  ("g" es/app-browser)
+  ("t" es/terminal)
+  ("T" es/app-terminal)
+  ("E" treemacs)
+  ("l" es/lock-screen)
+  ("s" es/app-splash)
+  ("n" es/app-netflix)
+  ("j" es/ssh)
+  ("v" es/volumeset)
+  ("f" counsel-rg)
+  ("F" counsel-ag)
+  ("G" es/gdm-tweaks)
+  ("S" es/gdm-set-scale)
+
+  ("w" exwm-workspace-switch)
+  ("r" exwm-workspace-reset)
+  ("L" es/monitor-monitor-move-left)
+  ("R" es/monitor-monitor-move-right)
+  ("-" text-scale-decrease)
+  ("=" text-scale-increase)
+
+  ("<up>" windmove-up)
+  ("<down>" windmove-down)
+  ("<left>" windmove-left)
+  ("<right>" windmove-right)
+  ("\\" split-window-horizontally-and-follow)
+  ("]" split-window-vertically-and-follow)
+  ("<backpsace>" delete-window)
+  ("[" delete-other-windows)
+  ("u" winner-undo)
+  ("b" ivy-switch-buffer)
+  ("q" nil :color blue))
+
 
 (use-package ag
   :bind (("C-F" . counsel-ag)))   ;; for expanded results use ag command
@@ -845,12 +899,7 @@ Git gutter:
   ("p" git-gutter:popup-hunk)
   ("R" git-gutter:set-start-revision)
   ("q" nil :color blue)
-  ("Q" (progn (git-gutter-mode -1)
-              ;; git-gutter-fringe doesn't seem to
-              ;; clear the markup right away
-              (sit-for 0.1)
-              (git-gutter:clear))
-   :color blue))
+  ("Q" (git-gutter-mode -1) :color blue))
 
 
 (use-package magit
@@ -1173,7 +1222,7 @@ Git gutter:
  '(compilation-scroll-output (quote first-error))
  '(custom-safe-themes
    (quote
-    ("615123f602c56139c8170c153208406bf467804785007cdc11ba73d18c3a248b" "845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" "a7928e99b48819aac3203355cbffac9b825df50d2b3347ceeec1e7f6b592c647" "1ed5c8b7478d505a358f578c00b58b430dde379b856fbcb60ed8d345fc95594e" "774aa2e67af37a26625f8b8c86f4557edb0bac5426ae061991a7a1a4b1c7e375" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "1d50bd38eed63d8de5fcfce37c4bb2f660a02d3dff9cbfd807a309db671ff1af" "e1ef2d5b8091f4953fe17b4ca3dd143d476c106e221d92ded38614266cea3c8b" "9743d1941d0559264aa21a542e55043c032d779024cd70468d1123c320699fd1" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "1c8171893a9a0ce55cb7706766e57707787962e43330d7b0b6b0754ed5283cda" "d5d2ab76985738c142adbe6a35dc51c8d15baf612fdf6745c901856457650314" "f11e219c9d043cbd5f4b2e01713c2c24a948a98bed48828dc670bd64ae771aa1" "09cadcc2784baa744c6a7c5ebf2a30df59c275414768b0719b800cabd8d1b842" "a70b47c87e9b0940f6fece46656200acbfbc55e129f03178de8f50934ac89f58" "b69323309e5839676409607f91c69da2bf913914321c995f63960c3887224848" "53993d7dc1db7619da530eb121aaae11c57eaf2a2d6476df4652e6f0bd1df740" "c74e83f8aa4c78a121b52146eadb792c9facc5b1f02c917e3dbb454fca931223" "3c83b3676d796422704082049fc38b6966bcad960f896669dfc21a7a37a748fa" "855eb24c0ea67e3b64d5d07730b96908bac6f4cd1e5a5986493cbac45e9d9636" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "0eb3c0868ff890b0c4ee138069ce2a8936a8a69ba150efa6bfb9fb7c05af5ec3" "054e929c1df4293dd68f99effc595f5f7eb64ff3c064c4cfaad186cd450796db" default)))
+    ("845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" default)))
  '(dabbrev-case-fold-search nil)
  '(display-buffer-base-action
    (quote
@@ -1525,8 +1574,6 @@ mouse-2: EXWM Workspace menu.
            )
   named-buffer)
 
-
-
 (defun es/app-netflix()
   "Start Netflix."
   (interactive)
@@ -1626,7 +1673,7 @@ mouse-2: EXWM Workspace menu.
   )
 
 (defun es/lock-screen()
-  "Lock Screen command for es."
+  "Lock screen command for es."
   (interactive)
   (start-process-shell-command
    "/usr/bin/gnome-screensaver-command" nil  "/usr/bin/gnome-screensaver-command -l"))
@@ -1683,19 +1730,6 @@ mouse-2: EXWM Workspace menu.
                                 " -e 'ssh -Y " hostName "'"
                                 ))
   (start-process-shell-command  ssh-binary nil ssh-invocation))
-
-
-(defun es/workspace-setup()
-  "Setups a sample EOS workspace."
-  (interactive)
-  ;; setup workspaces in addition to the 0th workspace
-  (exwm-workspace-add)
-  (start-process-shell-command "" nil "/usr/bin/slack")
-  (exwm-workspace-add)
-  (es/app-browser)
-  (exwm-workspace-add)
-  (es/app-terminal)
-  (exwm-workspace-add))
 (message "es/app-setup")
 
 ;;;;;;;;;;;;;;;;;;;;;
@@ -1749,121 +1783,7 @@ mouse-2: EXWM Workspace menu.
       (or (cdr (assoc desc real-keyboard-keys))
           (read-kbd-macro desc))))
 
-
-;; HELP DOCUMENTATION AND OTHER STUFF
-(defvar es/emacsDesktopHelp
-"
- .ooooo.  ooo. .oo.  .oo.    .oooo.    .ooooo.   .oooo.o
-d88. .88b .888P.Y88bP.Y88b  .P  )88b  d88. ..Y8 d88(  .8
-888ooo888  888   888   888   .oP.888  888       ..Y88b.
-888    .o  888   888   888  d8(  888  888   .o8 o.  )88b
-.Y8bod8P. o888o o888o o888o .Y888..8o .Y8bod8P. 8..888P.
-
-
-
-      .o8                     oooo            .
-     .888                     .888          .o8
- .oooo888   .ooooo.   .oooo.o  888  oooo  .o888oo  .ooooo.  oo.ooooo.
-d88. .888  d88. .88b d88(  .8  888 .8P.     888   d88. .88b  888. .88b
-888   888  888ooo888 ..Y88b.   888888.      888   888   888  888   888
-888   888  888    .o o.  )88b  888 .88b.    888 . 888   888  888   888
-.Y8bod88P. .Y8bod8P. 8..888P. o888o o888o   .888. .Y8bod8P.  888bod8P.
-                                                             888
-                                                            o888o
-
- Emacs Desktop Environment[EDE] Help.
- ....................................
- EDE is fully function emacs based desktop environment built using EXWM
- This provides a full fledged desktop experience for software development.
- EDE manages applications and emacs buffers using single window managment
- system. In a nutshell you can manage your application windows the same way
- as would manager your emacs window.
-
- Keys
- ....
- Win/Apple/SuperKey: This is windows keys or the apple command key.
- This will be referred to as the super key while describing key bindings
-
- Window Management:
- .................
- Window splitting and movement using emacs key bindings is available
- i.e. C-x-3 C-x-2 for horizontal and veritcal splitting and C-x-o for focus
- change works.
-
- In addition to this the following shortcuts are used.
- Super+|                             Split window vertically
- Super+]                             Split window horizontally
- Super+[                             Close all window except current
- Super+z                             Undo recent window managment action
- Ctrl-g   Super+z                    Redo recent window managment action
- Super+[Up/Down/Shift/Left]          Move focus to window above/below/left/right
-                                     adjacent window
- Super+Shift+[[Up/Down/Shift/Left]]  Resize current window in the key direction
- Super+b                             Menu based application switching
- Alt-tab                             Windows style application switching
-
-
- Application Management:
- .......................
- S-d                                 Launch apps. Present menu lising all available apps
- C-x-k                               Kill buffer/application
- S-g                                 Find Or launch default browser (chromoim-browser)_
- S-t                                 Find Or launch a new terminal (xterm)
- S-l                                 Lock screen using default screen saver
- S-&                                 Run bash command
-
- Workspace (Multiple desktops)
- .............................
- S-w                                 Interactively Switch to workspace
- S-{0..9}                            Switch to workspace 0 ... 9
-
-
- Git Integration
- ...............
- Git diff and merge conflicts are trasparently handled withing the EDE editior
- ee  <filename> bash alias  open file in current emacs desktop
-
- Programming Language Suport using lsp
- ............................
- C
- C++                Using irony
- Python             Using Elpy
- Rust               Using rustic
- Golang
- JavaScript/Node    Using tern
-
- Monitor Support:
- ................
- Auto-detects monitor resolution aka. retina/HD/UHD and does scaling for app
- Working for 13inch, 15inch Macbook Pro Retina
- 1440p and 4K monitors
-
- One can over ride detected Monitor Setting by calling the interactive
- functions
- Alt-x RetinaSetup
- Alt-x MonitorSetup
-
- Miscellaneous
- -------------
- Alt-x GetToNetflix                   Start Netflix using chromium HTML-5
- Alt-x GetToSplash                    Splash Screen
- Alt-x LockScreen
- Alt-x MonitorMoveLeft                Re-positon dual monitor setups
- Alt-x MonitorMoveRight               Re-positon dual monitor setups
- Alt-x ssh                            Open up secure-shell (interactive)
-")
-
-
-(defun  EmacsDesktopGetSplash ()
-  "Display the EOS intro help buffer."
-  (with-current-buffer
-      (get-buffer-create "EmacsDesktopSplash")
-    (insert es/emacsDesktopHelp)
-    (goto-char (point-min)))
-  (get-buffer-create "EmacsDesktopSplash"))
-
-;;(setf initial-buffer-choice 'EmacsDesktopGetSplash)
-
+(message "!!!es/load-complete!!!")
 (server-start)
 (message "!!!es/load-complete!!!")
 
