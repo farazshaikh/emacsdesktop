@@ -1,0 +1,16 @@
+rofi.theme: /usr/share/rofi/themes/paper-float.rasi
+!rofi -combi-modi window,drun -modi window,run,drun,ssh,combi,keys -display-drun DesktopApp  -display-window Window  -display-run Run  -display-ssh SSH  -display-combi Window+Drun
+!-show-icons -lines 10 -columns 4 -sidebar-mode -auto-select -show window
+rofi.combi-modi:                     window,drun
+rofi.modi:                           window,run,drun,ssh,combi,keys
+rofi.display-drun:                   DesktopApp:
+rofi.display-window:                 Window:
+rofi.display-run:                    Run:
+rofi.display-ssh:                    SSH:
+rofi.display-combi:                  Window+Drun:
+rofi.show-icons:                     true
+rofi.line:                           10
+rofi.columns:                        4
+rofi.sidebar-mode:                   true
+rofi.auto-select:                    true
+rofi.window-match-fields:            name

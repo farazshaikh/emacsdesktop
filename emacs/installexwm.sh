@@ -84,7 +84,8 @@ checkoutCode() {
 linkupFiles() {
     pushd `pwd`
     local installLoc=${1}
-    local ts=${2}
+    local gitRepoInstallLoc=${2}
+    local ts=${3}
 
     cd ${installLoc}/Misc
 
@@ -94,7 +95,9 @@ linkupFiles() {
     linkup ${ts} ~/.screenrc `pwd`/.screenrc
     linkup ${ts} ~/.tmux.conf `pwd`/.tmux.conf
     linkup ${ts} ~/.i3/config `pwd`/.i3/config
+    linkup ${ts} ~/.i3/i3-wm-scripts ${gitRepoInstallLoc}/i3-wm-scripts
     linkup ${ts} ~/.i3/.inputrc `pwd`/.inputrc
+    linkup ${ts} ~/.config/rofi/config  `pwd`/.config/rofi/config
 
     mkdir -p  ~/.config/powerline-shell
     linkup ${ts} ~/.config/powerline-shell/config.json `pwd`/emacs/config_powerline-shell_config.json
@@ -144,17 +147,22 @@ main() {
     set +e
     # 2. Checkout code that comes out of git-repos
     # /Misc
-    checkoutCode ${installLoc} git@github.com:farazshaikh/Misc.git
-    # /site_eos
+    #checkoutCode ${installLoc} git@github.com:farazshaikh/Misc.git
+    # /third_party_git_repos
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/fzf.git
     ${gitRepoInstallLoc}/fzf/install
     checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/powerline-shell.git
     ${gitRepoInstallLoc}/powerline-shell/setup.py install
     checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/Gogh.git
+    checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/i3-wm-scripts.git
+    checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/i3-gnome
+    cd i3-gnome
+    make
+    sudo make install
     set -e
 
     # 3. Linkup the files from the git checkout
-    linkupFiles ${installLoc} ${installTime}
+    linkupFiles ${installLoc} ${gitRepoInstallLoc} ${installTime}
 
     # 4. Nop
     disable_greeter

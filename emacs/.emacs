@@ -386,6 +386,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (defun es/set-up-gnome-desktop()
   "GNOME is used for mosto of the system settings."
   (setenv "XDG_CURRENT_DESKTOP" "GNOME")
+  ;; Start with the /run folder as  TMPDIR
+  (setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid))))
   (start-process "" nil "/usr/bin/gnome-flashback")
   (start-process "" nil "/usr/lib/gnome-settings-daemon/gnome-settings-daemon")
   (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-power")
@@ -418,7 +420,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (start-process "" nil "/snap/bin/pa-applet")
   (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
   (message "es/setup-up-gnome-desktop"))
-(if (and window-system (getenv "EOS_DESKTOP")) (es/set-up-gnome-desktop))
+(if (and window-system (getenv "EOS_DESKTOP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
 
 (use-package exwm-config
   :disabled
@@ -634,6 +636,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
   (exwm-input-set-key (kbd "s-e") 'hydra-eos/body)
   (exwm-input-set-key (kbd "s-r") 'exwm-reset)
+  (exwm-input-set-key (kbd "s-s") 'es/save-edit-position)
+  (exwm-input-set-key (kbd "s-a") 'es/jump-edit-position)
 
   ;; window move
   (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
@@ -700,8 +704,8 @@ Apps^^                        EXWM^^                     Windows
 [_T_] New Terminal            [_R_] Monitor Move right   [_<right>_] right
 [_E_] Treemacs Explorer       [_-_] Text size decrease   [_\\_] Vertical split
 [_l_] lock screen             [_=_] Text size increase   [_]_] Horizontal split
-[_s_] Splash                                             [<backspace>] delete win
-[_n_] netflix                                            [_[_] delete other win
+[_s_] Splash                  [_s_] Save edit positon    [<backspace>] delete win
+[_n_] netflix                 [_a_] Jump edit position   [_[_] delete other win
 [_j_] ssh                                                [_u_] winner-undo
 [_v_] Volume 200pct                                      [_b_] switch buffer
 [_f_] rip grep                                           [_G_] GDM Tweaks
@@ -729,6 +733,8 @@ Apps^^                        EXWM^^                     Windows
   ("R" es/monitor-monitor-move-right)
   ("-" text-scale-decrease)
   ("=" text-scale-increase)
+  ("s" es/save-edit-position)
+  ("a" es/jump-edit-position)
 
   ("<up>" windmove-up)
   ("<down>" windmove-down)
@@ -815,9 +821,14 @@ Apps^^                        EXWM^^                     Windows
 (use-package ivy-posframe
   :ensure t
   :config
-  (setq ivy-posframe-parameters
+  (if (and window-system (getenv "EOS_DESKTOP"))
+      (setq ivy-posframe-parameters
         '((parent-frame nil)  ;; Required for EXWM
           (left-fringe . 30)
+          (right-fringe . 30)
+          (ivy-posframe-border-width 1))))
+  (setq ivy-posframe-parameters
+        '((left-fringe . 30)
           (right-fringe . 30)
           (ivy-posframe-border-width 1)))
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
@@ -1146,6 +1157,22 @@ Git gutter:
 (use-package ggtags :ensure t  :diminish)
 (use-package company-c-headers :ensure t :diminish)
 
+;; YAS
+(use-package yasnippet
+  :config
+  (yas-global-mode 1)
+  :bind
+  (:map yas-minor-mode-map
+        ("C-c & t" . yas-describe-tables)
+        ("C-c & &" . org-mark-ring-goto)))
+(use-package yasnippet-snippets
+  :defer)
+
+;; Rust
+(use-package rust-mode
+  :config
+  (setq rust-format-on-save t))
+(setq-default abbrev-mode 1)
 
 ;; Some custom configuration to ediff
 (use-package ediff
@@ -1238,16 +1265,16 @@ Git gutter:
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black" t)
- '(lsp-ui-doc-enable t t)
+ '(lsp-ui-doc-border "black")
+ '(lsp-ui-doc-enable t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t t)
- '(lsp-ui-doc-include-signature t t)
- '(lsp-ui-doc-position (quote bottom) t)
- '(lsp-ui-sideline-enable t t)
- '(lsp-ui-sideline-ignore-duplicate t t)
+ '(lsp-ui-doc-header t)
+ '(lsp-ui-doc-include-signature t)
+ '(lsp-ui-doc-position (quote bottom))
+ '(lsp-ui-sideline-enable t)
+ '(lsp-ui-sideline-ignore-duplicate t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t t)
+ '(lsp-ui-sideline-show-code-actions t)
  '(lsp-ui-sideline-update-mode (quote line))
  '(message-send-mail-function (quote smtpmail-send-it))
  '(normal-erase-is-backspace-mode 0)
@@ -1411,6 +1438,15 @@ mouse-2: EXWM Workspace menu.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helper/Utility functions ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun es/save-edit-position()
+  (interactive)
+  (point-to-register ?p))
+
+(defun es/jump-edit-position()
+  (interactive)
+  (jump-to-register ?p))
+
 (defun es/toggle-show-trailing-whitespace ()
   "Toggle 'show-trailing-whitespace' between t and nil."
   (interactive)
