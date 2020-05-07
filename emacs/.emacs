@@ -41,6 +41,7 @@
 (defun es/setup-package-mgmt()
   "Setup the package management for EOS."
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
+                           ("melpa-stable" . "https://stable.melpa.org/packages/")
                            ("melpa" . "http://melpa.milkbox.net/packages/")
                            ("elpy" . "http://jorgenschaefer.github.io/packages/")))
   ;;elget
@@ -204,7 +205,7 @@
 (use-package doom-themes
   :ensure t
   :config
-  (load-theme 'doom-gruvbox t))
+  (load-theme 'doom-molokai t))
 
 (use-package treemacs
   :disabled
@@ -382,12 +383,28 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :disabled
   :ensure t)
 
+;; Start with the /run folder as  TMPDIR
+(setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid))))
+
 ;; Load EXWM.
+(defun es/setup-systray()
+  (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
+  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/indicator-messages-service")
+  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
+;;  (start-process "" nil "zeitgeist-datahub")
+  (start-process "" nil "update-notifier")
+  (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")
+
+  (start-process "" nil "/usr/bin/nm-applet")
+  (start-process "" nil "/usr/bin/blueman-applet")
+  (start-process "" nil "/usr/bin/pasystray")
+  (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
+  (message "es/setupsystray"))
+(if (and window-system (getenv "EOS_DESKTOP") (eq system-type 'gnu/linux)) (es/setup-systray))
+
 (defun es/set-up-gnome-desktop()
-  "GNOME is used for mosto of the system settings."
+  "GNOME is used for most of the system settings."
   (setenv "XDG_CURRENT_DESKTOP" "GNOME")
-  ;; Start with the /run folder as  TMPDIR
-  (setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid))))
   (start-process "" nil "/usr/bin/gnome-flashback")
   (start-process "" nil "/usr/lib/gnome-settings-daemon/gnome-settings-daemon")
   (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-power")
@@ -407,26 +424,20 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-keyboard")
   (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-media-keys")
   (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-mouse")
-  (start-process "" nil "/usr/lib/gnome-disk-utility/gsd-disk-utility-(not )otify")
-  (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
-  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/(insert )ndicator-messages-service")
-  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
-;;  (start-process "" nil "zeitgeist-datahub")
-  (start-process "" nil "update-notifier")
-  (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")
+  (start-process "" nil "/usr/lib/gnome-disk-utility/gsd-disk-utility-notify")
 
-  (start-process "" nil "/usr/bin/nm-applet")
-  (start-process "" nil "/usr/bin/blueman-applet")
-  (start-process "" nil "/snap/bin/pa-applet")
-  (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
+  ;; setup gnome-keyring
+  (start-process "" nil "/usr/bin/gnome-keyring-daemon --daemonize --login")
+  (setq ssh-auth-sock  (shell-command-to-string  "/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh"))
+  (setq ssh-auth-sock (split-string (replace-regexp-in-string "\n$" ""  ssh-auth-sock) "="))
+  (setenv (car ssh-auth-sock) (car (cdr ssh-auth-sock)))
   (message "es/setup-up-gnome-desktop"))
-(if (and window-system (getenv "EOS_DESKTOP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
+(if (and window-system (getenv "EOS_DESKTOP") (getenv "EOS_EMACS_GNOME_SHELL_SETUP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
 
 (use-package exwm-config
   :disabled
   :init
   (exwm-config-default))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;Setup alt-tab     ;;
@@ -826,11 +837,11 @@ Apps^^                        EXWM^^                     Windows
         '((parent-frame nil)  ;; Required for EXWM
           (left-fringe . 30)
           (right-fringe . 30)
-          (ivy-posframe-border-width 1))))
-  (setq ivy-posframe-parameters
-        '((left-fringe . 30)
-          (right-fringe . 30)
           (ivy-posframe-border-width 1)))
+    (setq ivy-posframe-parameters
+          '((left-fringe . 30)
+            (right-fringe . 30)
+            (ivy-posframe-border-width 1))))
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-center)))
@@ -838,14 +849,14 @@ Apps^^                        EXWM^^                     Windows
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-bottom-left)))
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
   (setq ivy-posframe-display-functions-alist
-      '((swiper-isearch  . ivy-posframe-display-at-window-bottom-left)
-        (complete-symbol . ivy-posframe-display-at-point)
-        (counsel-M-x     . ivy-posframe-display-at-point)
-        (t               . ivy-posframe-display-at-point)))
+        '((swiper-isearch  . ivy-posframe-display-at-window-bottom-left)
+          (counsel-switch-buffer . ivy-posframe-display-at-window-bottom-left)
+          (complete-symbol . ivy-posframe-display-at-point)
+          (counsel-M-x     . ivy-posframe-display-at-point)
+          (t               . ivy-posframe-display-at-point)))
   (setq ivy-posframe-width 110
         ivy-posframe-height 30)
-   (ivy-posframe-mode 1)
-   (setq exwm-workspace-minibuffer-position 'bottom))
+   (ivy-posframe-mode 1))
 
 
 (setq ivy-posframe-border-width 3)
@@ -854,19 +865,24 @@ Apps^^                        EXWM^^                     Windows
   :hook
   (prog-mode-hook . whitespace-mode)
   :init
-  (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode))
+  (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode VTerm))
   :custom
   (whitespace-style (quote (face empty tabs lines-tail whitespace))))
 
 (use-package flycheck
   :ensure t
+  :hook (prog-mode . company-mode)
   :init
-  (global-flycheck-mode t)
   (setq flycheck-global-modes '(not exwm-mode treemacs-mode)))
 
 (use-package flyspell
+  :init
+  (defun flyspell-local-vars ()
+    (add-hook 'hack-local-variables-hook #'flyspell-buffer))
   :hook
-  (prog-mode-hook . flyspell-prog-mode))
+  (prog-mode . flyspell-prog-mode)
+  (text-mode . flyspell-mode)
+  (flyspell-mode . flyspell-local-vars))
 
 (use-package flyspell-correct-ivy
   :bind ("C-;" . flyspell-correct-wrapper)
@@ -946,6 +962,55 @@ Git gutter:
    (magithub-message-confirm-cancellation nil)
    (magithub-use-ssl t)))
 
+
+;;https://ladicle.com/post/config/#smerge
+(use-package smerge-mode
+  :diminish
+  :preface
+  (with-eval-after-load 'hydra
+    (defhydra smerge-hydra
+      (:color pink :hint nil :post (smerge-auto-leave))
+      "
+^Move^       ^Keep^               ^Diff^                 ^Other^
+^^-----------^^-------------------^^---------------------^^-------
+_n_ext       _b_ase               _<_: upper/base        _C_ombine
+_p_rev       _u_pper              _=_: upper/lower       _r_esolve
+^^           _l_ower              _>_: base/lower        _k_ill current
+^^           _a_ll                _R_efine
+^^           _RET_: current       _E_diff
+"
+      ("n" smerge-next)
+      ("p" smerge-prev)
+      ("b" smerge-keep-base)
+      ("u" smerge-keep-upper)
+      ("l" smerge-keep-lower)
+      ("a" smerge-keep-all)
+      ("RET" smerge-keep-current)
+      ("\C-m" smerge-keep-current)
+      ("<" smerge-diff-base-upper)
+      ("=" smerge-diff-upper-lower)
+      (">" smerge-diff-base-lower)
+      ("R" smerge-refine)
+      ("E" smerge-ediff)
+      ("C" smerge-combine-with-next)
+      ("r" smerge-resolve)
+      ("k" smerge-kill-current)
+      ("ZZ" (lambda ()
+              (interactive)
+              (save-buffer)
+              (bury-buffer))
+       "Save and bury buffer" :color blue)
+      ("q" nil "cancel" :color blue)))
+  :hook ((find-file . (lambda ()
+                        (save-excursion
+                          (goto-char (point-min))
+                          (when (re-search-forward "^<<<<<<< " nil t)
+                            (smerge-mode 1)))))
+         (magit-diff-visit-file . (lambda ()
+                                    (when smerge-mode
+                                      (smerge-hydra/body))))))
+
+
 ;; persistent-scratch
 (use-package persistent-scratch
   :config
@@ -962,6 +1027,7 @@ Git gutter:
 (use-package function-args
   :config
   (fa-config-default))
+
 (use-package lsp-mode
   :ensure t
   :commands lsp
@@ -1102,7 +1168,9 @@ Git gutter:
   :requires auto-complete
   :ensure t)
 
-(use-package company :ensure t
+(use-package company
+  :ensure t
+  :hook (prog-mode . company-mode)
   :config
   (message "es/use-package-company")
    (setq company-idle-delay 0
@@ -1154,8 +1222,20 @@ Git gutter:
                                       (next-error-follow-minor-mode t)))
   :hook ((c-mode c++-mode objc-mode) .
          (lambda () (require 'ccls) (lsp))))
-(use-package ggtags :ensure t  :diminish)
-(use-package company-c-headers :ensure t :diminish)
+(use-package ggtags
+  :ensure t
+  :diminish)
+
+(use-package company-c-headers
+  :ensure t
+  :diminish)
+
+(use-package clang-format+
+  :custom
+  (clang-format-executable "clang-format-9")
+  (clang-format-style "Google")
+  :hook
+  ((c-mode c++-mode glsl-mode) . clang-format+-mode))
 
 ;; YAS
 (use-package yasnippet
@@ -1229,6 +1309,47 @@ Git gutter:
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Project Specific Setup                   ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun es/setup-project-dfn()
+  "Setup DFN project."
+  (interactive)
+  (setenv "RUST_SRC_PATH" "/home/emacs/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/")
+  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/.")))
+  (setq compile-command
+        "cd $WRK/rs;\n\
+ source ~/.nix-profile/etc/profile.d/nix.sh;\n \
+ nix-shell --run \"cargo build\"")
+  )
+
+
+(defun es/setup-project-sp()
+  "Setup SP project."
+  (interactive)
+  (setenv "WRK" "/storvisor/work/cypress")
+  (setq compile-command
+   "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
+)
+
+
+(defun es/setup-project-excb()
+  "Setup Excubito Project."
+  (interactive)
+  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
+)
+(es/setup-project-dfn)
+
+;; Setup projectile
+(use-package projectile
+  :ensure t
+  :pin melpa-stable
+  :config
+  (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (setq projectile-project-search-path (getenv "WRK"))
+  (projectile-mode))
+
 (message "!!es/packages-loaded!!")
 
 
@@ -1241,20 +1362,31 @@ Git gutter:
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-names-vector
+   ["#1c1e1f" "#e74c3c" "#b6e63e" "#e2c770" "#268bd2" "#fb2874" "#66d9ef" "#d6d6d4"])
  '(c-basic-offset 3)
  '(c-echo-syntactic-information-p t)
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
+ '(clang-format-executable "clang-format-9" t)
+ '(clang-format-style "Google" t)
  '(column-number-mode t)
+ '(company-lsp-cache-cadidates (quote auto) t)
  '(compilation-scroll-output (quote first-error))
  '(custom-safe-themes
    (quote
-    ("845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" default)))
+    ("be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" default)))
  '(dabbrev-case-fold-search nil)
  '(display-buffer-base-action
    (quote
     ((display-buffer-reuse-window display-buffer-same-window display-buffer-in-previous-window display-buffer-use-some-window))))
+ '(ediff-keep-variants nil)
+ '(ediff-split-window-function (quote split-window-horizontally))
+ '(ediff-window-setup-function (quote ediff-setup-windows-plain))
+ '(elpy-rpc-backend "jedi" t)
+ '(elpy-rpc-python-command "python3")
  '(exwm-layout-show-all-buffers t)
+ '(fci-rule-color "#555556")
  '(global-eldoc-mode nil)
  '(global-hl-line-mode t)
  '(ido-mode t nil (ido))
@@ -1262,25 +1394,57 @@ Git gutter:
  '(ido-vertical-mode 1)
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
+ '(ivy-count-format "%d/%d ")
+ '(ivy-display-style (quote fancy))
+ '(ivy-re-builders-alist (quote ((swiper . ivy--regex) (t . ivy--regex-plus))) t)
+ '(ivy-use-virtual-buffers t)
+ '(ivy-wrap t)
+ '(jdee-db-active-breakpoint-face-colors (cons "#1B2229" "#fd971f"))
+ '(jdee-db-requested-breakpoint-face-colors (cons "#1B2229" "#b6e63e"))
+ '(jdee-db-spec-breakpoint-face-colors (cons "#1B2229" "#525254"))
+ '(jedi:complete-on-dot t t)
+ '(jedi:setup-keys t t)
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
  '(lsp-prefer-flymake nil)
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
+ '(lsp-ui-doc-border "black" t)
+ '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position (quote bottom))
- '(lsp-ui-sideline-enable t)
- '(lsp-ui-sideline-ignore-duplicate t)
+ '(lsp-ui-doc-header t t)
+ '(lsp-ui-doc-include-signature t t)
+ '(lsp-ui-doc-position (quote bottom) t)
+ '(lsp-ui-sideline-enable t t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t)
+ '(lsp-ui-sideline-show-code-actions t t)
  '(lsp-ui-sideline-update-mode (quote line))
+ '(magit-auto-revert-mode nil)
+ '(magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")) t)
+ '(magit-diff-refine-hunk t)
+ '(magit-expand-staged-on-commit (quote full) t)
+ '(magit-fetch-arguments (quote ("--prune")) t)
+ '(magit-log-auto-more t)
+ '(magit-log-cutoff-length 20 t)
+ '(magit-no-confirm (quote (stage-all-changes unstage-all-changes)))
+ '(magit-process-connection-type nil)
+ '(magit-push-always-verify nil t)
+ '(magit-push-arguments (quote ("--set-upstream")) t)
+ '(magit-refresh-file-buffer-hook nil t)
+ '(magit-save-some-buffers nil t)
+ '(magit-set-upstream-on-push (quote askifnotset) t)
+ '(magit-stage-all-confirm nil t)
+ '(magit-status-verbose-untracked nil t)
+ '(magit-unstage-all-confirm nil t)
+ '(magithub-message-confirm-cancellation nil t)
+ '(magithub-use-ssl t t)
  '(message-send-mail-function (quote smtpmail-send-it))
  '(normal-erase-is-backspace-mode 0)
+ '(objed-cursor-color "#e74c3c")
  '(package-selected-packages
    (quote
-    (persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit)))
+    (clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit)))
+ '(pdf-view-midnight-colors (cons "#d6d6d4" "#1c1e1f"))
+ '(python-python-command "/usr/bin/ipython" t)
  '(ring-bell-function
    (lambda nil
      (let
@@ -1297,6 +1461,8 @@ Git gutter:
                                (quote mode-line)
                                fg))
                             orig-fg))))
+ '(rustic-ansi-faces
+   ["#1c1e1f" "#e74c3c" "#b6e63e" "#e2c770" "#268bd2" "#fb2874" "#66d9ef" "#d6d6d4"])
  '(safe-local-variable-values (quote ((buffer-reado-only . t))))
  '(savehist-mode 1)
  '(scroll-step 1)
@@ -1314,6 +1480,28 @@ Git gutter:
  '(standard-indent 3)
  '(transient-mark-mode t)
  '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
+ '(vc-annotate-background "#1c1e1f")
+ '(vc-annotate-color-map
+   (list
+    (cons 20 "#b6e63e")
+    (cons 40 "#c4db4e")
+    (cons 60 "#d3d15f")
+    (cons 80 "#e2c770")
+    (cons 100 "#ebb755")
+    (cons 120 "#f3a73a")
+    (cons 140 "#fd971f")
+    (cons 160 "#fc723b")
+    (cons 180 "#fb4d57")
+    (cons 200 "#fb2874")
+    (cons 220 "#f43461")
+    (cons 240 "#ed404e")
+    (cons 260 "#e74c3c")
+    (cons 280 "#c14d41")
+    (cons 300 "#9c4f48")
+    (cons 320 "#77504e")
+    (cons 340 "#555556")
+    (cons 360 "#555556")))
+ '(vc-annotate-very-old-color nil)
  '(which-function-mode t)
  '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
  '(winner-mode t))
@@ -1560,40 +1748,6 @@ mouse-2: EXWM Workspace menu.
 
 (put 'downcase-region 'disabled nil)
 (message "es/legacy-lang-setup")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Project Specific Setup                   ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun es/setup-project-dfn()
-  "Setup DFN project."
-  (interactive)
-  (setenv "RUST_SRC_PATH" "/home/emacs/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/")
-  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/.")))
-  (setq compile-command
-        "cd $WRK/rs;\n\
- source ~/.nix-profile/etc/profile.d/nix.sh;\n \
- nix-shell --run \"cargo build\"")
-  )
-
-
-(defun es/setup-project-sp()
-  "Setup SP project."
-  (interactive)
-  (setenv "WRK" "/storvisor/work/cypress")
-  (setq compile-command
-   "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
-)
-
-
-(defun es/setup-project-excb()
-  "Setup Excubito Project."
-  (interactive)
-  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
-)
-(es/setup-project-dfn)
-
-
-
 
 ;; Application invocations
 (defun find-named-buffer(buffPrefix)

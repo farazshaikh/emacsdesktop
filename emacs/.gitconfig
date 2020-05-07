@@ -41,4 +41,7 @@
     # Show files ignored by git:
     ign = ls-files -o -i --exclude-standard
 [rerere]
-	enabled = true
+        enabled = true
+
+[format]
+        outputdirectory=patches

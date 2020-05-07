@@ -43,6 +43,7 @@ packageInstall() {
     sudo add-apt-repository ppa:kelleyk/emacs
     sudo apt-get update
 
+    sudo apt-get install pasystray
     sudo apt install emacs26 emacs25 vim -y
     sudo apt-get install chromium-browser -y
     sudo apt-get install git curl openssh-server -y
