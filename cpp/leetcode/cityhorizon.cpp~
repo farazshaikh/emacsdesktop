@@ -1,6 +1,0 @@
-
-
-struct Point {
-   int x, y;
-   bool start;
-}
