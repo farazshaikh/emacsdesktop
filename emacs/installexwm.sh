@@ -90,7 +90,7 @@ linkupFiles() {
     local gitRepoInstallLoc=${2}
     local ts=${3}
 
-    cd ${installLoc}/Misc
+    cd ${installLoc}/emacsdesktop
 
     linkup ${ts} ~/.bashrc `pwd`/.bashrc
     linkup ${ts} ~/.gdbinit `pwd`/.gdbinit
@@ -149,8 +149,8 @@ main() {
 
     set +e
     # 2. Checkout code that comes out of git-repos
-    # /Misc
-    checkoutCode ${installLoc} git@github.com:farazshaikh/Misc.git
+    # /emacsdesktop
+    checkoutCode ${installLoc} git@github.com:farazshaikh/emacsdesktop.git
     # /third_party_git_repos
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/fzf.git
     ${gitRepoInstallLoc}/fzf/install

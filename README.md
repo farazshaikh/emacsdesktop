@@ -27,11 +27,11 @@ Screenshots better describe EDesktop in concept.
 ![EDesktop Screenshot](https://github.com/farazshaikh/Misc/blob/master/screenshots/EDesktopdash.jpg)
 
 ### EDesktop Language Server Protocol Integration
-![EDesktop LSP](https://github.com/farazshaikh/Misc/blob/master/screenshots/EDesktoplsp.jpg)
+![EDesktop LSP](https://github.com/farazshaikh/emacsdesktop/blob/master/screenshots/EDesktoplsp.jpg)
 
 # Installation (Only Single-user installation is supported)
 ```
-wget -qO- https://raw.githubusercontent.com/farazshaikh/Misc/master/emacs/installexwm.sh | bash -x
+wget -qO- https://raw.githubusercontent.com/farazshaikh/emacsdesktop/master/emacs/installexwm.sh | bash -x
 ```
 
 NOTE: Single user installation.
@@ -43,7 +43,7 @@ the git local repository.
 For example, .emacs will be replaced with sym-link to .emacs provided by
 EDesktop
 
-~/.emacs -> ~/.eos/Misc/emacs/.emacs
+~/.emacs -> ~/.eos/emacsdesktop/emacs/.emacs
 
 After installation use can log in via GDM greeter and choose EDesktop
 from the session drop-down list.
@@ -55,7 +55,7 @@ EDesktop session.
 #### UI Login:
 
 GDM/LigthDM login will include a session entry named EmacsDesktop.
-![EDesktop Login](https://github.com/farazshaikh/Misc/blob/master/screenshots/EDesktoplogin.jpg)
+![EDesktop Login](https://github.com/farazshaikh/emacsdesktop/blob/master/screenshots/EDesktoplogin.jpg)
 
 #### Login from the Terminal:
 Also provided is a ~/.xinitrc, using this one can start the desktop
@@ -92,7 +92,7 @@ buffer.
 
   EDesktop specific bindings are invoked using the super key. All key
   bindings are also accessible using the EDesktop hydra which is bound to [Super+E]
-![EDesktop Hydra Login](https://github.com/farazshaikh/Misc/blob/master/screenshots/EDesktophydra.jpg)
+![EDesktop Hydra Login](https://github.com/farazshaikh/emacsdesktop/blob/master/screenshots/EDesktophydra.jpg)
 
 # Git/Magit terminal and Language Server Protocol (LSP) integration.
 
@@ -104,8 +104,8 @@ the window configuration will be restored.
  Similarly running `# ec filename` from a command line user EDesktop
  will open the file under Emacs.
 
-![EDesktop Hydra ec](https://github.com/farazshaikh/Misc/blob/master/screenshots/EDesktopec.jpg)
-![EDesktop Hydra ec](https://github.com/farazshaikh/Misc/blob/master/screenshots/EDesktopdiff.jpg)
+![EDesktop Hydra ec](https://github.com/farazshaikh/emacsdesktop/blob/master/screenshots/EDesktopec.jpg)
+![EDesktop Hydra ec](https://github.com/farazshaikh/emacsdesktop/blob/master/screenshots/EDesktopdiff.jpg)
 
 # Logout
   Exit Emacs `C-x c`
