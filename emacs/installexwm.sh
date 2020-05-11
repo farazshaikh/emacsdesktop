@@ -150,7 +150,7 @@ main() {
     set +e
     # 2. Checkout code that comes out of git-repos
     # /Misc
-    #checkoutCode ${installLoc} git@github.com:farazshaikh/Misc.git
+    checkoutCode ${installLoc} git@github.com:farazshaikh/Misc.git
     # /third_party_git_repos
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/fzf.git
     ${gitRepoInstallLoc}/fzf/install
