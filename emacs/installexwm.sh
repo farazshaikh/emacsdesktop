@@ -56,6 +56,8 @@ packageInstall() {
     sudo apt-get install gnome-flashback gnome-screensaver -y
     sudo apt-get install fonts-noto fonts-powerline -y
     sudo snap install ripgrep --classic
+
+    curl -L https://github.com/farazshaikh/top-programming-fonts/raw/master/install.sh | bash
 }
 
 checkoutCode() {

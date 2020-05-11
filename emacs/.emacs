@@ -369,7 +369,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setq dashboard-startup-banner "~/acme.png")
   (setq dashboard-banner-logo-title "Cogito, ergo sum")
   (setq dashboard-center-content t)
-  (setq dashboard-items '((recents  . 20)
+  (setq dashboard-items '((recents  . 30)
                           (bookmarks . 5)
                           (projects . 5)
                           (agenda . 5)

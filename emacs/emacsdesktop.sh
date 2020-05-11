@@ -62,8 +62,7 @@ for (( i=0; i<${procslength}; i++ )); do
     pids[$i]=$!
 done
 
-sleep 3
-
+export XDG_CURRENT_DESKTOP=GNOME
 export `/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh`
 
 killall ${EMACS}
