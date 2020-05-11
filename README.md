@@ -22,8 +22,7 @@ Screenshots better describe the above concept.
 
 # Screen Shots:
 
-![EDesktop Screenshot]
- (https://github.com/farazshaikh/Misc/blob/master/screenshots/EDesktop.png)
+![EDesktop Screenshot](https://github.com/farazshaikh/Misc/blob/master/screenshots/EDesktop.png)
 
 
 # Installation
