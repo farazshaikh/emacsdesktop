@@ -16,7 +16,8 @@ primary IDE, and would like to a have uniform way of handling Emacs
 and other desktop windows.  A desktop environment where everything
 runs under the aegis of Emacs.
 
-Other Goodies: ivy, counsel, lsp integrations, dual/large montior support.
+
+# Other Emacs Goodies: ivy, counsel, lsp (C/C++/Rust/Python/JavaScript), git integrations (merge,commit,smerge, magit), pos-frame, hydra,  dual/large montior support.
 
 Screenshots better describe EDesktop in concept.
 
