@@ -18,15 +18,15 @@ runs under the aegis of Emacs.
 
 
 # Other Emacs Goodies: 
-ivy
-counsel
-hydra
-rg,ag,fzf
-lsp (C/C++/Rust/Python/JavaScript),
-git integration (merge,commit,smerge, magit),
-pos-frame,
-hydra,
-dual/large montior support
+* ivy
+* counsel
+* hydra
+* pos-frame
+* ripgrep,ag,fzf
+* lsp (C/C++/Rust/Python/JavaScript),
+* git integration (merge,commit,smerge, magit),
+* pos-frame,
+* dual/large montior support
 ....
 
 Screenshots better describe EDesktop in concept.
