@@ -37,7 +37,8 @@
     lol = log --graph --decorate --pretty=oneline --abbrev-commit
     lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
     ls = ls-files
-
+    l = log --graph --decorate --pretty=oneline --abbrev-commit --max-count=5
+    
     # Show files ignored by git:
     ign = ls-files -o -i --exclude-standard
 [rerere]

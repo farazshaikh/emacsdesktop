@@ -772,6 +772,13 @@ Apps^^                        EXWM^^                     Windows
 
 (use-package flx :ensure t)
 
+
+(defun ivy-switch-file-search ()
+  "Switch to counsel-file-jump, preserving current input."
+  (interactive)
+  (let ((input (ivy--input)))
+    (ivy-quit-and-run (counsel-git))))
+
 (use-package counsel
   :ensure t
   :bind
@@ -782,14 +789,23 @@ Apps^^                        EXWM^^                     Windows
    ("s-d" . counsel-linux-app)
    ("M-y" . counsel-yank-pop)
    :map ivy-minibuffer-map
-   ("M-y" . ivy-next-line)))
+   ("M-y" . ivy-next-line)
+
+   :map counsel-find-file-map
+   ("M-."  . ivy-switch-file-search)
+   ("C-h"     . counsel-up-directory)
+   ("RET" . ivy-alt-done)
+   ))
 
 (use-package ivy
   :ensure t
   :diminish (ivy-mode)
   :bind (("C-x b" . ivy-switch-buffer)
-         ("s-b" . 'ivy-switch-buffer))
+         ("s-b" . 'ivy-switch-buffer)
+         ("<f5>" . counsel-compile))
   :custom
+  (global-set-key (kbd "C-d") 'ivy-backward-delete-char)
+  (global-set-key (kbd "<f5>") 'compile)
   (ivy-use-virtual-buffers t)
   (ivy-count-format "%d/%d ")
   (ivy-display-style 'fancy)
@@ -799,7 +815,6 @@ Apps^^                        EXWM^^                     Windows
      (t      . ivy--regex-plus)))
   :config
   (ivy-mode 1))
-
 
 (use-package ivy-hydra)
 
@@ -878,7 +893,8 @@ Apps^^                        EXWM^^                     Windows
 (use-package flyspell
   :init
   (defun flyspell-local-vars ()
-    (add-hook 'hack-local-variables-hook #'flyspell-buffer))
+    ;;(add-hook 'hack-local-variables-hook #'flyspell-buffer)
+    )
   :hook
   (prog-mode . flyspell-prog-mode)
   (text-mode . flyspell-mode)
@@ -1041,6 +1057,50 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :custom
   (lsp-auto-guess-root nil)
   (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
+  (lsp-restart 'auto-restart)
+  (lsp-enable-file-watchers nil)
+  (lsp-file-watch-threshold 64)
+
+  (lsp-rust-wait-to-build 10000)
+  (lsp-rust-build-on-save t)
+  (lsp-rust-jobs 2)
+  ;; `company-lsp' is automatically enabled
+  ;; (lsp-enable-completion-at-point nil)
+  (lsp-file-watch-ignored '(
+                            "[/\\\\]\\.direnv$"
+                                        ; SCM tools
+                            "[/\\\\]\\.git$"
+                            "[/\\\\]\\.cargo$"
+                            "[/\\\\]\\.hg$"
+                            "[/\\\\]\\.bzr$"
+                            "[/\\\\]_darcs$"
+                            "[/\\\\]\\.svn$"
+                            "[/\\\\]_FOSSIL_$"
+                                        ; IDE tools
+                            "[/\\\\]\\.idea$"
+                            "[/\\\\]\\.ensime_cache$"
+                            "[/\\\\]\\.eunit$"
+                            "[/\\\\]node_modules$"
+                            "[/\\\\]\\.fslckout$"
+                            "[/\\\\]\\.tox$"
+                            "[/\\\\]\\.stack-work$"
+                            "[/\\\\]\\.bloop$"
+                            "[/\\\\]\\.metals$"
+                            "[/\\\\]target$"
+                                        ; Autotools output
+                            "[/\\\\]\\.deps$"
+                            "[/\\\\]build-aux$"
+                            "[/\\\\]autom4te.cache$"
+                            "[/\\\\]\\.reference$"
+                                        ; rls cargo etc
+                            "[/\\\\]\\result???$"
+                            "[/\\\\]\\target???$"
+                            "[/\\\\]\\.cargo-home???$"
+                                        ; ccls cache
+                            "[/\\\\]\\.ccls-cache$"
+                                        ; all hidden folders
+                            "[/\\\\]\\.$"
+                            ))
   :bind (:map lsp-mode-map
               ("C-c C-l" . hydra-lsp/body)
               ("C-c C-f" . lsp-format-buffer))
@@ -1076,12 +1136,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq lsp-ui-doc-use-webkit nil
         lsp-ui-peek-enable t
         lsp-ui-imenu-enable t
-        lsp-ui-flycheck-enable t
-        lsp-file-watch-threshold 2000
-        gc-cons-threshold 100000000)
-  (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\result???$")
-  (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\target???$")
-  (add-to-list 'lsp-file-watch-ignored "[/\\\\]\\.cargo-home???$")
+        lsp-ui-flycheck-enable t)
   ;;WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
   ;;https://github.com/emacs-lsp/lsp-ui/issues/243
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)

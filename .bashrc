@@ -86,6 +86,19 @@ prune() {
         fi
 }
 
+g() {
+    git log --max-count=5 --format=oneline --abbrev-commit; git status ; git rev-parse --abbrev-ref HEAD
+}
+
+
+rustproj() {
+	mkdir ~/rustplay
+	cd ~/rustplay
+	cargo init $1
+	cd $1
+	$EDITOR ./src/main.rs
+}
+
 runtillfail () {
      command=$1
      while $command; do :; done

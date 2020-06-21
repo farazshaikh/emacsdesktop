@@ -54,7 +54,28 @@ test -n "$DESKTOP_AUTOSTART_ID" && {
     dbus-send --print-reply --session --dest=org.gnome.SessionManager "/org/gnome/SessionManager" org.gnome.SessionManager.RegisterClient "string:i3-exwm" "string:$DESKTOP_AUTOSTART_ID"
 }
 
-procs=("/usr/bin/gnome-flashback" "/usr/lib/gnome-settings-daemon/gsd-xsettings" "/usr/bin/gnome-keyring-daemon -f")
+procs=("/usr/bin/gnome-flashback"
+       "/usr/lib/gnome-settings-daemon/gsd-xsettings"
+       "/usr/bin/gnome-keyring-daemon -f"
+       "/usr/lib/gnome-settings-daemon/gnome-settings-daemon"
+       "/usr/lib/gnome-settings-daemon/gsd-power"
+       "/usr/lib/gnome-settings-daemon/gsd-print-notifications"
+       "/usr/lib/gnome-settings-daemon/gsd-rfkill"
+       "/usr/lib/gnome-settings-daemon/gsd-screensaver-proxy"
+       "/usr/lib/gnome-settings-daemon/gsd-sharing"
+       "/usr/lib/gnome-settings-daemon/gsd-smartcard"
+       "/usr/lib/gnome-settings-daemon/gsd-wacom"
+       "/usr/lib/gnome-settings-daemon/gsd-sound"
+       "/usr/lib/gnome-settings-daemon/gsd-a11y-settings"
+       "/usr/lib/gnome-settings-daemon/gsd-clipboard"
+       "/usr/lib/gnome-settings-daemon/gsd-color"
+       "/usr/lib/gnome-settings-daemon/gsd-datetime"
+       "/usr/lib/gnome-settings-daemon/gsd-housekeeping"
+       "/usr/lib/gnome-settings-daemon/gsd-keyboard"
+       "/usr/lib/gnome-settings-daemon/gsd-media-keys"
+       "/usr/lib/gnome-settings-daemon/gsd-mouse"
+       "/usr/lib/gnome-disk-utility/gsd-disk-utility-notify"
+      )
 procslength=${#procs[@]}
 
 for (( i=0; i<${procslength}; i++ )); do
