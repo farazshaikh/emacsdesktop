@@ -9,7 +9,7 @@ EDesktop aims to seamlessly extend Emacs windows management to a
 general desktop environment.  In EDesktop application windows are
 treated a standard Emacs buffers and are controlled using Emacs window
 management commands (Ex `C-x b`, `C-x 1`, `winner-undo`, `windmove-*`
-etc). EDesktop uses EXWM which can be seen as a tiling window manager.
+etc). EDesktop uses EXWM which can be viewed as a tiling window manager.
 
 EDesktop is targeted for developers who work with Emacs as their
 primary IDE, and would like to a have uniform way of handling Emacs
