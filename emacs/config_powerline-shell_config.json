@@ -1,4 +1,5 @@
 {
+  "mode": "compatible",
   "theme": "~/.eos/third_party_git_repos/powerline-shell/powerline_shell/themes/default.py",
   "segments": [
     "virtual_env",

@@ -55,10 +55,12 @@
   (package-initialize)
 
   ;; quelpa
-  (unless (require 'quelpa nil t)
+  (unless (package-installed-p 'quelpa)
     (with-temp-buffer
-      (url-insert-file-contents "https://github.com/quelpa/quelpa/raw/master/bootstrap.el")
-      (eval-buffer)))
+      (url-insert-file-contents "https://github.com/quelpa/quelpa/raw/master/quelpa.el")
+      (eval-buffer)
+      (quelpa-self-upgrade)))
+
   (message "es/setup-package-mgmt"))
 
 (defun es/unsafe-signature-override()
@@ -384,7 +386,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :ensure t)
 
 ;; Start with the /run folder as  TMPDIR
-(setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid))))
+(if (eq  system-type 'gnu/linux) (setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid)))))
 
 ;; Load EXWM.
 (defun es/setup-systray()
@@ -1461,7 +1463,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(jedi:setup-keys t t)
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
- '(lsp-prefer-flymake nil)
+ '(lsp-prefer-flymake nil t)
  '(lsp-ui-doc-border "black" t)
  '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
@@ -1558,7 +1560,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (cons 360 "#555556")))
  '(vc-annotate-very-old-color nil)
  '(which-function-mode t)
- '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
+ '(whitespace-style (quote (face empty tabs lines-tail whitespace)) t)
  '(winner-mode t))
 (message "es/customizations-applied")
 

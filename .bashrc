@@ -126,5 +126,5 @@ esac
 # sync bash commands to file always
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
-export WRK="/home/faraz/dfn/dfinity/./"
+export WRK="$HOME//dfn/dfinity/./"
 
