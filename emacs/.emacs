@@ -207,7 +207,7 @@
 (use-package doom-themes
   :ensure t
   :config
-  (load-theme 'doom-molokai t))
+  (load-theme 'doom-gruvbox t))
 
 (use-package treemacs
   :disabled
@@ -1432,7 +1432,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(compilation-scroll-output (quote first-error))
  '(custom-safe-themes
    (quote
-    ("be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" default)))
+    ("4e764943cc022ba136b80fa82d7cdd6b13a25023da27528a59ac61b0c4f1d16f" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" default)))
  '(dabbrev-case-fold-search nil)
  '(display-buffer-base-action
    (quote
@@ -1560,7 +1560,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     (cons 360 "#555556")))
  '(vc-annotate-very-old-color nil)
  '(which-function-mode t)
- '(whitespace-style (quote (face empty tabs lines-tail whitespace)) t)
+ '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
  '(winner-mode t))
 (message "es/customizations-applied")
 

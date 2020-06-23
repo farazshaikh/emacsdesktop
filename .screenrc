@@ -9,11 +9,6 @@ shelltitle '$ |...'
 term screen-256color
 vbell off
 bell_msg ""
-mousetrack on
-
-
-
-
 
 # huge scrollback buffer
 defscrollback 5000
@@ -25,9 +20,6 @@ startup_message off
 attrcolor b ".I"
 termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'
 defbce on
-
-# mouse tracking allows to switch region focus by clicking
-mousetrack on
 
 # default windows
 screen -t Shell1  1 bash
@@ -41,6 +33,7 @@ bind 0 select 10
 # get rid of silly xoff stuff
 bind ] split
 bind \ split -v
+bind x remove
 
 # navigating regions with Ctrl-arrows
 bindkey "^[[1;3D" focus left
