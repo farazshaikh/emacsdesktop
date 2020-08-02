@@ -42,7 +42,7 @@
   "Setup the package management for EOS."
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                            ("melpa-stable" . "https://stable.melpa.org/packages/")
-                           ("melpa" . "http://melpa.milkbox.net/packages/")
+                           ("melpa" . "http://melpa.org/packages/")
                            ("elpy" . "http://jorgenschaefer.github.io/packages/")))
   ;;elget
   (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
@@ -1432,7 +1432,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(compilation-scroll-output (quote first-error))
  '(custom-safe-themes
    (quote
-    ("4e764943cc022ba136b80fa82d7cdd6b13a25023da27528a59ac61b0c4f1d16f" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" default)))
+    ("09cadcc2784baa744c6a7c5ebf2a30df59c275414768b0719b800cabd8d1b842" "a7928e99b48819aac3203355cbffac9b825df50d2b3347ceeec1e7f6b592c647" "4e764943cc022ba136b80fa82d7cdd6b13a25023da27528a59ac61b0c4f1d16f" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" default)))
  '(dabbrev-case-fold-search nil)
  '(display-buffer-base-action
    (quote
@@ -1446,6 +1446,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(fci-rule-color "#555556")
  '(global-eldoc-mode nil)
  '(global-hl-line-mode t)
+ '(global-set-key [f5] t)
  '(ido-mode t nil (ido))
  '(ido-vertical-define-keys (quote C-n-and-C-p-only))
  '(ido-vertical-mode 1)
@@ -1463,7 +1464,16 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(jedi:setup-keys t t)
  '(load-home-init-file t t)
  '(lsp-auto-guess-root nil)
- '(lsp-prefer-flymake nil t)
+ '(lsp-enable-file-watchers nil)
+ '(lsp-file-watch-ignored
+   (quote
+    ("[/\\\\]\\.direnv$" "[/\\\\]\\.git$" "[/\\\\]\\.cargo$" "[/\\\\]\\.hg$" "[/\\\\]\\.bzr$" "[/\\\\]_darcs$" "[/\\\\]\\.svn$" "[/\\\\]_FOSSIL_$" "[/\\\\]\\.idea$" "[/\\\\]\\.ensime_cache$" "[/\\\\]\\.eunit$" "[/\\\\]node_modules$" "[/\\\\]\\.fslckout$" "[/\\\\]\\.tox$" "[/\\\\]\\.stack-work$" "[/\\\\]\\.bloop$" "[/\\\\]\\.metals$" "[/\\\\]target$" "[/\\\\]\\.deps$" "[/\\\\]build-aux$" "[/\\\\]autom4te.cache$" "[/\\\\]\\.reference$" "[/\\\\]\\result???$" "[/\\\\]\\target???$" "[/\\\\]\\.cargo-home???$" "[/\\\\]\\.ccls-cache$" "[/\\\\]\\.$")))
+ '(lsp-file-watch-threshold 64)
+ '(lsp-prefer-flymake nil)
+ '(lsp-restart (quote auto-restart))
+ '(lsp-rust-build-on-save t)
+ '(lsp-rust-jobs 2)
+ '(lsp-rust-wait-to-build 10000)
  '(lsp-ui-doc-border "black" t)
  '(lsp-ui-doc-enable t t)
  '(lsp-ui-doc-glance t t)
