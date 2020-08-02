@@ -139,7 +139,6 @@
           py-autopep8
 
           ;; javascript setup from emacs.cafe Nicolas Petton
-          company-tern
           js2-mode
           xref-js2
 
@@ -195,6 +194,7 @@
   :disabled
   :ensure t
   :config
+  (setq custom-safe-themes t)
   (load-theme 'kaolin-bubblegum t)
   (kaolin-treemacs-theme))
 
@@ -208,6 +208,8 @@
   :ensure t
   :config
   (load-theme 'doom-gruvbox t))
+
+(use-package hydra :ensure t)
 
 (use-package treemacs
   :disabled
@@ -908,8 +910,6 @@ Apps^^                        EXWM^^                     Windows
   (global-eldoc-mode -1)
   (setq flyspell-correct-interface #'flyspell-correct-ivy))
 
-
-(use-package hydra :ensure t)
 (use-package git-gutter
   :diminish
   :hook (after-init . global-git-gutter-mode)
@@ -1430,9 +1430,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(column-number-mode t)
  '(company-lsp-cache-cadidates (quote auto) t)
  '(compilation-scroll-output (quote first-error))
- '(custom-safe-themes
-   (quote
-    ("09cadcc2784baa744c6a7c5ebf2a30df59c275414768b0719b800cabd8d1b842" "a7928e99b48819aac3203355cbffac9b825df50d2b3347ceeec1e7f6b592c647" "4e764943cc022ba136b80fa82d7cdd6b13a25023da27528a59ac61b0c4f1d16f" "be9645aaa8c11f76a10bcf36aaf83f54f4587ced1b9b679b55639c87404e2499" "bc836bf29eab22d7e5b4c142d201bcce351806b7c1f94955ccafab8ce5b20208" "d1c7f2db070c96aa674f1d61403b4da1fff2154163e9be76ce51824ed5ca709c" "845103fcb9b091b0958171653a4413ccfad35552bc39697d448941bcbe5a660d" default)))
  '(dabbrev-case-fold-search nil)
  '(display-buffer-base-action
    (quote
