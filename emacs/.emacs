@@ -23,6 +23,7 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (fringe-mode 1)
+(savehist-mode 1)
 
 ;; Make startup faster by reducing the frequency of garbage
 ;; collection.  The default is 800 kilobytes.  Measured in bytes.
@@ -806,10 +807,9 @@ Apps^^                        EXWM^^                     Windows
   :diminish (ivy-mode)
   :bind (("C-x b" . ivy-switch-buffer)
          ("s-b" . 'ivy-switch-buffer)
-         ("<f5>" . counsel-compile))
+         ("<f5>" . compile))
   :custom
   (global-set-key (kbd "C-d") 'ivy-backward-delete-char)
-  (global-set-key (kbd "<f5>") 'compile)
   (ivy-use-virtual-buffers t)
   (ivy-count-format "%d/%d ")
   (ivy-display-style 'fancy)
@@ -1119,7 +1119,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
               ([remap xref-find-references] . lsp-ui-peek-find-references)
-              ([remap xref-find-apropos] . lsp-ui-find-workspace-symbol)
+              ([remap xref-find-apropos] . lsp-ivy-workspace-symbol)
               ("C-c u" . lsp-ui-imenu))
   :custom
   (lsp-ui-doc-enable t)
@@ -1373,11 +1373,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   "Setup DFN project."
   (interactive)
   (setenv "RUST_SRC_PATH" "/home/emacs/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/")
-  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/.")))
+  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/rs/.")))
   (setq compile-command
-        "cd $WRK/rs;\n\
- source ~/.nix-profile/etc/profile.d/nix.sh;\n \
- nix-shell --run \"cargo build\"")
+        "cd $WRK/;source ~/.nix-profile/etc/profile.d/nix.sh;nix-shell --run \"cargo build\"")
   )
 
 
@@ -1425,8 +1423,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(c-echo-syntactic-information-p t)
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
- '(clang-format-executable "clang-format-9" t)
- '(clang-format-style "Google" t)
+ '(clang-format-executable "clang-format-9")
+ '(clang-format-style "Google")
  '(column-number-mode t)
  '(company-lsp-cache-cadidates (quote auto) t)
  '(compilation-scroll-output (quote first-error))
@@ -1443,7 +1441,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(fci-rule-color "#555556")
  '(global-eldoc-mode nil)
  '(global-hl-line-mode t)
- '(global-set-key [f5] t)
+ '(global-semantic-idle-local-symbol-highlight-mode t nil (semantic/idle))
  '(ido-mode t nil (ido))
  '(ido-vertical-define-keys (quote C-n-and-C-p-only))
  '(ido-vertical-mode 1)
@@ -1468,19 +1466,20 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(lsp-file-watch-threshold 64)
  '(lsp-prefer-flymake nil)
  '(lsp-restart (quote auto-restart))
- '(lsp-rust-build-on-save t)
- '(lsp-rust-jobs 2)
- '(lsp-rust-wait-to-build 10000)
- '(lsp-ui-doc-border "black" t)
- '(lsp-ui-doc-enable t t)
+ '(lsp-rust-build-on-save t nil nil "Customized with use-package lsp-mode")
+ '(lsp-rust-jobs 2 nil nil "Customized with use-package lsp-mode")
+ '(lsp-rust-server (quote rust-analyzer))
+ '(lsp-rust-wait-to-build 10000 nil nil "Customized with use-package lsp-mode")
+ '(lsp-ui-doc-border "black")
+ '(lsp-ui-doc-enable t)
  '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t t)
- '(lsp-ui-doc-include-signature t t)
- '(lsp-ui-doc-position (quote bottom) t)
- '(lsp-ui-sideline-enable t t)
- '(lsp-ui-sideline-ignore-duplicate t t)
+ '(lsp-ui-doc-header t)
+ '(lsp-ui-doc-include-signature t)
+ '(lsp-ui-doc-position (quote bottom))
+ '(lsp-ui-sideline-enable t)
+ '(lsp-ui-sideline-ignore-duplicate t)
  '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t t)
+ '(lsp-ui-sideline-show-code-actions t)
  '(lsp-ui-sideline-update-mode (quote line))
  '(magit-auto-revert-mode nil)
  '(magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")) t)
