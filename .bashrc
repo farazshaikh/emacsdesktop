@@ -128,3 +128,4 @@ shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
 export WRK="$HOME//dfn/dfinity/./"
 
+eval "$(direnv hook bash)"

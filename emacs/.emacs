@@ -560,6 +560,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
        window-system
        (getenv "EOS_DESKTOP"))
   :ensure windmove
+  :ensure t
   :pin gnu
   :demand
   :functions exwm-workspace-rename-buffer exwm-systemtray-enable exwm-randr-enable
@@ -922,6 +923,15 @@ Apps^^                        EXWM^^                     Windows
   :bind
   ("C-c g" . hydra-git-gutter/body))
 
+(use-package git-timemachine
+  :ensure t
+  :pin melpa-stable)
+
+(use-package direnv
+  :ensure t
+  :pin melpa-stable
+  :config
+  (direnv-mode))
 
 (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
                             :hint nil)
@@ -1066,6 +1076,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-rust-wait-to-build 10000)
   (lsp-rust-build-on-save t)
   (lsp-rust-jobs 2)
+
+  (lsp-rust-analyzer-display-chaining-hints t)
+  (lsp-rust-analyzer-display-parameter-hints t)
+  (lsp-rust-analyzer-server-display-inlay-hints t)
+  (lsp-rust-server 'rust-analyzer)
+  (lsp-rust-analyzer-server-command "rust-analyzer-linux")
+
   ;; `company-lsp' is automatically enabled
   ;; (lsp-enable-completion-at-point nil)
   (lsp-file-watch-ignored '(
@@ -1123,16 +1140,18 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               ("C-c u" . lsp-ui-imenu))
   :custom
   (lsp-ui-doc-enable t)
+  (lsp-ui-doc-glance t)
   (lsp-ui-doc-header t)
   (lsp-ui-doc-include-signature t)
   (lsp-ui-doc-glance t)
   (lsp-ui-doc-position 'bottom)
-  (lsp-ui-doc-border (face-foreground 'default))
-  (lsp-ui-sideline-ignore-duplicate t)
+  (lsp-ui-doc-alignment 'window)
+
   (lsp-ui-sideline-enable t)
   (lsp-ui-sideline-ignore-duplicate t)
   (lsp-ui-sideline-mode t)
   (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-sideline-update-mode 'line)
   :config
   ;;  Use lsp-ui-doc-webkit only in GUI
   (setq lsp-ui-doc-use-webkit nil
@@ -1372,7 +1391,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (defun es/setup-project-dfn()
   "Setup DFN project."
   (interactive)
-  (setenv "RUST_SRC_PATH" "/home/emacs/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/src/")
   (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/rs/.")))
   (setq compile-command
         "cd $WRK/;source ~/.nix-profile/etc/profile.d/nix.sh;nix-shell --run \"cargo build\"")
@@ -1423,8 +1441,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(c-echo-syntactic-information-p t)
  '(c-insert-tab-function (quote insert-tab))
  '(c-report-syntactic-errors t)
- '(clang-format-executable "clang-format-9")
- '(clang-format-style "Google")
+ '(clang-format-executable "clang-format-9" t)
+ '(clang-format-style "Google" t)
  '(column-number-mode t)
  '(company-lsp-cache-cadidates (quote auto) t)
  '(compilation-scroll-output (quote first-error))
@@ -1467,20 +1485,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(lsp-prefer-flymake nil)
  '(lsp-restart (quote auto-restart))
  '(lsp-rust-build-on-save t nil nil "Customized with use-package lsp-mode")
+ '(lsp-rust-full-docs t)
  '(lsp-rust-jobs 2 nil nil "Customized with use-package lsp-mode")
  '(lsp-rust-server (quote rust-analyzer))
  '(lsp-rust-wait-to-build 10000 nil nil "Customized with use-package lsp-mode")
- '(lsp-ui-doc-border "black")
- '(lsp-ui-doc-enable t)
- '(lsp-ui-doc-glance t t)
- '(lsp-ui-doc-header t)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-doc-position (quote bottom))
- '(lsp-ui-sideline-enable t)
- '(lsp-ui-sideline-ignore-duplicate t)
- '(lsp-ui-sideline-mode t t)
- '(lsp-ui-sideline-show-code-actions t)
- '(lsp-ui-sideline-update-mode (quote line))
  '(magit-auto-revert-mode nil)
  '(magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")) t)
  '(magit-diff-refine-hunk t)
@@ -1524,8 +1532,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                                (quote mode-line)
                                fg))
                             orig-fg))))
- '(rustic-ansi-faces
-   ["#1c1e1f" "#e74c3c" "#b6e63e" "#e2c770" "#268bd2" "#fb2874" "#66d9ef" "#d6d6d4"])
  '(safe-local-variable-values (quote ((buffer-reado-only . t))))
  '(savehist-mode 1)
  '(scroll-step 1)
@@ -1793,7 +1799,7 @@ mouse-2: EXWM Workspace menu.
 ;; JavaScript ;;
 ;;;;;;;;;;;;;;;;
 (require 'company)
-(require 'company-tern)
+;;(require 'company-tern)
 (defun js2-mode-setup()
   "Setup Tern mode for javascript."
   (tern-mode)
@@ -1929,8 +1935,11 @@ mouse-2: EXWM Workspace menu.
   "Lock screen command for es."
   (interactive)
   (start-process-shell-command
-   "/usr/bin/gnome-screensaver-command" nil  "/usr/bin/gnome-screensaver-command -l"))
+   "/usr/bin/gnome-screensaver-command" nil  "/usr/bin/gnome-screensaver-command -l")
+  (start-process-shell-command "/usr/bin/xset" nil "/usr/bin/xset dpms force standby")
+  )
 
+(setq lock-screen-timer (run-with-idle-timer 300 nil 'es/lock-screen))
 
 ;; Swap monitors
 (defun es/monitor-monitor-move-left()
