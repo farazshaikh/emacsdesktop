@@ -9,7 +9,7 @@ alias ton="tmux set-window-option synchronize-panes on"
 export EDITOR=ec
 export HISTCONTROL=ignoredups
 export EOS=~/.eos
-
+alias scr="screen -DAR -h 10000"
 
 # Fallback command prompt if powerline-shell isn't available
 export GIT_PS1_SHOWDIRTYSTATE=true

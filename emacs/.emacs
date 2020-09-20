@@ -24,6 +24,9 @@
 (scroll-bar-mode -1)
 (fringe-mode 1)
 (savehist-mode 1)
+(setq org-agenda-files (list "~/todo.org"
+                               "~/notes.org"
+                               "~/org/home.org"))
 
 ;; Make startup faster by reducing the frequency of garbage
 ;; collection.  The default is 800 kilobytes.  Measured in bytes.
@@ -675,7 +678,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-input-set-key (kbd "s-]") 'split-window-vertically-and-follow)
   (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
   (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
-  (exwm-input-set-key (kbd "s-b") 'ivy-switch-buffer)
+  (exwm-input-set-key (kbd "s-b") 'counsel-switch-buffer)
   (exwm-input-set-key (kbd "s-d") 'counsel-linux-app)
 
   ;; window undo
@@ -762,15 +765,15 @@ Apps^^                        EXWM^^                     Windows
   ("<backpsace>" delete-window)
   ("[" delete-other-windows)
   ("u" winner-undo)
-  ("b" ivy-switch-buffer)
+  ("b" counsel-switch-buffer)
   ("q" nil :color blue))
 
 
 (use-package ag
-  :bind (("C-F" . counsel-ag)))   ;; for expanded results use ag command
+  :bind (("C-S-f" . counsel-ag)))   ;; for expanded results use ag command
 
 (use-package rg
-  :bind (("C-f" . counsel-rg)))    ;; for expanded results use rg command
+  :bind (("C-f" . counsel-git-grep)))    ;; for expanded results use rg command
 
 ;; magit on ssh-protected git repos
 (use-package ssh-agency
@@ -791,9 +794,12 @@ Apps^^                        EXWM^^                     Windows
   (("M-x" . counsel-M-x)
    ("s-x" . counsel-M-x)
    ("C-x C-f" . counsel-find-file)
+   ("C-j" . counsel-mark-ring)
    ("C-x C-j" . counsel-fzf)
    ("s-d" . counsel-linux-app)
    ("M-y" . counsel-yank-pop)
+   ("C-x b" . counsel-switch-buffer)
+   ("s-b" . counsel-switch-buffer)
    :map ivy-minibuffer-map
    ("M-y" . ivy-next-line)
 
@@ -806,9 +812,7 @@ Apps^^                        EXWM^^                     Windows
 (use-package ivy
   :ensure t
   :diminish (ivy-mode)
-  :bind (("C-x b" . ivy-switch-buffer)
-         ("s-b" . 'ivy-switch-buffer)
-         ("<f5>" . compile))
+  :bind (("<f5>" . compile))
   :custom
   (global-set-key (kbd "C-d") 'ivy-backward-delete-char)
   (ivy-use-virtual-buffers t)
@@ -870,9 +874,10 @@ Apps^^                        EXWM^^                     Windows
   ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
   (setq ivy-posframe-display-functions-alist
         '((swiper-isearch  . ivy-posframe-display-at-window-bottom-left)
-          (counsel-switch-buffer . ivy-posframe-display-at-window-bottom-left)
           (complete-symbol . ivy-posframe-display-at-point)
           (counsel-M-x     . ivy-posframe-display-at-point)
+          (counsel-mark-ring . ivy-posframe-display-at-window-bottom-left)
+          (ivy-switch-buffer . ivy-posframe-display-at-window-bottom-left)
           (t               . ivy-posframe-display-at-point)))
   (setq ivy-posframe-width 110
         ivy-posframe-height 30)
@@ -1072,6 +1077,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-restart 'auto-restart)
   (lsp-enable-file-watchers nil)
   (lsp-file-watch-threshold 64)
+  (lsp-auto-guess-root nil)
 
   (lsp-rust-wait-to-build 10000)
   (lsp-rust-build-on-save t)
@@ -1082,6 +1088,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-rust-analyzer-server-display-inlay-hints t)
   (lsp-rust-server 'rust-analyzer)
   (lsp-rust-analyzer-server-command "rust-analyzer-linux")
+  (lsp-rust-full-docs t)
 
   ;; `company-lsp' is automatically enabled
   ;; (lsp-enable-completion-at-point nil)
@@ -1151,7 +1158,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-ui-sideline-ignore-duplicate t)
   (lsp-ui-sideline-mode t)
   (lsp-ui-sideline-show-code-actions t)
+  (lsp-ui-sideline-show-hover t)
   (lsp-ui-sideline-update-mode 'line)
+  (lsp-ui-sideline-diagnostic-max-line-length 40)
   :config
   ;;  Use lsp-ui-doc-webkit only in GUI
   (setq lsp-ui-doc-use-webkit nil
@@ -1163,7 +1172,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
     (setq mode-line-format nil)))
 
-
+(use-package lsp-ivy
+  :ensure t
+  :pin melpa-stable)
 
 (defhydra hydra-lsp (:exit t :hint nil)
   "
@@ -1446,6 +1457,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(column-number-mode t)
  '(company-lsp-cache-cadidates (quote auto) t)
  '(compilation-scroll-output (quote first-error))
+ '(custom-safe-themes
+   (quote
+    ("8d7684de9abb5a770fbfd72a14506d6b4add9a7d30942c6285f020d41d76e0fa" default)))
  '(dabbrev-case-fold-search nil)
  '(display-buffer-base-action
    (quote
@@ -1476,19 +1490,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(jedi:complete-on-dot t t)
  '(jedi:setup-keys t t)
  '(load-home-init-file t t)
- '(lsp-auto-guess-root nil)
- '(lsp-enable-file-watchers nil)
- '(lsp-file-watch-ignored
-   (quote
-    ("[/\\\\]\\.direnv$" "[/\\\\]\\.git$" "[/\\\\]\\.cargo$" "[/\\\\]\\.hg$" "[/\\\\]\\.bzr$" "[/\\\\]_darcs$" "[/\\\\]\\.svn$" "[/\\\\]_FOSSIL_$" "[/\\\\]\\.idea$" "[/\\\\]\\.ensime_cache$" "[/\\\\]\\.eunit$" "[/\\\\]node_modules$" "[/\\\\]\\.fslckout$" "[/\\\\]\\.tox$" "[/\\\\]\\.stack-work$" "[/\\\\]\\.bloop$" "[/\\\\]\\.metals$" "[/\\\\]target$" "[/\\\\]\\.deps$" "[/\\\\]build-aux$" "[/\\\\]autom4te.cache$" "[/\\\\]\\.reference$" "[/\\\\]\\result???$" "[/\\\\]\\target???$" "[/\\\\]\\.cargo-home???$" "[/\\\\]\\.ccls-cache$" "[/\\\\]\\.$")))
- '(lsp-file-watch-threshold 64)
- '(lsp-prefer-flymake nil)
- '(lsp-restart (quote auto-restart))
- '(lsp-rust-build-on-save t nil nil "Customized with use-package lsp-mode")
- '(lsp-rust-full-docs t)
- '(lsp-rust-jobs 2 nil nil "Customized with use-package lsp-mode")
- '(lsp-rust-server (quote rust-analyzer))
- '(lsp-rust-wait-to-build 10000 nil nil "Customized with use-package lsp-mode")
  '(magit-auto-revert-mode nil)
  '(magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")) t)
  '(magit-diff-refine-hunk t)
@@ -1511,9 +1512,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(message-send-mail-function (quote smtpmail-send-it))
  '(normal-erase-is-backspace-mode 0)
  '(objed-cursor-color "#e74c3c")
+ '(org-agenda-files (quote ("~/todo.org")))
  '(package-selected-packages
    (quote
-    (clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit)))
+    (nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit)))
  '(pdf-view-midnight-colors (cons "#d6d6d4" "#1c1e1f"))
  '(python-python-command "/usr/bin/ipython" t)
  '(ring-bell-function
@@ -1939,7 +1941,7 @@ mouse-2: EXWM Workspace menu.
   (start-process-shell-command "/usr/bin/xset" nil "/usr/bin/xset dpms force standby")
   )
 
-(setq lock-screen-timer (run-with-idle-timer 300 nil 'es/lock-screen))
+;;(setq lock-screen-timer (run-with-idle-timer 1800 nil 'es/lock-screen))
 
 ;; Swap monitors
 (defun es/monitor-monitor-move-left()
