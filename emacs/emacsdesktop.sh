@@ -4,7 +4,9 @@ EMACS=emacs
 EMACSCLIENT=emacsclient
 
 detectEmacs() {
-    if hash emacs26 2>/dev/null; then
+    if hash emacs27 2>/dev/null; then
+	EMACS=emacs27
+    elif hash emacs26 2>/dev/null; then
 	EMACS=emacs26
     elif hash emacs25 2>/dev/null; then
 	EMACS=emacs25
@@ -15,12 +17,13 @@ detectEmacs() {
 
 
 detectEmacsClient() {
-    if hash emacsclient26 2>/dev/null; then
+    if hash emacsclient27 2>/dev/null; then
+	EMACSCLIENT=emacsclient27
+    elif hash emacsclient26 2>/dev/null; then
 	EMACSCLIENT=emacsclient26
     elif hash emacsclient25 2>/dev/null; then
 	EMACSCLIENT=emacsclient25
     elif hash emacsclient.emacs25 2> /dev/null; then
-
 	EMACSCLIENT=emacsclient.emacs25
     else
 	EMACSCLIENT=emacsclient
@@ -47,7 +50,7 @@ export EOS_DESKTOP=true
 #${EMACS} -rv --daemon -f exwm-enable
 #${EMACSCLIENT} -a '' -c
 
-
+[[ -f ~/.Xresources ]] && xrdb -merge -I$HOME ~/.Xresources
 
 # Register with gnome-session so that it does not kill the whole session thinking it is dead.
 test -n "$DESKTOP_AUTOSTART_ID" && {
@@ -56,7 +59,6 @@ test -n "$DESKTOP_AUTOSTART_ID" && {
 
 procs=("/usr/bin/gnome-flashback"
        "/usr/lib/gnome-settings-daemon/gsd-xsettings"
-       "/usr/bin/gnome-keyring-daemon -f"
        "/usr/lib/gnome-settings-daemon/gnome-settings-daemon"
        "/usr/lib/gnome-settings-daemon/gsd-power"
        "/usr/lib/gnome-settings-daemon/gsd-print-notifications"

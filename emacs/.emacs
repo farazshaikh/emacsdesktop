@@ -17,6 +17,8 @@
 ;;  remove all the packages from ~/.emacs.d
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;;; -*- lexical-binding: t; -*-
+
 ;;; Code:
 (set-background-color "#1c1e1f")
 (menu-bar-mode -1)
@@ -24,9 +26,36 @@
 (scroll-bar-mode -1)
 (fringe-mode 1)
 (savehist-mode 1)
-(setq org-agenda-files (list "~/todo.org"
-                               "~/notes.org"
-                               "~/org/home.org"))
+
+
+;; (add-to-list 'initial-frame-alist '(fullscreen . maximized))
+;; (add-to-list 'default-frame-alist '(fullscreen . fullheight))
+
+(set-face-background 'vertical-border "grey2")
+(set-face-foreground 'vertical-border (face-background 'vertical-border))
+
+(defvar org-agenda-files (list "~/todo.org"
+                               "~/notes.org"))
+
+
+;; Custom variables
+(defgroup emacs-desktop-environment nil
+  "Emacs Desktop Environment"
+  :prefix "ede"
+  :group 'convenience)
+
+(defcustom ede-term-type 'xterm
+  "Choose Terminal Type."
+  :group 'emacs-desktop-environment
+  :type '(choice (const :tag "gnome-terminal" gnome-terminal)
+                 (const :tag "xterm" xterm)))
+
+(defcustom ede-browser 'firefox
+  "Choose Terminal Type."
+  :group 'emacs-desktop-environment
+  :type '(choice (const :tag "firefox" firefox)
+                 (const :tag "chrome" chrome)))
+
 
 ;; Make startup faster by reducing the frequency of garbage
 ;; collection.  The default is 800 kilobytes.  Measured in bytes.
@@ -195,23 +224,18 @@
   (auto-package-update-maybe))
 
 (use-package kaolin-themes
-  :disabled
   :ensure t
   :config
-  (setq custom-safe-themes t)
-  (load-theme 'kaolin-bubblegum t)
-  (kaolin-treemacs-theme))
+  (setq custom-safe-themes t))
 
 (use-package monokai-pro-theme
-  :ensure t
-  :disabled
-  :config
-  (load-theme 'monokai-pro t))
+  :ensure t)
 
 (use-package doom-themes
-  :ensure t
-  :config
-  (load-theme 'doom-gruvbox t))
+  :ensure t)
+
+;;(load-theme 'doom-molokai t)
+(load-theme 'doom-gruvbox t)
 
 (use-package hydra :ensure t)
 
@@ -396,6 +420,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 ;; Load EXWM.
 (defun es/setup-systray()
+  "Setup system tray."
   (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
   (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/indicator-messages-service")
   (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
@@ -435,9 +460,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (start-process "" nil "/usr/lib/gnome-disk-utility/gsd-disk-utility-notify")
 
   ;; setup gnome-keyring
-  (start-process "" nil "/usr/bin/gnome-keyring-daemon --daemonize --login")
-  (setq ssh-auth-sock  (shell-command-to-string  "/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh"))
-  (setq ssh-auth-sock (split-string (replace-regexp-in-string "\n$" ""  ssh-auth-sock) "="))
+  (defvar ssh-auth-sock  (shell-command-to-string  "/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh"))
+  (setq-default ssh-auth-sock (split-string (replace-regexp-in-string "\n$" ""  ssh-auth-sock) "="))
   (setenv (car ssh-auth-sock) (car (cdr ssh-auth-sock)))
   (message "es/setup-up-gnome-desktop"))
 (if (and window-system (getenv "EOS_DESKTOP") (getenv "EOS_EMACS_GNOME_SHELL_SETUP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
@@ -557,6 +581,17 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ("C-<down>" . forward-paragraph)
   ("<find>" . beginning-of-line))
 
+(use-package windower
+  :ensure t
+  :demand
+  :pin gnu
+  :config
+  (global-set-key (kbd "<s-S-left>") 'windower-swap-left)
+  (global-set-key (kbd "<s-S-down>") 'windower-swap-below)
+  (global-set-key (kbd "<s-S-up>") 'windower-swap-above)
+  (global-set-key (kbd "<s-S-right>") 'windower-swap-right)
+  (global-set-key (kbd "<s-tab>") 'windower-switch-to-last-buffer)
+  (global-set-key (kbd "<s-o>") 'windower-toggle-single))
 
 (use-package exwm
   :if (and
@@ -646,8 +681,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ;; setup alt-tab
   (exwm-input-set-key (kbd "<M-tab>") 'timed-iflipb-next-buffer)
   (exwm-input-set-key (kbd "<M-S-iso-lefttab>") 'timed-iflipb-previous-buffer)
-  (exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
-  (exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+  ;;(exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
+  ;;(exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
 
   ;; applications
   (exwm-input-set-key (kbd "s-l") 'es/lock-screen)
@@ -656,8 +691,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
   (exwm-input-set-key (kbd "s-e") 'hydra-eos/body)
   (exwm-input-set-key (kbd "s-r") 'exwm-reset)
-  (exwm-input-set-key (kbd "s-s") 'es/save-edit-position)
-  (exwm-input-set-key (kbd "s-a") 'es/jump-edit-position)
+  (exwm-input-set-key (kbd "s-<space>") 'es/save-edit-position)
+  (exwm-input-set-key (kbd "s-j") 'counsel-mark-ring)
 
   ;; window move
   (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
@@ -665,13 +700,13 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (exwm-input-set-key (kbd "s-<up>") 'windmove-up)
   (exwm-input-set-key (kbd "s-<right>") 'windmove-right)
   ;; window resize
-  (exwm-input-set-key (kbd "s-S-<right>")
+  (exwm-input-set-key (kbd "s-M-<right>")
                       (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 50)))
-  (exwm-input-set-key (kbd "s-S-<left>")
+  (exwm-input-set-key (kbd "s-M-<left>")
                       (lambda () (interactive) (exwm-layout-shrink-window-horizontally 50)))
-  (exwm-input-set-key (kbd "s-S-<up>")
+  (exwm-input-set-key (kbd "s-M-<up>")
                       (lambda () (interactive) (exwm-layout-enlarge-window             50)))
-  (exwm-input-set-key (kbd "s-S-<down>")
+  (exwm-input-set-key (kbd "s-M-<down>")
                       (lambda () (interactive) (exwm-layout-shrink-window              50)))
     ;; window splits
   (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally-and-follow)
@@ -716,21 +751,20 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (defhydra hydra-eos (:exit nil :hint nil)
   "
 Emacs Deskop EOS: Binding ALSO accessible under Super key i.e. s-b switch buffer
-Apps^^                        EXWM^^                     Windows
--------------------------------------------------------------------------------------
-[_d_] Linux application       [_w_] Workspace switch     [_<up>_] up
-[_g_] Browser                 [_r_] Reset                [_<down>_] down
-[_t_] Terminal                [_L_] Monitor Move left    [_<left>_] left
-[_T_] New Terminal            [_R_] Monitor Move right   [_<right>_] right
-[_E_] Treemacs Explorer       [_-_] Text size decrease   [_\\_] Vertical split
-[_l_] lock screen             [_=_] Text size increase   [_]_] Horizontal split
-[_s_] Splash                  [_s_] Save edit positon    [<backspace>] delete win
-[_n_] netflix                 [_a_] Jump edit position   [_[_] delete other win
-[_j_] ssh                                                [_u_] winner-undo
-[_v_] Volume 200pct                                      [_b_] switch buffer
-[_f_] rip grep                                           [_G_] GDM Tweaks
-[_F_] ag silver searcher                                 [_S_] GDM Set Scale
-
+Apps^^                        EXWM^^                     Windows mvmt                Windows split
+-------------------------------------------------------------------------------------------------------------
+[_d_] Linux application       [_w_] Workspace switch     [_<up>_] up                 [_\\_] Vertical split
+[_g_] Browser                 [_r_] Reset                [_<down>_] down             [_]_] Horizontal split
+[_t_] Terminal                [_L_] Monitor Move left    [_<left>_] left             [<backspace>] delete win
+[_T_] New Terminal            [_R_] Monitor Move right   [_<right>_] right           [_[_] delete other win
+[_E_] Treemacs Explorer       [_-_] Text size decrease   [_S-<up>_] move window up   [_u_] winner-undo
+[_l_] lock screen             [_=_] Text size increase   [_S-<down>_] move wind down [_b_] switch buffer
+[_a_] Splash                  [_s_] Save edit Position   [_S-<left>_] move left      [_G_] GDM Tweaks
+[_n_] Netflix                 [_j_] Jump edit position   [_S-<right>_] move right    [_S_] GDM Set Scale
+[_s_] ssh
+[_v_] Volume 200pct
+[_f_] rip grep
+[_F_] ag silver searcher
 "
   ("d"  counsel-linux-app)
   ("g" es/app-browser)
@@ -738,9 +772,9 @@ Apps^^                        EXWM^^                     Windows
   ("T" es/app-terminal)
   ("E" treemacs)
   ("l" es/lock-screen)
-  ("s" es/app-splash)
+  ("a" es/app-splash)
   ("n" es/app-netflix)
-  ("j" es/ssh)
+  ("s" es/ssh)
   ("v" es/volumeset)
   ("f" counsel-rg)
   ("F" counsel-ag)
@@ -753,13 +787,17 @@ Apps^^                        EXWM^^                     Windows
   ("R" es/monitor-monitor-move-right)
   ("-" text-scale-decrease)
   ("=" text-scale-increase)
-  ("s" es/save-edit-position)
-  ("a" es/jump-edit-position)
+  ("<space>" es/save-edit-position)
+  ("j" counsel-mark-ring)
 
   ("<up>" windmove-up)
   ("<down>" windmove-down)
   ("<left>" windmove-left)
   ("<right>" windmove-right)
+  ("S-<up>" windower-swap-up)
+  ("S-<down>" windower-swap-down)
+  ("S-<left>" windower-swap-left)
+  ("S-<right>" windower-swap-right)
   ("\\" split-window-horizontally-and-follow)
   ("]" split-window-vertically-and-follow)
   ("<backpsace>" delete-window)
@@ -894,12 +932,6 @@ Apps^^                        EXWM^^                     Windows
   :custom
   (whitespace-style (quote (face empty tabs lines-tail whitespace))))
 
-(use-package flycheck
-  :ensure t
-  :hook (prog-mode . company-mode)
-  :init
-  (setq flycheck-global-modes '(not exwm-mode treemacs-mode)))
-
 (use-package flyspell
   :init
   (defun flyspell-local-vars ()
@@ -935,6 +967,9 @@ Apps^^                        EXWM^^                     Windows
 (use-package direnv
   :ensure t
   :pin melpa-stable
+  :custom
+  (direnv-always-show-summary t)
+  (direnv-show-paths-in-summary nil)
   :config
   (direnv-mode))
 
@@ -964,6 +999,7 @@ Git gutter:
 
 (use-package magit
   :ensure t
+  :pin melpa-stable
   :init
   (progn
     (bind-key "C-x g" 'magit-status))
@@ -1136,14 +1172,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package lsp-ui
   :ensure t
   :diminish
+  :demand
   :commands lsp-ui-mode
   :custom-face
   (lsp-ui-doc-background ((t (:background nil))))
   (lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
   :bind (:map lsp-ui-mode-map
-              ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
-              ([remap xref-find-references] . lsp-ui-peek-find-references)
-              ([remap xref-find-apropos] . lsp-ivy-workspace-symbol)
+              ([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
+              ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M--?
+              ([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
               ("C-c u" . lsp-ui-imenu))
   :custom
   (lsp-ui-doc-enable t)
@@ -1161,12 +1198,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-ui-sideline-show-hover t)
   (lsp-ui-sideline-update-mode 'line)
   (lsp-ui-sideline-diagnostic-max-line-length 40)
-  :config
+
   ;;  Use lsp-ui-doc-webkit only in GUI
   (setq lsp-ui-doc-use-webkit nil
         lsp-ui-peek-enable t
         lsp-ui-imenu-enable t
         lsp-ui-flycheck-enable t)
+
+  :config
   ;;WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
   ;;https://github.com/emacs-lsp/lsp-ui/issues/243
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
@@ -1183,7 +1222,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
  [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
  [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature       [_c_] clear blacklist
- [_e_] descirbe ession"
+ [_e_] describe session"
   ("d" lsp-find-declaration)
   ("D" lsp-ui-peek-find-definitions)
   ("R" lsp-ui-peek-find-references)
@@ -1202,6 +1241,21 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   ("M-s" lsp-describe-session)
   ("M-r" lsp-workspace-restart)
   ("S" lsp-workspace-shutdown))
+
+(use-package flycheck
+  :ensure t
+  :hook (prog-mode . company-mode)
+  :demand
+  :init
+  (global-flycheck-mode)
+  (setq flycheck-global-modes '(not exwm-mode treemacs-mode))
+  (flycheck-set-indication-mode 'left-margin)
+  (add-hook 'sh-mode-hook
+            (lambda ()
+              (defvar lsp-diagnostics-provider :none)
+              (when (flycheck-may-enable-checker 'sh-shellcheck)
+                (flycheck-select-checker 'sh-shellcheck)))))
+
 
 (use-package unicode-fonts :if window-system :ensure t)
 (use-package all-the-icons-dired :if window-system :ensure t)
@@ -1273,6 +1327,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :custom
   (company-lsp-cache-cadidates 'auto))
 
+;; ansible
+(use-package yaml-mode
+  :pin melpa-stable)
+(use-package ansible
+  :init
+  (add-hook 'yaml-mode-hook '(lambda () (ansible 1))))
+(use-package company-ansible)
+
 ;; Python
 (use-package elpy
   :ensure t
@@ -1302,8 +1364,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :diminish
   :config
   (message "es/use-package-ccls")
-  (setq ccls-executable "/snap/bin/ccls")
-  (setq lsp-prefer-flymake nil)
+  (defvar ccls-executable "/snap/bin/ccls")
+  (defvar lsp-prefer-flymake nil)
   (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
   (add-hook 'compilation-mode '(lamda ()
                                       (next-error-follow-minor-mode t)))
@@ -1402,7 +1464,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (defun es/setup-project-dfn()
   "Setup DFN project."
   (interactive)
-  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/rs/.")))
+  (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/rs")))
   (setq compile-command
         "cd $WRK/;source ~/.nix-profile/etc/profile.d/nix.sh;nix-shell --run \"cargo build\"")
   )
@@ -1425,18 +1487,70 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (es/setup-project-dfn)
 
 ;; Setup projectile
+(use-package counsel-projectile
+  :ensure
+  :pin melpa-stable)
+
 (use-package projectile
   :ensure t
   :pin melpa-stable
   :config
+  (projectile-mode 1)
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (setq projectile-project-search-path (getenv "WRK"))
-  (projectile-mode))
+  :init
+  (projectile-add-known-project (getenv "WRK"))
+  :bind
+  ("C-c p" . hydra-projectile/body))
+
+(defhydra hydra-projectile-other-window (:color teal)
+  "projectile-other-window"
+  ("f"  projectile-find-file-other-window        "file")
+  ("g"  projectile-find-file-dwim-other-window   "file dwim")
+  ("d"  projectile-find-dir-other-window         "dir")
+  ("b"  projectile-switch-to-buffer-other-window "buffer")
+  ("q"  nil                                      "cancel" :color blue))
+
+(defhydra hydra-projectile (:exit nil
+                            :color teal
+                            :hint nil)
+  "
+     PROJECTILE: %(projectile-project-root)
+
+     Find File            Search/Tags          Buffers                Cache
+------------------------------------------------------------------------------------------
+_s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear
+ _ff_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project
+ _fd_: file curr dir   _o_: multi-occur     _s-k_: Kill all buffers  _X_: cleanup non-existing
+  _r_: recent file                                               ^^^^_z_: cache current
+  _d_: dir
+
+"
+  ("a"   counsel-projectile-ag)
+  ("b"   counsel-projectile-switch-to-buffer)
+  ("c"   projectile-invalidate-cache)
+  ("d"   counsel-projectile-find-dir)
+  ("s-f" counsel-projectile-find-file)
+  ("ff"  counsel-projectile-find-file-dwim)
+  ("fd"  projectile-find-file-in-directory)
+  ("g"   ggtags-update-tags)
+  ("s-g" ggtags-update-tags)
+  ("i"   projectile-ibuffer)
+  ("K"   projectile-kill-buffers)
+  ("s-k" projectile-kill-buffers)
+  ("m"   projectile-multi-occur)
+  ("o"   projectile-multi-occur)
+  ("s-p" counsel-projectile-switch-project "switch project")
+  ("p"   counsel-projectile-switch-project)
+  ("s"   counsel-projectile-switch-project)
+  ("r"   projectile-recentf)
+  ("x"   projectile-remove-known-project)
+  ("X"   projectile-cleanup-known-projects)
+  ("z"   projectile-cache-current-file)
+  ("`"   hydra-projectile-other-window/body "other window")
+  ("q"   nil "cancel" :color blue))
+
 
 (message "!!es/packages-loaded!!")
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Setup common variables across packages ;;
@@ -1487,20 +1601,20 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(jdee-db-active-breakpoint-face-colors (cons "#1B2229" "#fd971f"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#1B2229" "#b6e63e"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1B2229" "#525254"))
- '(jedi:complete-on-dot t t)
- '(jedi:setup-keys t t)
+ '(jedi:complete-on-dot t)
+ '(jedi:setup-keys t)
  '(load-home-init-file t t)
  '(magit-auto-revert-mode nil)
- '(magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")) t)
+ '(magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")))
  '(magit-diff-refine-hunk t)
  '(magit-expand-staged-on-commit (quote full) t)
- '(magit-fetch-arguments (quote ("--prune")) t)
+ '(magit-fetch-arguments (quote ("--prune")))
  '(magit-log-auto-more t)
  '(magit-log-cutoff-length 20 t)
  '(magit-no-confirm (quote (stage-all-changes unstage-all-changes)))
  '(magit-process-connection-type nil)
  '(magit-push-always-verify nil t)
- '(magit-push-arguments (quote ("--set-upstream")) t)
+ '(magit-push-arguments (quote ("--set-upstream")))
  '(magit-refresh-file-buffer-hook nil t)
  '(magit-save-some-buffers nil t)
  '(magit-set-upstream-on-push (quote askifnotset) t)
@@ -1515,7 +1629,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
  '(org-agenda-files (quote ("~/todo.org")))
  '(package-selected-packages
    (quote
-    (nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit)))
+    (counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit)))
  '(pdf-view-midnight-colors (cons "#d6d6d4" "#1c1e1f"))
  '(python-python-command "/usr/bin/ipython" t)
  '(ring-bell-function
@@ -1699,10 +1813,12 @@ mouse-2: EXWM Workspace menu.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun es/save-edit-position()
+  "Save this buffer position in marker ring."
   (interactive)
   (point-to-register ?p))
 
 (defun es/jump-edit-position()
+  "Jump to last saved position."
   (interactive)
   (jump-to-register ?p))
 
@@ -1863,9 +1979,16 @@ mouse-2: EXWM Workspace menu.
   (defvar es/browser-bufname)
   (defvar es/browser-binary)
   (defvar es/browser-invocation)
-  (setq es/browser-bufname "Google-chrome")
-  (setq es/browser-binary "/usr/bin/google-chrome")
-  (setq es/browser-invocation (concat es/browser-binary))
+
+
+  (cond ((eq ede-browser 'chrome)
+         (setq es/browser-bufname "Google-chrome")
+         (setq es/browser-binary "/usr/bin/google-chrome")
+         (setq es/browser-invocation (concat es/browser-binary)))
+        ((eq ede-browser 'firefox)
+         (setq es/browser-bufname "Firefox")
+         (setq es/browser-binary "/usr/bin/firefox --private-window")
+         (setq es/browser-invocation (concat es/browser-binary))))
 
   (defvar es/browser)
   (setq es/browser (find-named-buffer es/browser-bufname))
@@ -1879,21 +2002,6 @@ mouse-2: EXWM Workspace menu.
       (switch-to-buffer es/browser))
     ))
 
-(defun es/app-terminal()
-  "Find existing or open a new terminal window."
-  (interactive)
-  (defvar es/terminal)
-  (defvar es/termbufname)
-  (setq es/termbufname "Gnome-terminal")
-  (setq es/terminal (find-named-buffer es/termbufname))
-  (if (eq es/terminal nil)
-      (progn
-        (message "Opening terminal")
-        (es/app-terminal-new))
-    (progn
-      (message "terminal")
-      (switch-to-buffer es/terminal))
-    ))
 
 (defun es/app-splash()
   "EOS Splash screen."
@@ -1918,14 +2026,40 @@ mouse-2: EXWM Workspace menu.
       (switch-to-buffer es/splash))
     ))
 
+(defun es/app-terminal()
+  "Find existing or open a new terminal window."
+  (interactive)
+  (defvar es/terminal)
+  (defvar es/termbufname)
+  (setq es/termbufname
+        (cond ((eq ede-term-type 'xterm)  "XTerm")
+              ((eq ede-term-type 'gnome-terminal)  "Gnome-terminal")
+              (t "XTerm")))
+
+  (setq es/terminal (find-named-buffer es/termbufname))
+  (if (eq es/terminal nil)
+      (progn
+        (message "Opening terminal")
+        (es/app-terminal-new))
+    (progn
+      (message "terminal")
+      (switch-to-buffer es/terminal))
+    ))
+
 (defun es/app-terminal-new()
   "Start a new terminal."
   (interactive)
   (defvar es/term-bufname)
   (defvar es/term-binary)
   (defvar es/term-invocation)
-  (setq es/term-bufname "Gnome-terminal")
-  (setq es/term-binary "/usr/bin/gnome-terminal")
+
+  (setq es/term-binary
+        (cond ((eq ede-term-type 'xterm)
+               "/usr/bin/dbus-launch /usr/bin/xterm -fa \"Ubuntu Mono\" -fs 10")
+              ((eq ede-term-type 'gnome-terminal)
+               "/usr/bin/dbus-launch /usr/bin/gnome-terminal")
+              (t "/usr/bin/dbus-launch /usr/bin/xterm -fa \"Ubuntu Mono\" -fs 10")))
+
   (setq es/term-invocation es/term-binary)
   (progn
     (message "Opening terminal")
@@ -2057,3 +2191,26 @@ mouse-2: EXWM Workspace menu.
 
 (provide '.emacs)
 ;;; .emacs ends here
+
+
+
+(setq exwm-workspace-index-map
+        (lambda (index)
+          (let ((named-workspaces ["code" "brow" "term" "slac" "extr"]))
+            (if (< index (length named-workspaces))
+                (elt named-workspaces index)
+              (number-to-string index)))))
+
+(defun exwm-workspace--update-ewmh-desktop-names ()
+  (xcb:+request exwm--connection
+      (make-instance 'xcb:ewmh:set-_NET_DESKTOP_NAMES
+                     :window exwm--root :data
+                     (mapconcat (lambda (i) (funcall exwm-workspace-index-map i))
+                                (number-sequence 0 (1- (exwm-workspace--count)))
+                                "\0"))))
+
+(add-hook 'exwm-workspace-list-change-hook
+          #'exwm-workspace--update-ewmh-desktop-names)
+
+;; you may need to call the function once manually
+(exwm-workspace--update-ewmh-desktop-names)
