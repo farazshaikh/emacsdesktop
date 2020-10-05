@@ -1,3 +1,4 @@
+
 ;;; package -- Summary EOS_DESKTOP
 ;;         EXWM/Gnome based Desktop Environment using Emacs.
 ;;
@@ -423,7 +424,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   "Setup system tray."
   (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
   (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/indicator-messages-service")
-  (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
+
+  ;; some issues with systray
+  ;;(start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
 ;;  (start-process "" nil "zeitgeist-datahub")
   (start-process "" nil "update-notifier")
   (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")

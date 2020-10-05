@@ -46,6 +46,6 @@ xrandr --addmode $OUTPUT 3840x2160
 
 # Finally launch emacs.
 export EOS_DESKTOP=true
-exec dbus-launch emacs
+exec dbus-launch --exit-with-session emacs
 #exec dbus-launch emacsclient -c
 

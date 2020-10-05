@@ -89,8 +89,8 @@ export XDG_CURRENT_DESKTOP=GNOME
 export `/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh`
 
 killall ${EMACS}
-${EMACS}
-
+#${EMACS}
+dbus-launch --exit-with-session "${EMACS}"
 
 for pid in ${pids[*]}; do
     kill $pid
