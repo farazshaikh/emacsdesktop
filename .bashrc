@@ -6,6 +6,7 @@ alias ec='emacsclient -n '
 alias magit='emacsclient -n --eval "(magit)"'
 alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
+alias tmuxa="tmux attach"
 export EDITOR=ec
 export HISTCONTROL=ignoredups
 export EOS=~/.eos

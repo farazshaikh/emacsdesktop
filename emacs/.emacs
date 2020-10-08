@@ -1126,7 +1126,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-rust-analyzer-display-parameter-hints t)
   (lsp-rust-analyzer-server-display-inlay-hints t)
   (lsp-rust-server 'rust-analyzer)
-  (lsp-rust-analyzer-server-command "rust-analyzer-linux")
   (lsp-rust-full-docs t)
 
   ;; `company-lsp' is automatically enabled
