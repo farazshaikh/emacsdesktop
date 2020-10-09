@@ -45,11 +45,12 @@
   :prefix "ede"
   :group 'convenience)
 
-(defcustom ede-term-type 'xterm
+(defcustom ede-term-type 'uxterm
   "Choose Terminal Type."
   :group 'emacs-desktop-environment
   :type '(choice (const :tag "gnome-terminal" gnome-terminal)
-                 (const :tag "xterm" xterm)))
+                 (const :tag "xterm" xterm)
+                 (const :tag "uxterm" uxterm)))
 
 (defcustom ede-browser 'firefox
   "Choose Terminal Type."
@@ -1566,23 +1567,21 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
    ["#1c1e1f" "#e74c3c" "#b6e63e" "#e2c770" "#268bd2" "#fb2874" "#66d9ef" "#d6d6d4"])
  '(c-basic-offset 3)
  '(c-echo-syntactic-information-p t)
- '(c-insert-tab-function (quote insert-tab))
+ '(c-insert-tab-function 'insert-tab)
  '(c-report-syntactic-errors t)
  '(clang-format-executable "clang-format-9" t)
  '(clang-format-style "Google" t)
  '(column-number-mode t)
- '(company-lsp-cache-cadidates (quote auto) t)
- '(compilation-scroll-output (quote first-error))
+ '(company-lsp-cache-cadidates 'auto t)
+ '(compilation-scroll-output 'first-error)
  '(custom-safe-themes
-   (quote
-    ("8d7684de9abb5a770fbfd72a14506d6b4add9a7d30942c6285f020d41d76e0fa" default)))
+   '("8d7684de9abb5a770fbfd72a14506d6b4add9a7d30942c6285f020d41d76e0fa" default))
  '(dabbrev-case-fold-search nil)
  '(display-buffer-base-action
-   (quote
-    ((display-buffer-reuse-window display-buffer-same-window display-buffer-in-previous-window display-buffer-use-some-window))))
+   '((display-buffer-reuse-window display-buffer-same-window display-buffer-in-previous-window display-buffer-use-some-window)))
  '(ediff-keep-variants nil)
- '(ediff-split-window-function (quote split-window-horizontally))
- '(ediff-window-setup-function (quote ediff-setup-windows-plain))
+ '(ediff-split-window-function 'split-window-horizontally)
+ '(ediff-window-setup-function 'ediff-setup-windows-plain)
  '(elpy-rpc-backend "jedi" t)
  '(elpy-rpc-python-command "python3")
  '(exwm-layout-show-all-buffers t)
@@ -1591,13 +1590,13 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
  '(global-hl-line-mode t)
  '(global-semantic-idle-local-symbol-highlight-mode t nil (semantic/idle))
  '(ido-mode t nil (ido))
- '(ido-vertical-define-keys (quote C-n-and-C-p-only))
+ '(ido-vertical-define-keys 'C-n-and-C-p-only)
  '(ido-vertical-mode 1)
  '(indent-tabs-mode nil)
  '(inhibit-startup-screen t)
  '(ivy-count-format "%d/%d ")
- '(ivy-display-style (quote fancy))
- '(ivy-re-builders-alist (quote ((swiper . ivy--regex) (t . ivy--regex-plus))) t)
+ '(ivy-display-style 'fancy)
+ '(ivy-re-builders-alist '((swiper . ivy--regex) (t . ivy--regex-plus)) t)
  '(ivy-use-virtual-buffers t)
  '(ivy-wrap t)
  '(jdee-db-active-breakpoint-face-colors (cons "#1B2229" "#fd971f"))
@@ -1607,66 +1606,60 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
  '(jedi:setup-keys t)
  '(load-home-init-file t t)
  '(magit-auto-revert-mode nil)
- '(magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")))
+ '(magit-diff-arguments '("--no-ext-diff" "-M" "-C"))
  '(magit-diff-refine-hunk t)
- '(magit-expand-staged-on-commit (quote full) t)
- '(magit-fetch-arguments (quote ("--prune")))
+ '(magit-expand-staged-on-commit 'full t)
+ '(magit-fetch-arguments '("--prune"))
  '(magit-log-auto-more t)
  '(magit-log-cutoff-length 20 t)
- '(magit-no-confirm (quote (stage-all-changes unstage-all-changes)))
+ '(magit-no-confirm '(stage-all-changes unstage-all-changes))
  '(magit-process-connection-type nil)
  '(magit-push-always-verify nil t)
- '(magit-push-arguments (quote ("--set-upstream")))
+ '(magit-push-arguments '("--set-upstream"))
  '(magit-refresh-file-buffer-hook nil t)
  '(magit-save-some-buffers nil t)
- '(magit-set-upstream-on-push (quote askifnotset) t)
+ '(magit-set-upstream-on-push 'askifnotset t)
  '(magit-stage-all-confirm nil t)
  '(magit-status-verbose-untracked nil t)
  '(magit-unstage-all-confirm nil t)
  '(magithub-message-confirm-cancellation nil t)
  '(magithub-use-ssl t t)
- '(message-send-mail-function (quote smtpmail-send-it))
+ '(message-send-mail-function 'smtpmail-send-it)
  '(normal-erase-is-backspace-mode 0)
  '(objed-cursor-color "#e74c3c")
- '(org-agenda-files (quote ("~/todo.org")))
+ '(org-agenda-files '("~/todo.org"))
  '(package-selected-packages
-   (quote
-    (counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit)))
+   '(adoc-mode counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit))
  '(pdf-view-midnight-colors (cons "#d6d6d4" "#1c1e1f"))
  '(python-python-command "/usr/bin/ipython" t)
  '(ring-bell-function
    (lambda nil
      (let
          ((orig-fg
-           (face-foreground
-            (quote mode-line))))
-       (set-face-foreground
-        (quote mode-line)
-        "#6495ED")
+           (face-foreground 'mode-line)))
+       (set-face-foreground 'mode-line "#6495ED")
        (run-with-idle-timer 0.1 nil
                             (lambda
                               (fg)
-                              (set-face-foreground
-                               (quote mode-line)
-                               fg))
+                              (set-face-foreground 'mode-line fg))
                             orig-fg))))
- '(safe-local-variable-values (quote ((buffer-reado-only . t))))
+ '(safe-local-variable-values '((buffer-reado-only . t)))
  '(savehist-mode 1)
  '(scroll-step 1)
  '(select-enable-clipboard t)
- '(send-mail-function (quote smtpmail-send-it))
+ '(send-mail-function 'smtpmail-send-it)
  '(set-fill-column 80)
  '(show-paren-mode t)
  '(show-trailing-whitespace t)
- '(smtpmail-auth-credentials (quote (("smtp.gmail.com" 587 "faraz@email.com" nil))))
+ '(smtpmail-auth-credentials '(("smtp.gmail.com" 587 "faraz@email.com" nil)))
  '(smtpmail-default-smtp-server "smtp.gmail.com")
  '(smtpmail-smtp-server "smtp.gmail.com")
  '(smtpmail-smtp-service 587)
- '(smtpmail-starttls-credentials (quote (("smtp.gmail.com" 587 nil nil))))
- '(speedbar-default-position (quote left))
+ '(smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil)))
+ '(speedbar-default-position 'left)
  '(standard-indent 3)
  '(transient-mark-mode t)
- '(uniquify-buffer-name-style (quote reverse) nil (uniquify))
+ '(uniquify-buffer-name-style 'reverse nil (uniquify))
  '(vc-annotate-background "#1c1e1f")
  '(vc-annotate-color-map
    (list
@@ -1690,7 +1683,7 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
     (cons 360 "#555556")))
  '(vc-annotate-very-old-color nil)
  '(which-function-mode t)
- '(whitespace-style (quote (face empty tabs lines-tail whitespace)))
+ '(whitespace-style '(face empty tabs lines-tail whitespace))
  '(winner-mode t))
 (message "es/customizations-applied")
 
@@ -2034,9 +2027,10 @@ mouse-2: EXWM Workspace menu.
   (defvar es/terminal)
   (defvar es/termbufname)
   (setq es/termbufname
-        (cond ((eq ede-term-type 'xterm)  "XTerm")
+        (cond ((eq ede-term-type 'xterm)  "UXTerm")
+              ((eq ede-term-type 'xterm)  "XTerm")
               ((eq ede-term-type 'gnome-terminal)  "Gnome-terminal")
-              (t "XTerm")))
+              (t "UXTerm")))
 
   (setq es/terminal (find-named-buffer es/termbufname))
   (if (eq es/terminal nil)
@@ -2056,11 +2050,13 @@ mouse-2: EXWM Workspace menu.
   (defvar es/term-invocation)
 
   (setq es/term-binary
-        (cond ((eq ede-term-type 'xterm)
-               "/usr/bin/dbus-launch /usr/bin/xterm -fa \"Ubuntu Mono\" -fs 10")
+        (cond ((eq ede-term-type 'uxterm)
+               "/usr/bin/dbus-launch /usr/bin/uxterm -fa \"Ubuntu Mono for Powerline\" -fs 12")
+              ((eq ede-term-type 'xterm)
+               "/usr/bin/dbus-launch /usr/bin/xterm  -fa \"Ubuntu Mono for Powerline\" -fs 12")
               ((eq ede-term-type 'gnome-terminal)
                "/usr/bin/dbus-launch /usr/bin/gnome-terminal")
-              (t "/usr/bin/dbus-launch /usr/bin/xterm -fa \"Ubuntu Mono\" -fs 10")))
+              (t "/usr/bin/dbus-launch /usr/bin/uxterm")))
 
   (setq es/term-invocation es/term-binary)
   (progn

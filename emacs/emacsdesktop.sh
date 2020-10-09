@@ -90,7 +90,7 @@ export `/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh`
 
 killall ${EMACS}
 #${EMACS}
-dbus-launch --exit-with-session "${EMACS}"
+dbus-launch --exit-with-session "${EMACS}" -fs
 
 for pid in ${pids[*]}; do
     kill $pid

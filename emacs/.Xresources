@@ -9,12 +9,20 @@ Xft.dpi:192
 XTerm*selectToClipboard:false
 XTerm*rightScrollBar: true
 XTerm*scrollBar: true
+XTerm*renderFont: true
 XTerm*metaSendsEscape: true
 XTerm*termName: xterm-256color
 
 xterm*selectToClipboard:false
 xterm*rightScrollBar: true
-xterm*termName: xterm-256color
-xterm*faceName: Ubuntu Mono
-xterm*faceSize: 8
+xterm*scrollBar: true
 xterm*renderFont: true
+xterm*metaSendsEscape: true
+xterm*termName: xterm-256color
+
+UXTerm*selectToClipboard:false
+UXTerm*rightScrollBar: true
+UXTerm*scrollBar: true
+UXTerm*renderFont: true
+UXTerm*metaSendsEscape: true
+UXTerm*termName: xterm-256color
