@@ -27,11 +27,6 @@
 (scroll-bar-mode -1)
 (fringe-mode 1)
 (savehist-mode 1)
-
-
-;; (add-to-list 'initial-frame-alist '(fullscreen . maximized))
-;; (add-to-list 'default-frame-alist '(fullscreen . fullheight))
-
 (set-face-background 'vertical-border "grey2")
 (set-face-foreground 'vertical-border (face-background 'vertical-border))
 
