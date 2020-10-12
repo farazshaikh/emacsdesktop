@@ -1,4 +1,3 @@
-
 ;;; package -- Summary EOS_DESKTOP
 ;;         EXWM/Gnome based Desktop Environment using Emacs.
 ;;
@@ -25,7 +24,8 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
-(fringe-mode 1)
+;; default 8 pixel fringes on both sides
+(fringe-mode nil)
 (savehist-mode 1)
 (set-face-background 'vertical-border "grey2")
 (set-face-foreground 'vertical-border (face-background 'vertical-border))
@@ -231,8 +231,8 @@
 (use-package doom-themes
   :ensure t)
 
-;;(load-theme 'doom-molokai t)
-(load-theme 'doom-gruvbox t)
+(load-theme 'doom-molokai t)
+;;(load-theme 'doom-gruvbox t)
 
 (use-package hydra :ensure t)
 
@@ -614,12 +614,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                                         (string= "gimp" exwm-instance-name))
                                (exwm-workspace-rename-buffer exwm-title)))))
   :config
-  ;; create space
-  (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
-  (fringe-mode 1)
-
   ;; Disable dialog boxes since they are unusable in EXWM
   (setq use-dialog-box nil)
 
@@ -741,11 +735,34 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ;; start the emacs x'window manager.
   (exwm-enable)
 
-  ;; workaround to refresh screen size
-  (exwm-workspace-delete)
-  (exwm-workspace-add)
+  ;; set work psace names
+  (setq exwm-workspace-index-map
+        (lambda (index)
+          (let ((named-workspaces ["code" "brow" "term" "slac" "extr"]))
+            (if (< index (length named-workspaces))
+                (elt named-workspaces index)
+              (number-to-string index)))))
+
+  (defun exwm-workspace--update-ewmh-desktop-names ()
+    "Set names for work spaces."
+    (xcb:+request exwm--connection
+        (make-instance 'xcb:ewmh:set-_NET_DESKTOP_NAMES
+                       :window exwm--root :data
+                       (mapconcat (lambda (i) (funcall exwm-workspace-index-map i))
+                                  (number-sequence 0 (1- (exwm-workspace--count)))
+                                  "\0"))))
+
+  (add-hook 'exwm-workspace-list-change-hook
+            #'exwm-workspace--update-ewmh-desktop-names)
+
+  ;; you may need to call the function once manually
+  (exwm-workspace--update-ewmh-desktop-names)
+
   :init
   (message "es/use-package/exwm"))
+
+
+
 
 (defhydra hydra-eos (:exit nil :hint nil)
   "
@@ -1114,6 +1131,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-file-watch-threshold 64)
   (lsp-auto-guess-root nil)
 
+  (lsp-signature-auto-activate nil)
+  (lsp-signature-doc-lines 0)
+
   (lsp-rust-wait-to-build 10000)
   (lsp-rust-build-on-save t)
   (lsp-rust-jobs 2)
@@ -1123,6 +1143,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-rust-analyzer-server-display-inlay-hints t)
   (lsp-rust-server 'rust-analyzer)
   (lsp-rust-full-docs t)
+
 
   ;; `company-lsp' is automatically enabled
   ;; (lsp-enable-completion-at-point nil)
@@ -1244,10 +1265,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :ensure t
   :hook (prog-mode . company-mode)
   :demand
+  :custom
+  (flycheck-set-indication-mode 'left-fringe)
   :init
   (global-flycheck-mode)
   (setq flycheck-global-modes '(not exwm-mode treemacs-mode))
-  (flycheck-set-indication-mode 'left-margin)
   (add-hook 'sh-mode-hook
             (lambda ()
               (defvar lsp-diagnostics-provider :none)
@@ -1316,6 +1338,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          company-tooltip-align-annotations t
          company-tooltip-idle-delay 0
          company-minimum-prefix-length 1))
+
+(use-package company-posframe
+  :ensure t
+  :pin melpa-stable
+  :config
+  (company-posframe-mode))
 
 (use-package company-lsp
   :ensure t
@@ -1597,8 +1625,8 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
  '(jdee-db-active-breakpoint-face-colors (cons "#1B2229" "#fd971f"))
  '(jdee-db-requested-breakpoint-face-colors (cons "#1B2229" "#b6e63e"))
  '(jdee-db-spec-breakpoint-face-colors (cons "#1B2229" "#525254"))
- '(jedi:complete-on-dot t)
- '(jedi:setup-keys t)
+ '(jedi:complete-on-dot t t)
+ '(jedi:setup-keys t t)
  '(load-home-init-file t t)
  '(magit-auto-revert-mode nil)
  '(magit-diff-arguments '("--no-ext-diff" "-M" "-C"))
@@ -1624,7 +1652,7 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
  '(objed-cursor-color "#e74c3c")
  '(org-agenda-files '("~/todo.org"))
  '(package-selected-packages
-   '(adoc-mode counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit))
+   '(company-counsel company-posframe adoc-mode counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit))
  '(pdf-view-midnight-colors (cons "#d6d6d4" "#1c1e1f"))
  '(python-python-command "/usr/bin/ipython" t)
  '(ring-bell-function
@@ -2184,26 +2212,3 @@ mouse-2: EXWM Workspace menu.
 
 (provide '.emacs)
 ;;; .emacs ends here
-
-
-
-(setq exwm-workspace-index-map
-        (lambda (index)
-          (let ((named-workspaces ["code" "brow" "term" "slac" "extr"]))
-            (if (< index (length named-workspaces))
-                (elt named-workspaces index)
-              (number-to-string index)))))
-
-(defun exwm-workspace--update-ewmh-desktop-names ()
-  (xcb:+request exwm--connection
-      (make-instance 'xcb:ewmh:set-_NET_DESKTOP_NAMES
-                     :window exwm--root :data
-                     (mapconcat (lambda (i) (funcall exwm-workspace-index-map i))
-                                (number-sequence 0 (1- (exwm-workspace--count)))
-                                "\0"))))
-
-(add-hook 'exwm-workspace-list-change-hook
-          #'exwm-workspace--update-ewmh-desktop-names)
-
-;; you may need to call the function once manually
-(exwm-workspace--update-ewmh-desktop-names)
