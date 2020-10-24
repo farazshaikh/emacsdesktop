@@ -470,6 +470,28 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :init
   (exwm-config-default))
 
+
+(use-package use-package-hydra
+  :ensure t)
+
+(use-package undo-tree
+  :ensure t
+  :diminish (undo-tree-mode . "")
+  :after hydra
+  :bind ("C-x u" . hydra-undo-tree/undo-tree-undo)
+  :config
+  (global-undo-tree-mode 1)
+  (undo-tree-save-history t)
+  :hydra (hydra-undo-tree (:hint nil)
+  "
+  _p_: undo  _n_: redo _s_: save _l_: load   "
+  ("p"   undo-tree-undo)
+  ("n"   undo-tree-redo)
+  ("s"   undo-tree-save-history)
+  ("l"   undo-tree-load-history)
+  ("u"   undo-tree-visualize "visualize" :color blue)
+  ("q"   nil "quit" :color blue)))
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;Setup alt-tab     ;;
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -738,7 +760,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ;; set work psace names
   (setq exwm-workspace-index-map
         (lambda (index)
-          (let ((named-workspaces ["code" "brow" "term" "slac" "extr"]))
+          (let ((named-workspaces ["code" "term" "brow" "slac" "extr"]))
             (if (< index (length named-workspaces))
                 (elt named-workspaces index)
               (number-to-string index)))))
@@ -1131,6 +1153,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-file-watch-threshold 64)
   (lsp-auto-guess-root nil)
 
+  ;; completions are better handled by company-box
+  (lsp-completion-no-cache nil)
+  (lsp-completion-show-detail nil)
+  (lsp-completion-show-kind nil)
+
   (lsp-signature-auto-activate nil)
   (lsp-signature-doc-lines 0)
 
@@ -1344,6 +1371,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :pin melpa-stable
   :config
   (company-posframe-mode))
+
+(use-package company-box
+  :pin melpa
+  :hook (company-mode . company-box-mode))
 
 (use-package company-lsp
   :ensure t
@@ -1592,8 +1623,8 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
  '(c-echo-syntactic-information-p t)
  '(c-insert-tab-function 'insert-tab)
  '(c-report-syntactic-errors t)
- '(clang-format-executable "clang-format-9" t)
- '(clang-format-style "Google" t)
+ '(clang-format-executable "clang-format-9")
+ '(clang-format-style "Google")
  '(column-number-mode t)
  '(company-lsp-cache-cadidates 'auto t)
  '(compilation-scroll-output 'first-error)
@@ -1628,6 +1659,9 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
  '(jedi:complete-on-dot t t)
  '(jedi:setup-keys t t)
  '(load-home-init-file t t)
+ '(lsp-completion-no-cache t)
+ '(lsp-completion-show-detail nil)
+ '(lsp-completion-show-kind nil)
  '(magit-auto-revert-mode nil)
  '(magit-diff-arguments '("--no-ext-diff" "-M" "-C"))
  '(magit-diff-refine-hunk t)
@@ -1652,7 +1686,7 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
  '(objed-cursor-color "#e74c3c")
  '(org-agenda-files '("~/todo.org"))
  '(package-selected-packages
-   '(company-counsel company-posframe adoc-mode counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit))
+   '(use-package-hydra undo-tree company-prescient company-box undohist company-counsel company-posframe adoc-mode counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit))
  '(pdf-view-midnight-colors (cons "#d6d6d4" "#1c1e1f"))
  '(python-python-command "/usr/bin/ipython" t)
  '(ring-bell-function
@@ -2178,6 +2212,7 @@ mouse-2: EXWM Workspace menu.
   (define-key input-decode-map "\e[1;3A" [(meta up)])
   (define-key input-decode-map "\e[1;3B" [(meta down)])
   (define-key input-decode-map "\e[1;3C" [(meta right)])
+
   (define-key input-decode-map "\e[1;3D" [(meta left)]))
 
 (add-hook 'tty-setup-hook 'es/input-decode-map-xterm-compatibility)
