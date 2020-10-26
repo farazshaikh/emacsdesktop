@@ -481,7 +481,8 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :bind ("C-x u" . hydra-undo-tree/undo-tree-undo)
   :config
   (global-undo-tree-mode 1)
-  (undo-tree-save-history t)
+  :custom
+  (undo-tree-auto-save-history t)
   :hydra (hydra-undo-tree (:hint nil)
   "
   _p_: undo  _n_: redo _s_: save _l_: load   "
@@ -1135,6 +1136,14 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :config
   (fa-config-default))
 
+(use-package dap-mode
+  :ensure t
+  :pin melpa-stable
+  :init
+  (require 'dap-gdb-lldb)
+  :hook
+  ('dap-stopped . (lambda (arg) (call-interactively #'dap-hydra))))
+
 (use-package lsp-mode
   :ensure t
   :commands lsp
@@ -1161,6 +1170,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-signature-auto-activate nil)
   (lsp-signature-doc-lines 0)
 
+  ;; rust
   (lsp-rust-wait-to-build 10000)
   (lsp-rust-build-on-save t)
   (lsp-rust-jobs 2)
@@ -1171,6 +1181,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-rust-server 'rust-analyzer)
   (lsp-rust-full-docs t)
 
+  ;;cpp
+  (lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
 
   ;; `company-lsp' is automatically enabled
   ;; (lsp-enable-completion-at-point nil)
@@ -1686,7 +1698,7 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
  '(objed-cursor-color "#e74c3c")
  '(org-agenda-files '("~/todo.org"))
  '(package-selected-packages
-   '(use-package-hydra undo-tree company-prescient company-box undohist company-counsel company-posframe adoc-mode counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit))
+   '(dap-mode use-package-hydra undo-tree company-prescient company-box undohist company-counsel company-posframe adoc-mode counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit))
  '(pdf-view-midnight-colors (cons "#d6d6d4" "#1c1e1f"))
  '(python-python-command "/usr/bin/ipython" t)
  '(ring-bell-function
