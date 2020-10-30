@@ -6,7 +6,7 @@
 
 parallel_ssh() {
     echo faraz $1
-    local SESSION=`date +"%d%b%Y%k%M%S"`i
+    local SESSION=`date +"%d%b%Y%M%S"`i
     local hosts=( ${HOSTS:=$*} )
     echo $hosts $SESSION
 
