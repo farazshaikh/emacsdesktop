@@ -50,7 +50,6 @@ export EOS_DESKTOP=true
 #${EMACS} -rv --daemon -f exwm-enable
 #${EMACSCLIENT} -a '' -c
 
-[[ -f ~/.Xresources ]] && xrdb -merge -I$HOME ~/.Xresources
 
 # Register with gnome-session so that it does not kill the whole session thinking it is dead.
 test -n "$DESKTOP_AUTOSTART_ID" && {
@@ -87,6 +86,16 @@ done
 
 export XDG_CURRENT_DESKTOP=GNOME
 export `/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh`
+
+# Keep the Xresources setting closest to the emacs invocation. Lots
+# tools (gnome settings manager and others) play with DPI setting. We
+# want the dpi settings coming from the .Xresources to be final
+#
+# For debugging DPI issues start with
+# xdpyinfo  | grep -B 2 resolution
+# xrdb -q | grep dpi
+# both should be around 96 for hi-res screens
+[[ -f ~/.Xresources ]] && xrdb -merge -I$HOME ~/.Xresources
 
 killall ${EMACS}
 #${EMACS}

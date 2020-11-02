@@ -20,19 +20,54 @@
 ;;; -*- lexical-binding: t; -*-
 
 ;;; Code:
-(set-background-color "#1c1e1f")
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-;; default 8 pixel fringes on both sides
-(fringe-mode nil)
-(savehist-mode 1)
-(set-face-background 'vertical-border "grey2")
-(set-face-foreground 'vertical-border (face-background 'vertical-border))
 
-(defvar org-agenda-files (list "~/todo.org"
-                               "~/notes.org"))
+(defun es/emacs-base-settings()
+  "Base editor customization."
+  (set-background-color "grey2")
+  (setq inhibit-startup-screen t)
+  (menu-bar-mode -1)
+  (tool-bar-mode -1)
+  (scroll-bar-mode -1)
+  (global-eldoc-mode -1)
+  ;; default 8 pixel fringes on both sides
+  (fringe-mode nil)
+  (savehist-mode 1)
 
+  (line-number-mode 1)
+  (column-number-mode 1)
+  (show-paren-mode 1)
+  (global-hl-line-mode 1)
+  (which-function-mode 1)
+
+  (setq scroll-step 1)
+  (setq fill-column 80)
+  (setq select-enable-clipboard t)
+  (setq compilation-scroll-output 'first-error)
+  (setq dabbrev-case-fold-search nil)
+  ;; kill tabs
+  (setq indent-tabs-mode nil)
+
+  ;; window/frame selection preference
+  (setq display-buffer-base-action
+	'((display-buffer-reuse-window
+	   display-buffer-same-window
+	   display-buffer-in-previous-window
+	   display-buffer-use-some-window)))
+
+  (setq ring-bell-function
+	(lambda nil
+	  (let
+              ((orig-fg
+		(face-foreground 'mode-line)))
+	    (set-face-foreground 'mode-line "#6495ED")
+	    (run-with-idle-timer 0.1 nil
+				 (lambda
+				   (fg)
+				   (set-face-foreground 'mode-line fg))
+				 orig-fg))))
+  (set-face-background 'vertical-border "grey2")
+  (message "es/emacs-base-settings"))
+(es/emacs-base-settings)
 
 ;; Custom variables
 (defgroup emacs-desktop-environment nil
@@ -73,7 +108,8 @@
   (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                            ("melpa-stable" . "https://stable.melpa.org/packages/")
                            ("melpa" . "http://melpa.org/packages/")
-                           ("elpy" . "http://jorgenschaefer.github.io/packages/")))
+                           ("elpy" . "http://jorgenschaefer.github.io/packages/")
+			   ("org" . "http://orgmode.org/elpa/")))
   ;;elget
   (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
   (unless (require 'el-get nil t)
@@ -224,6 +260,17 @@
   :ensure t
   :config
   (setq custom-safe-themes t))
+
+(use-package org
+  :mode (("\\.org$" . org-mode))
+  :ensure org-plus-contrib
+  :config
+  (progn
+    ;; config stuff
+    (if (file-exists-p "~/todo.org")
+	(add-to-list 'org-agenda-files "~/todo.org"))
+    (if (file-exists-p "~/notes.org")
+	(add-to-list 'org-agenda-files "~/notes.org"))))
 
 (use-package monokai-pro-theme
   :ensure t)
@@ -408,9 +455,11 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (dashboard-setup-startup-hook)
   :hook (window-setup . es/windowsetup))
 
-(use-package winner-mode-enable
-  :disabled
-  :ensure t)
+(use-package winner
+  :pin gnu
+  :ensure t
+  :config
+  (winner-mode 1))
 
 ;; Start with the /run folder as  TMPDIR
 (if (eq  system-type 'gnu/linux) (setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid)))))
@@ -464,12 +513,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (setenv (car ssh-auth-sock) (car (cdr ssh-auth-sock)))
   (message "es/setup-up-gnome-desktop"))
 (if (and window-system (getenv "EOS_DESKTOP") (getenv "EOS_EMACS_GNOME_SHELL_SETUP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
-
-(use-package exwm-config
-  :disabled
-  :init
-  (exwm-config-default))
-
 
 (use-package use-package-hydra
   :ensure t)
@@ -896,6 +939,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (ivy-count-format "%d/%d ")
   (ivy-display-style 'fancy)
   (ivy-wrap t)
+  (ivy-use-virtual-buffers t)
   (ivy-re-builders-alist
    '((swiper . ivy--regex)
      (t      . ivy--regex-plus)))
@@ -969,6 +1013,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
   :init
   (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode VTerm))
   :custom
+  (show-trailing-whitespace t)
   (whitespace-style (quote (face empty tabs lines-tail whitespace))))
 
 (use-package flyspell
@@ -1227,6 +1272,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :hook (((prog-mode) . 'display-line-numbers-mode)
          ((prog-mode) . lsp)))
 
+(use-package clang-format
+  :custom
+   (clang-format-executable "clang-format-9" t)
+   (clang-format-style "Google" t)
+   (c-basic-offset 3)
+   (c-echo-syntactic-information-p t)
+   (c-insert-tab-function 'insert-tab)
+   (c-report-syntactic-errors t))
+
 (use-package lsp-ui
   :ensure t
   :diminish
@@ -1258,10 +1312,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-ui-sideline-diagnostic-max-line-length 40)
 
   ;;  Use lsp-ui-doc-webkit only in GUI
-  (setq lsp-ui-doc-use-webkit nil
-        lsp-ui-peek-enable t
-        lsp-ui-imenu-enable t
-        lsp-ui-flycheck-enable t)
+  (lsp-ui-doc-use-webkit nil)
+  (lsp-ui-peek-enable t)
+  (lsp-ui-imenu-enable t)
+  (lsp-ui-flycheck-enable t)
 
   :config
   ;;WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
@@ -1620,156 +1674,6 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
 
 
 (message "!!es/packages-loaded!!")
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Setup common variables across packages ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#1c1e1f" "#e74c3c" "#b6e63e" "#e2c770" "#268bd2" "#fb2874" "#66d9ef" "#d6d6d4"])
- '(c-basic-offset 3)
- '(c-echo-syntactic-information-p t)
- '(c-insert-tab-function 'insert-tab)
- '(c-report-syntactic-errors t)
- '(clang-format-executable "clang-format-9")
- '(clang-format-style "Google")
- '(column-number-mode t)
- '(company-lsp-cache-cadidates 'auto t)
- '(compilation-scroll-output 'first-error)
- '(custom-safe-themes
-   '("8d7684de9abb5a770fbfd72a14506d6b4add9a7d30942c6285f020d41d76e0fa" default))
- '(dabbrev-case-fold-search nil)
- '(display-buffer-base-action
-   '((display-buffer-reuse-window display-buffer-same-window display-buffer-in-previous-window display-buffer-use-some-window)))
- '(ediff-keep-variants nil)
- '(ediff-split-window-function 'split-window-horizontally)
- '(ediff-window-setup-function 'ediff-setup-windows-plain)
- '(elpy-rpc-backend "jedi" t)
- '(elpy-rpc-python-command "python3")
- '(exwm-layout-show-all-buffers t)
- '(fci-rule-color "#555556")
- '(global-eldoc-mode nil)
- '(global-hl-line-mode t)
- '(global-semantic-idle-local-symbol-highlight-mode t nil (semantic/idle))
- '(ido-mode t nil (ido))
- '(ido-vertical-define-keys 'C-n-and-C-p-only)
- '(ido-vertical-mode 1)
- '(indent-tabs-mode nil)
- '(inhibit-startup-screen t)
- '(ivy-count-format "%d/%d ")
- '(ivy-display-style 'fancy)
- '(ivy-re-builders-alist '((swiper . ivy--regex) (t . ivy--regex-plus)) t)
- '(ivy-use-virtual-buffers t)
- '(ivy-wrap t)
- '(jdee-db-active-breakpoint-face-colors (cons "#1B2229" "#fd971f"))
- '(jdee-db-requested-breakpoint-face-colors (cons "#1B2229" "#b6e63e"))
- '(jdee-db-spec-breakpoint-face-colors (cons "#1B2229" "#525254"))
- '(jedi:complete-on-dot t t)
- '(jedi:setup-keys t t)
- '(load-home-init-file t t)
- '(lsp-completion-no-cache t)
- '(lsp-completion-show-detail nil)
- '(lsp-completion-show-kind nil)
- '(magit-auto-revert-mode nil)
- '(magit-diff-arguments '("--no-ext-diff" "-M" "-C"))
- '(magit-diff-refine-hunk t)
- '(magit-expand-staged-on-commit 'full t)
- '(magit-fetch-arguments '("--prune"))
- '(magit-log-auto-more t)
- '(magit-log-cutoff-length 20 t)
- '(magit-no-confirm '(stage-all-changes unstage-all-changes))
- '(magit-process-connection-type nil)
- '(magit-push-always-verify nil t)
- '(magit-push-arguments '("--set-upstream"))
- '(magit-refresh-file-buffer-hook nil t)
- '(magit-save-some-buffers nil t)
- '(magit-set-upstream-on-push 'askifnotset t)
- '(magit-stage-all-confirm nil t)
- '(magit-status-verbose-untracked nil t)
- '(magit-unstage-all-confirm nil t)
- '(magithub-message-confirm-cancellation nil t)
- '(magithub-use-ssl t t)
- '(message-send-mail-function 'smtpmail-send-it)
- '(normal-erase-is-backspace-mode 0)
- '(objed-cursor-color "#e74c3c")
- '(org-agenda-files '("~/todo.org"))
- '(package-selected-packages
-   '(dap-mode use-package-hydra undo-tree company-prescient company-box undohist company-counsel company-posframe adoc-mode counsel-projectile rainbow-delimiters counsel-world-clock ivy-pass projectile windower transpose-frame flymake-shellcheck yaml-mode ansible-company nix-mode company-ansible ansible protobuf-mode ivy-todo org-mode company-org-roam clang-format+ persistent-scratch git-gutter ivy-prescient flycheck-posframe exwm-randr exwm-systemtray auto-package-update spaceline-config golden-ratio rg ripgrep lsp-ivy eglot flyspell-correct-ivy haskell-mode haskell-emacs xwidgete ssh-agency vterm mini-modeline ivy-posframe rust-playground fancy-battery doome-themes doom-themes realgud page-break-lines quelpa-use-package elisp-cache dashboard clues-theme monokai-pro-theme spaceline-all-the-icons spaceline powerline-evil auto-complete auto-complete-c-headers auto-complete-chunk auto-complete-clang auto-complete-clang-async auto-complete-etags auto-complete-exuberant-ctags auto-complete-nxml company company-lsp company-quickhelp company-c-headers company-cmake company-irony company-irony-c-headers company-go company-jedi function-args irony irony-eldoc jedi elpy ggtags ac-racer flycheck-rust cargo yasnippet yasnippet-snippets yasnippet-classic-snippets go-autocomplete spacemacs-theme go-direx go-eldoc go-errcheck go-mode go-play go-snippets go-stacktracer golint go-eldoc google-c-style flycheck flycheck-irony py-autopep8 powerline company-tern js2-mode xref-js2 free-keys ido-vertical-mode ag iflipb kaolin-themes diminish use-package general centaur-tabs treemacs flx swiper ivy ivy-hydra counsel hydra lsp-ui lsp-mode lsp-treemacs git-timemachine magit))
- '(pdf-view-midnight-colors (cons "#d6d6d4" "#1c1e1f"))
- '(python-python-command "/usr/bin/ipython" t)
- '(ring-bell-function
-   (lambda nil
-     (let
-         ((orig-fg
-           (face-foreground 'mode-line)))
-       (set-face-foreground 'mode-line "#6495ED")
-       (run-with-idle-timer 0.1 nil
-                            (lambda
-                              (fg)
-                              (set-face-foreground 'mode-line fg))
-                            orig-fg))))
- '(safe-local-variable-values '((buffer-reado-only . t)))
- '(savehist-mode 1)
- '(scroll-step 1)
- '(select-enable-clipboard t)
- '(send-mail-function 'smtpmail-send-it)
- '(set-fill-column 80)
- '(show-paren-mode t)
- '(show-trailing-whitespace t)
- '(smtpmail-auth-credentials '(("smtp.gmail.com" 587 "faraz@email.com" nil)))
- '(smtpmail-default-smtp-server "smtp.gmail.com")
- '(smtpmail-smtp-server "smtp.gmail.com")
- '(smtpmail-smtp-service 587)
- '(smtpmail-starttls-credentials '(("smtp.gmail.com" 587 nil nil)))
- '(speedbar-default-position 'left)
- '(standard-indent 3)
- '(transient-mark-mode t)
- '(uniquify-buffer-name-style 'reverse nil (uniquify))
- '(vc-annotate-background "#1c1e1f")
- '(vc-annotate-color-map
-   (list
-    (cons 20 "#b6e63e")
-    (cons 40 "#c4db4e")
-    (cons 60 "#d3d15f")
-    (cons 80 "#e2c770")
-    (cons 100 "#ebb755")
-    (cons 120 "#f3a73a")
-    (cons 140 "#fd971f")
-    (cons 160 "#fc723b")
-    (cons 180 "#fb4d57")
-    (cons 200 "#fb2874")
-    (cons 220 "#f43461")
-    (cons 240 "#ed404e")
-    (cons 260 "#e74c3c")
-    (cons 280 "#c14d41")
-    (cons 300 "#9c4f48")
-    (cons 320 "#77504e")
-    (cons 340 "#555556")
-    (cons 360 "#555556")))
- '(vc-annotate-very-old-color nil)
- '(which-function-mode t)
- '(whitespace-style '(face empty tabs lines-tail whitespace))
- '(winner-mode t))
-(message "es/customizations-applied")
-
-;;;;;;;;;;;;;;;;;;;
-;; Coloring      ;;
-;;;;;;;;;;;;;;;;;;;
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ivy-current-match ((t (:background "#2d2e2e" :box (:line-width 2 :color "grey75" :style released-button)))))
- '(ivy-posframe-border ((t (:inherit internal-border :background "white" :foreground "white"))))
- '(lsp-ui-doc-background ((t (:background nil))))
- '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
- '(spaceline-highlight-face ((t (:foreground "black")))))
-(message "es/custom-set-faces")
 
 ;;;;;;;;;;;;;;;
 ;;Workarounds;;
@@ -2249,13 +2153,19 @@ mouse-2: EXWM Workspace menu.
       (or (cdr (assoc desc real-keyboard-keys))
           (read-kbd-macro desc))))
 
-(message "!!!es/load-complete!!!")
 (server-start)
-(message "!!!es/load-complete!!!")
+(message "!!!server started!!!")
 
 ;; Make gc pauses faster by decreasing the threshold.  This works in
 ;; conjunction with gc setting set up in the starting of the file
 (setq gc-cons-threshold (* 128 1000 1000))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Setup common variables across packages ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(setq custom-file "~/.emacs_custom.el")
+(load custom-file t)
+(message "!!!es/load-complete!!!")
 
 (provide '.emacs)
 ;;; .emacs ends here

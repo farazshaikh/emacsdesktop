@@ -108,6 +108,7 @@ linkupFiles() {
     linkup ${ts} ~/.gitconfig `pwd`/emacs/.gitconfig
     linkup ${ts} ~/.gitignore `pwd`/.gitignore
     linkup ${ts} ~/.emacs `pwd`/emacs/.emacs
+    linkup ${ts} ~/.emacs_custom.el `pwd`/emacs/.emacs_custom.el
     linkup ${ts} ~/acme.png `pwd`/emacs/acme.png
     linkup ${ts} ~/.xinitrc `pwd`/emacs/.xinitrc
     linkup ${ts} ~/.Xresources `pwd`/emacs/.Xresources
