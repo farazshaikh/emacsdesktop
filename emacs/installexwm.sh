@@ -120,9 +120,15 @@ linkupFiles() {
     #linkup ${ts} /etc/apt/apt.conf.d/90aptforceyes `pwd`/emacs/90aptforceyes +
     touch ~/.gitmessage
 
-    ## Optional integrate with DM
+    ## Optional integrate with DM(obsolete)
     linkup ${ts} /usr/share/xsessions/emacsdesktop.sh `pwd`/emacs/emacsdesktop.sh +
     linkup ${ts} /usr/share/xsessions/emacs.desktop `pwd`/emacs/usr_share_xsessions_emacs.desktop +
+
+    ## gdm3login/
+    linkup ${ts} /usr/share/xsessions/emacs.desktop `pwd`/emacs/gdm3login/usr_share_xsessions_emacs.desktop +
+    linkup ${ts} /usr/bin/emacs-gnome-flashback-session `pwd`/emacs/gdm3login/usr_bin_emacs-gnome-flashback-session +
+    linkup ${ts} /usr/share/gnome-session/sessions/emacs-gnome-flashback.session `pwd`/emacs/gdm3login/usr_share_gnome-session_sessions_emacs-gnome-flashback.session +
+    linkup ${ts} /usr/bin/emacs-gnome-flashback  `pwd`/emacs/gdm3login/usr_bin_emacs-gnome-flashback +
     popd
 }
 
