@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=GNOME Flashback (emacs)
+Comment=This session logs you into GNOME Flashback with emacs
+Exec=emacs-gnome-flashback-session
+TryExec=emacs
+Type=Application
+DesktopNames=emacs-GNOME-Flashback;GNOME-Flashback;GNOME;
