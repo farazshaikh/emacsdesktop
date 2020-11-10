@@ -19,10 +19,16 @@ xterm*scrollBar: true
 xterm*renderFont: true
 xterm*metaSendsEscape: true
 xterm*termName: xterm-256color
+xterm*faceName: Ubuntu Mono
+xterm*faceSize: 14
+
+
 
 UXTerm*selectToClipboard:false
 UXTerm*rightScrollBar: true
 UXTerm*scrollBar: true
-UXTerm*renderFont: true
 UXTerm*metaSendsEscape: true
 UXTerm*termName: xterm-256color
+UXTerm*faceName: Ubuntu Mono
+UXTerm*faceSize: 14
+UXTerm*renderFont: true

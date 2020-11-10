@@ -278,7 +278,8 @@
 (use-package doom-themes
   :ensure t)
 
-(load-theme 'doom-molokai t)
+(load-theme 'monokai-pro t)
+;;(load-theme 'doom-molokai t)
 ;;(load-theme 'doom-gruvbox t)
 
 (use-package hydra :ensure t)

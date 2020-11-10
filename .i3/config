@@ -19,12 +19,6 @@ font pango:monospace 8
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
 #font pango:DejaVu Sans Mono 8
 
-
-# quick find OR Launch
-bindsym $mod+t exec python ~/.eos/third_party_git_repos/i3-wm-scripts/nextmatch 'Gnome-terminal' | [ "`grep -c success`" -eq "0" ] && gnome-terminal
-bindsym $mod+g exec python ~/.eos/third_party_git_repos/i3-wm-scripts/nextmatch 'firefox' | [ "`grep -c success`" -eq "0" ] && firefox
-bindsym $mod+c exec python ~/.eos/third_party_git_repos/i3-wm-scripts/nextmatch 'emacs' | [ "`grep -c success`" -eq "0" ] && emacs27
-
 # The combination of xss-lock, nm-applet and pactl is a popular choice, so
 # they are included here as an example. Modify as you see fit.
 
@@ -53,7 +47,7 @@ bindsym $mod+Return exec i3-sensible-terminal
 bindsym $mod+Shift+q kill
 
 # start dmenu (a program launcher)
-bindsym $mod+d exec dmenu_run
+# abindsym $mod+d exec dmenu_run
 # There also is the (new) i3-dmenu-desktop which only displays applications
 # shipping a .desktop file. It is a wrapper around dmenu, so you need that
 # installed.
@@ -185,3 +179,20 @@ bindsym $mod+r mode "resize"
 bar {
         status_command i3status
 }
+
+# quick find OR Launch
+#bindsym $mod+t exec python ~/.eos/third_party_git_repos/i3-wm-scripts/nextmatch 'Gnome-terminal' | [ "`grep -c success`" -eq "0" ] && gnome-terminal
+bindsym $mod+t exec python ~/.eos/third_party_git_repos/i3-wm-scripts/nextmatch 'uxterm' | [ "`grep -c success`" -eq "0" ] && uxterm
+bindsym $mod+g exec python ~/.eos/third_party_git_repos/i3-wm-scripts/nextmatch 'firefox' | [ "`grep -c success`" -eq "0" ] && firefox
+bindsym $mod+c exec python ~/.eos/third_party_git_repos/i3-wm-scripts/nextmatch 'emacs' | [ "`grep -c success`" -eq "0" ] && emacs27
+
+# rofi
+bindsym $mod+d exec "rofi -show drun"
+bindsym $mod+b exec "rofi -show window"
+
+
+# tools
+exec --no-startup-id nm-applet
+exec --no-startup-id pasystray
+
+focus_follows_mouse no
