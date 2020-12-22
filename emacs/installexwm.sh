@@ -55,6 +55,11 @@ packageInstall() {
     sudo apt-get install blueman cheese -y
     sudo apt-get install gnome-flashback gnome-screensaver -y
     sudo apt-get install fonts-noto fonts-powerline -y
+
+
+    sudo apt-get install pip -y
+    sudo apt-get install python3-pip -y
+
     sudo snap install ripgrep --classic
 
     curl -L https://github.com/farazshaikh/top-programming-fonts/raw/master/install.sh | bash
@@ -162,7 +167,7 @@ main() {
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/fzf.git
     ${gitRepoInstallLoc}/fzf/install
     checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/powerline-shell.git
-    ${gitRepoInstallLoc}/powerline-shell/setup.py install
+    python3 ${gitRepoInstallLoc}/powerline-shell/setup.py install
     checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/Gogh.git
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/i3-wm-scripts.git
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/i3-gnome
