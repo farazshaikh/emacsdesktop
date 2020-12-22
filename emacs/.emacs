@@ -975,7 +975,9 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (ivy-mode 1)
   (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
 
+
 (use-package ivy-posframe
+  :pin melpa
   :ensure t
   :config
   (if (and window-system (getenv "EOS_DESKTOP"))
@@ -1004,8 +1006,6 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (setq ivy-posframe-width 110
         ivy-posframe-height 30)
    (ivy-posframe-mode 1))
-
-
 (setq ivy-posframe-border-width 3)
 
 (use-package whitespace
@@ -1226,6 +1226,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-rust-analyzer-server-display-inlay-hints t)
   (lsp-rust-server 'rust-analyzer)
   (lsp-rust-full-docs t)
+  ;; (lsp-headerline-breadcrumb-mode)
 
   ;;cpp
   (lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
@@ -1270,8 +1271,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :bind (:map lsp-mode-map
               ("C-c C-l" . hydra-lsp/body)
               ("C-c C-f" . lsp-format-buffer))
+
   :hook (((prog-mode) . 'display-line-numbers-mode)
-         ((prog-mode) . lsp)))
+	 ((prog-mode) . lsp)
+	 ;; (lsp-mode . lsp-enable-which-key-integration)
+         (lsp-managed-mode . lsp-modeline-diagnostics-mode)
+         (lsp-mode . lsp-headerline-breadcrumb-mode)
+         (lsp-mode . lsp-modeline-code-actions-mode)))
 
 (use-package clang-format
   :custom

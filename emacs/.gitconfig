@@ -41,6 +41,7 @@
     
     # Show files ignored by git:
     ign = ls-files -o -i --exclude-standard
+    graph = log --all --graph --oneline --decorate
 [rerere]
         enabled = true
 

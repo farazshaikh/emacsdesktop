@@ -6,14 +6,14 @@ Xft.antialias: 1
 Xft.rgba: rgbt
 Xft.dpi:96
 
-XTerm*selectToClipboard:false
+XTerm*selectToClipboard:true
 XTerm*rightScrollBar: true
 XTerm*scrollBar: true
 XTerm*renderFont: true
 XTerm*metaSendsEscape: true
 XTerm*termName: xterm-256color
 
-xterm*selectToClipboard:false
+xterm*selectToClipboard:true
 xterm*rightScrollBar: true
 xterm*scrollBar: true
 xterm*renderFont: true
@@ -24,7 +24,7 @@ xterm*faceSize: 14
 
 
 
-UXTerm*selectToClipboard:false
+UXTerm*selectToClipboard:true
 UXTerm*rightScrollBar: true
 UXTerm*scrollBar: true
 UXTerm*metaSendsEscape: true

@@ -105,6 +105,26 @@ runtillfail () {
      while $command; do :; done
 }
 
+
+function git-grepblame {
+  local script
+  script="$(cat <<'EOF'
+  my $input = do { local $/=undef; <> };
+  while ($input =~ m!\A(([^\0]+)\0([1-9][0-9]*)\0([^\n]+)\n)!xmsg) {
+    my ($orig, $filename, $lineno, $line) = ($1, $2, $3, $4);
+    $input = substr $input, length $orig;
+    # Escape each single quote "'" in a singly quoted string as: "'\''"
+    $filename =~ s!'!'\\''!gxms;
+    # Run "git blame" on the file/line, and show the output.
+    print qx<
+      git blame --show-name --show-number -L $lineno,$lineno -- '$filename'
+    >;
+  }
+EOF
+  )"
+  git grep  --null --line-number "$@" | perl -e "$script"
+}
+
 export PYTHONSTARTUP=~/.pythonrc
 # Source rust and rust/cargo/nix
 [ -f $HOME/.nix-profile/etc/profile.d/nix.sh ] && source $HOME/.nix-profile/etc/profile.d/nix.sh
