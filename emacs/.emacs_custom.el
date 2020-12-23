@@ -20,6 +20,7 @@
  '(ivy-posframe-border ((t (:inherit internal-border :background "white" :foreground "white"))))
  '(lsp-ui-doc-background ((t (:background nil))))
  '(lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
+ '(markdown-code-face ((t (:inherit nil))))
  '(spaceline-highlight-face ((t (:foreground "black")))))
 
 (message "es/customizations-font-applied")

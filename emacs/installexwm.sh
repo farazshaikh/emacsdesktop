@@ -166,8 +166,9 @@ main() {
     # /third_party_git_repos
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/fzf.git
     ${gitRepoInstallLoc}/fzf/install
-    checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/powerline-shell.git
-    python3 ${gitRepoInstallLoc}/powerline-shell/setup.py install
+    #checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/powerline-shell.git
+    #sudo python3 ${gitRepoInstallLoc}/powerline-shell/setup.py install
+    sudo -H pip3 install powerline-shell
     checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/Gogh.git
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/i3-wm-scripts.git
     checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/i3-gnome
