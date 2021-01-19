@@ -104,6 +104,13 @@
 (es/check-version)
 
 
+(defun warn-if-executable-not-found(filename help)
+  "Check for executable specified by FILENAME.  HELP is printed if file is not found."
+  (if-let (full-path (executable-find filename))
+      (message "%s: %s" filename full-path)
+    (message " %s file not found: Help %s" filename help)))
+
+
 ;; Package Mgmt and EOS installation
 (defun es/setup-package-mgmt()
   "Setup the package management for EOS."
@@ -887,9 +894,12 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 
 (use-package ag
+  :init
+  (warn-if-executable-not-found "ag" "apt install the-silver-searcher")
   :bind (("C-S-f" . counsel-ag)))   ;; for expanded results use ag command
 
 (use-package rg
+  (warn-if-executable-not-found "rg" "apt install rip-grep")
   :bind (("C-f" . counsel-git-grep)))    ;; for expanded results use rg command
 
 ;; magit on ssh-protected git repos
@@ -1009,6 +1019,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 (use-package flyspell
   :init
+  (warn-if-executable-not-found "aspell" "Install ispell or aspell")
   (defun flyspell-local-vars ()
     ;;(add-hook 'hack-local-variables-hook #'flyspell-buffer)
     )
@@ -1031,13 +1042,15 @@ Apps^^                        EXWM^^                     Windows mvmt           
               git-gutter:modified-sign "*"
               git-gutter:added-sign "+"
               git-gutter:deleted-sign "x")
-
+  (warn-if-executable-not-found "git" "apt install git")
   :bind
   ("C-c g" . hydra-git-gutter/body))
 
 (use-package git-timemachine)
 
 (use-package direnv
+  :init
+    (warn-if-executable-not-found "direnv" "apt install direnv")
   :custom
   (direnv-always-show-summary t)
   (direnv-show-paths-in-summary nil)
@@ -1070,6 +1083,7 @@ Git gutter:
 
 (use-package magit
   :init
+  (warn-if-executable-not-found "git" "sudo apt install git")
   (progn
     (bind-key "C-x g" 'magit-status))
   :config
@@ -1168,6 +1182,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package dap-mode
   :init
   (require 'dap-gdb-lldb)
+  (warn-if-executable-not-found "gdb" "apt install gdb")
+  (warn-if-executable-not-found "gdb" "apt install lldb")
   :hook
   ('dap-stopped . (lambda (arg) (call-interactively #'dap-hydra))))
 
@@ -1269,6 +1285,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
               ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M--?
               ([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
               ("C-c u" . lsp-ui-imenu))
+   :custom-face
+   (lsp-ui-doc-background ((t (:background nil))))
+   (lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
+
   :custom
   (lsp-ui-doc-enable t)
   (lsp-ui-doc-glance t)
@@ -1408,6 +1428,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package company-posframe
   :pin melpa
+  :disabled
   :config
   (company-posframe-mode))
 
@@ -1464,6 +1485,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :pin melpa
   :diminish
   :disabled
+  :init
+  (warn-if-executable-not-found "ccls" "snap install ccls")
   :config
   (message "es/use-package-ccls")
   (defvar ccls-executable "/snap/bin/ccls")
@@ -1480,24 +1503,28 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package company-c-headers
   :diminish)
 
-(use-package clang-format+
-  :disabled
-  :custom
-  (clang-format-executable "clang-format-9")
-  (clang-format-style "Google")
-  :hook
-  ((c-mode c++-mode glsl-mode) . clang-format+-mode))
 
 (use-package clang-format
-  :disabled
+  :pin melpa
+  :init
+  (warn-if-executable-not-found "clang-format" "apt install clang-format")
+  (warn-if-executable-not-found "clangd" "sudo apt install clangd")
+  (warn-if-executable-not-found "clang++" "sudo apt install llvm")
+  (warn-if-executable-not-found "clang" "sudo apt install llvm")
+  :config
   :custom
-   (clang-format-executable "clang-format-9" t)
-   (clang-format-style "Google" t)
-   (c-basic-offset 3)
+   (clang-format-executable "clang-format" t)
+   (clang-format-style "Google")
    (c-echo-syntactic-information-p t)
    (c-insert-tab-function 'insert-tab)
    (c-report-syntactic-errors t))
 
+(use-package clang-format+
+  :pin melpa
+  :init
+  (warn-if-executable-not-found "clang-format" "apt install clang-format")
+  :hook
+  (c-mode-common . clang-format+-mode))
 
 ;; YAS
 (use-package yasnippet
@@ -1512,6 +1539,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; Rust
 (use-package rust-mode
+  :init
+  (warn-if-executable-not-found "rustfmt" "rustup component add rustfmt")
   :config
   (setq rust-format-on-save t)
   :hook (rust-mode . lsp))
@@ -1521,6 +1550,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; Add keybindings for interacting with Cargo
 (use-package cargo
+  :init
+  (warn-if-executable-not-found "cargo" "Install cargo from website")
   :hook (rust-mode . cargo-minor-mode))
 
 (use-package flycheck-rust
@@ -2153,6 +2184,13 @@ mouse-2: EXWM Workspace menu.
 (setq custom-file "~/.emacs_custom.el")
 (load custom-file t)
 (message "!!!es/load-complete!!!")
+
+
+
+
+(warn-if-file-not-found "ls")
+(warn-if-file-not-found "git")
+
 
 (provide '.emacs)
 ;;; .emacs ends here
