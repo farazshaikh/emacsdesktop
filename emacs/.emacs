@@ -23,7 +23,7 @@
 
 (defun es/emacs-base-settings()
   "Base editor customization."
-  (set-background-color "grey2")
+  ;;(set-background-color "grey2")
   (setq inhibit-startup-screen t)
   (menu-bar-mode -1)
   (tool-bar-mode -1)
@@ -44,6 +44,8 @@
   (setq select-enable-clipboard t)
   (setq compilation-scroll-output 'first-error)
   (setq dabbrev-case-fold-search nil)
+  (setq-default abbrev-mode 1)
+
   ;; kill tabs
   (setq indent-tabs-mode nil)
 
@@ -105,32 +107,45 @@
 ;; Package Mgmt and EOS installation
 (defun es/setup-package-mgmt()
   "Setup the package management for EOS."
-  (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
-                           ("melpa-stable" . "https://stable.melpa.org/packages/")
-                           ("melpa" . "http://melpa.org/packages/")
-                           ("elpy" . "http://jorgenschaefer.github.io/packages/")
-			   ("org" . "http://orgmode.org/elpa/")))
-  ;;elget
-  (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
-  (unless (require 'el-get nil t)
-    (url-retrieve
-     "https://raw.github.com/dimitri/el-get/master/el-get-install.el"
-     (lambda (s)
-       (goto-char (point-max))
-       (eval-print-last-sexp))))
+  (message "installing use package")
+  (require 'package)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+  ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
+  ;; and `package-pinned-packages`. Most users will not need or want to do this.
+  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
+  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+  ;;(add-to-list 'package-archives '("elpy" . "http://jorgenschaefer.github.io/packages/") t)
   (package-initialize)
 
-  ;; quelpa
-  (unless (package-installed-p 'quelpa)
-    (with-temp-buffer
-      (url-insert-file-contents "https://github.com/quelpa/quelpa/raw/master/quelpa.el")
-      (eval-buffer)
-      (quelpa-self-upgrade)))
+  
+  ;;elget
+  ;; (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
+  ;; (unless (require 'el-get nil t)
+  ;;   (url-retrieve
+  ;;    "https://raw.github.com/dimitri/el-get/master/el-get-install.el"
+  ;;    (lambda (s)
+  ;;      (goto-char (point-max))
+  ;;      (eval-print-last-sexp))))
+  ;; (package-initialize)
 
+  ;; quelpa
+  ;; (unless (package-installed-p 'quelpa)
+  ;;   (with-temp-buffer
+  ;;     (url-insert-file-contents "https://github.com/quelpa/quelpa/raw/master/quelpa.el")
+  ;;     (eval-buffer)
+  ;;     (quelpa-self-upgrade)))
+
+  (unless package-archive-contents
+    (package-refresh-contents))
+
+  (unless (package-installed-p 'use-package)
+    (package-install 'use-package))  
   (message "es/setup-package-mgmt"))
+(es/setup-package-mgmt)
 
 (defun es/unsafe-signature-override()
-  "Override package signature check requirements."
+  "DEPRECATED: Override package signature check requirements."
   (package-initialize)
   (unless (package-installed-p 'gnu-elpa-keyring-update)
     (progn
@@ -141,112 +156,108 @@
   (message "es/setup-package-mgmt"))
 ;;(es/unsafe-signature-override)
 
-(defun es/install-packages ()
-  "Install all required packages."
-  (interactive)
-  (message "installing missing packages")
-  (package-refresh-contents)
-  (setq package-selected-packages
-        '(auto-complete
-          auto-complete-c-headers
-          auto-complete-chunk
-          auto-complete-clang
-          auto-complete-clang-async
-	  auto-complete-exuberant-ctags
-          auto-complete-nxml
 
-          ;; COMPANY & ITS BACKENDS
-          company
-          company-lsp
-          company-quickhelp
-          company-c-headers
-          ;;company-cmake
-          company-irony
-          company-irony-c-headers
-          company-go
-          company-jedi
 
-          ;; Completion engines
-          function-args
-          irony
-          irony-eldoc
-          jedi
-          elpy
-          ggtags
+;; (defun es/install-packages ()
+;;   "DEPRECATED: in favor of use-package. Install all required packages."
+;;   (interactive)
+;;   (message "installing missing packages")
+;;   (package-refresh-contents)
+;;   (setq package-selected-packages
+;;         '(auto-complete
+;;           auto-complete-c-headers
+;;           auto-complete-chunk
+;;           auto-complete-clang
+;;           auto-complete-clang-async
+;; 	  auto-complete-exuberant-ctags
+;;           auto-complete-nxml
 
-          ;; rust
-          ac-racer
-          flycheck-rust
-          cargo
+;;           ;; COMPANY & ITS BACKENDS
+;;           company
+;;           company-lsp
+;;           company-quickhelp
+;;           company-c-headers
+;;           ;;company-cmake
+;;           company-irony
+;;           company-irony-c-headers
+;;           company-go
+;;           company-jedi
 
-          ;; Snippets
-          yasnippet
-          yasnippet-snippets
-          yasnippet-classic-snippets
+;;           ;; Completion engines
+;;           function-args
+;;           irony
+;;           irony-eldoc
+;;           jedi
+;;           elpy
+;;           ggtags
 
-          ;; go goodies
-          go-autocomplete
-          spacemacs-theme
-          go-direx
-          go-eldoc
-          go-errcheck
-          go-mode
-          ;;go-play
-          go-projectile
-          go-snippets
-          go-stacktracer
-          golint
-          go-eldoc
+;;           ;; Snippets
+;;           yasnippet
+;;           yasnippet-snippets
+;;           yasnippet-classic-snippets
 
-          ;; flycheck
-          google-c-style
-          flycheck
-          flycheck-irony
-          py-autopep8
+;;           ;; go goodies
+;;           go-autocomplete
+;;           spacemacs-theme
+;;           go-direx
+;;           go-eldoc
+;;           go-errcheck
+;;           go-mode
+;;           ;;go-play
+;;           go-projectile
+;;           go-snippets
+;;           go-stacktracer
+;;           golint
+;;           go-eldoc
 
-          ;; javascript setup from emacs.cafe Nicolas Petton
-          js2-mode
-          xref-js2
+;;           ;; flycheck
+;;           google-c-style
+;;           flycheck
+;;           flycheck-irony
+;;           py-autopep8
 
-          ;; emacs goodies
-          free-keys
-          ido-vertical-mode
-          diminish
+;;           ;; javascript setup from emacs.cafe Nicolas Petton
+;;           js2-mode
+;;           xref-js2
 
-          ;; emacs next gen
-          use-package))
-  (unless package-archive-contents
-    (package-refresh-contents))
+;;           ;; emacs goodies
+;;           free-keys
+;;           ido-vertical-mode
+;;           diminish
 
-  (dolist (package package-selected-packages)
-    (unless (package-installed-p package)
-      (package-install package)))
+;;           ;; emacs next gen
+;;           use-package))
+;;   (unless package-archive-contents
+;;     (package-refresh-contents))
 
-  (write-region "" "" "~/.eosinstall")
-  (message "es/setup-package-mgmt"))
+;;   (dolist (package package-selected-packages)
+;;     (unless (package-installed-p package)
+;;       (package-install package)))
 
-(defvar
-  es/eosinstallation nil
-  "Are we in installation mode.  In installation mode all you are doing in downloading and setting up the packages.")
+;;   (write-region "" "" "~/.eosinstall")
+;;   (message "es/setup-package-mgmt"))
 
-(defun es/install-if-needed()
-  "Check if Emacs is being invoked in the installation mode."
-  (interactive)
-  (when (or (member "-eosinstall" command-line-args)
-            (eq package-archive-contents nil)
-            (not (file-exists-p "~/.eosinstall")))
-    (progn
-     (es/install-packages)
-     (setq es/eosinstallation t))))
+;; (defvar
+;;   es/eosinstallation nil
+;;   "Are we in installation mode.  In installation mode all you are doing in downloading and setting up the packages.")
 
-(es/setup-package-mgmt)
-(es/install-if-needed)
+;; (defun es/install-if-needed()
+;;   "DEPRECATED: Check if Emacs is being invoked in the installation mode."
+;;   (interactive)
+;;   (when (or (member "-eosinstall" command-line-args)
+;;             (eq package-archive-contents nil)
+;;             (not (file-exists-p "~/.eosinstall")))
+;;     (progn
+;;      (es/install-packages)
+;;      (setq es/eosinstallation t))))
+;;(es/install-if-needed)
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package Setup     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
+(setq use-package-always-pin "melpa-stable")
 
 (use-package auto-package-update
   :disabled
@@ -257,9 +268,12 @@
   (auto-package-update-maybe))
 
 (use-package kaolin-themes
-  :ensure t
   :config
   (setq custom-safe-themes t))
+
+(use-package doom-themes
+  :config
+  (load-theme 'doom-molokai t))
 
 (use-package org
   :mode (("\\.org$" . org-mode))
@@ -272,21 +286,10 @@
     (if (file-exists-p "~/notes.org")
 	(add-to-list 'org-agenda-files "~/notes.org"))))
 
-(use-package monokai-pro-theme
-  :ensure t)
-
-(use-package doom-themes
-  :ensure t)
-
-(load-theme 'monokai-pro t)
-;;(load-theme 'doom-molokai t)
-;;(load-theme 'doom-gruvbox t)
-
-(use-package hydra :ensure t)
+(use-package hydra)
 
 (use-package treemacs
   :disabled
-  :ensure t
   :demand
   :init
   (with-eval-after-load 'winum
@@ -438,7 +441,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                                   display-buffer-use-some-window))))
 
 (use-package dashboard
-  :ensure t
   :if window-system
   :demand
   :config
@@ -458,7 +460,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package winner
   :pin gnu
-  :ensure t
   :config
   (winner-mode 1))
 
@@ -515,11 +516,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (message "es/setup-up-gnome-desktop"))
 (if (and window-system (getenv "EOS_DESKTOP") (getenv "EOS_EMACS_GNOME_SHELL_SETUP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
 
-(use-package use-package-hydra
-  :ensure t)
+(use-package use-package-hydra)
 
 (use-package undo-tree
-  :ensure t
   :diminish (undo-tree-mode . "")
   :after hydra
   :bind ("C-x u" . hydra-undo-tree/undo-tree-undo)
@@ -612,7 +611,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 
 (use-package windmove
-  :ensure t
   :demand t
   :pin gnu
   :functions split-window-horizontally-and-follow split-window-vertically-and-follow winner-undo
@@ -648,7 +646,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ("<find>" . beginning-of-line))
 
 (use-package windower
-  :ensure t
   :demand
   :pin gnu
   :config
@@ -664,7 +661,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
        window-system
        (getenv "EOS_DESKTOP"))
   :ensure windmove
-  :ensure t
   :pin gnu
   :demand
   :functions exwm-workspace-rename-buffer exwm-systemtray-enable exwm-randr-enable
@@ -897,10 +893,9 @@ Apps^^                        EXWM^^                     Windows mvmt           
   :bind (("C-f" . counsel-git-grep)))    ;; for expanded results use rg command
 
 ;; magit on ssh-protected git repos
-(use-package ssh-agency
-  :ensure t)
+(use-package ssh-agency)
 
-(use-package flx :ensure t)
+(use-package flx)
 
 
 (defun ivy-switch-file-search ()
@@ -910,7 +905,6 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (ivy-quit-and-run (counsel-git))))
 
 (use-package counsel
-  :ensure t
   :bind
   (("M-x" . counsel-M-x)
    ("s-x" . counsel-M-x)
@@ -931,7 +925,6 @@ Apps^^                        EXWM^^                     Windows mvmt           
    ))
 
 (use-package ivy
-  :ensure t
   :diminish (ivy-mode)
   :bind (("<f5>" . compile))
   :custom
@@ -963,7 +956,6 @@ Apps^^                        EXWM^^                     Windows mvmt           
                           (counsel-describe-variable . "^"))))
 
 (use-package swiper
-  :ensure t
   :bind (("C-s" . swiper-isearch)
 	 ("C-r" . swiper-isearch)
 	 ("C-c C-r" . ivy-resume))
@@ -977,8 +969,6 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 
 (use-package ivy-posframe
-  :pin melpa
-  :ensure t
   :config
   (if (and window-system (getenv "EOS_DESKTOP"))
       (setq ivy-posframe-parameters
@@ -1045,13 +1035,9 @@ Apps^^                        EXWM^^                     Windows mvmt           
   :bind
   ("C-c g" . hydra-git-gutter/body))
 
-(use-package git-timemachine
-  :ensure t
-  :pin melpa-stable)
+(use-package git-timemachine)
 
 (use-package direnv
-  :ensure t
-  :pin melpa-stable
   :custom
   (direnv-always-show-summary t)
   (direnv-show-paths-in-summary nil)
@@ -1083,8 +1069,6 @@ Git gutter:
 
 
 (use-package magit
-  :ensure t
-  :pin melpa-stable
   :init
   (progn
     (bind-key "C-x g" 'magit-status))
@@ -1171,30 +1155,27 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (persistent-scratch-setup-default))
 
 (use-package yasnippet
-  :ensure t
   :init
   (yas-global-mode 1))
 
-(use-package yasnippet-snippets  :ensure t )
-(use-package yasnippet-classic-snippets :ensure t )
-(use-package popup  :ensure t )
+(use-package yasnippet-snippets)
+(use-package yasnippet-classic-snippets)
+(use-package popup)
 (use-package function-args
   :config
   (fa-config-default))
 
 (use-package dap-mode
-  :ensure t
-  :pin melpa-stable
   :init
   (require 'dap-gdb-lldb)
   :hook
   ('dap-stopped . (lambda (arg) (call-interactively #'dap-hydra))))
 
 (use-package lsp-mode
-  :ensure t
   :commands lsp
   :functions lsp-session lsp--persist-session
   :config
+  (require 'lsp-clients)
   (defun lsp-clear-session-blacklist()
     "Clear the list of blacklisted folders."
     (interactive)
@@ -1279,23 +1260,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          (lsp-mode . lsp-headerline-breadcrumb-mode)
          (lsp-mode . lsp-modeline-code-actions-mode)))
 
-(use-package clang-format
-  :custom
-   (clang-format-executable "clang-format-9" t)
-   (clang-format-style "Google" t)
-   (c-basic-offset 3)
-   (c-echo-syntactic-information-p t)
-   (c-insert-tab-function 'insert-tab)
-   (c-report-syntactic-errors t))
-
 (use-package lsp-ui
-  :ensure t
   :diminish
   :demand
   :commands lsp-ui-mode
-  :custom-face
-  (lsp-ui-doc-background ((t (:background nil))))
-  (lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
               ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M--?
@@ -1330,9 +1298,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
     (setq mode-line-format nil)))
 
-(use-package lsp-ivy
-  :ensure t
-  :pin melpa-stable)
+(use-package lsp-ivy)
 
 (defhydra hydra-lsp (:exit t :hint nil)
   "
@@ -1362,8 +1328,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   ("S" lsp-workspace-shutdown))
 
 (use-package flycheck
-  :ensure t
-  :hook (prog-mode . company-mode)
+  :hook (prog-mode . flycheck-mode)
   :demand
   :custom
   (flycheck-set-indication-mode 'left-fringe)
@@ -1377,11 +1342,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                 (flycheck-select-checker 'sh-shellcheck)))))
 
 
-(use-package unicode-fonts :if window-system :ensure t)
-(use-package all-the-icons-dired :if window-system :ensure t)
+(use-package unicode-fonts
+  :if window-system)
+
+(use-package all-the-icons-dired
+  :if window-system
+  :pin melpa)
 (use-package all-the-icons
   :if window-system
-  :ensure t
+  :pin melpa
   :hook
   (dired-mode . all-the-icons-dired-mode)
   :config
@@ -1389,11 +1358,11 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (when (not (member "all-the-icons" (font-family-list)))
     (all-the-icons-install-fonts t)))
 
-(use-package spaceline :ensure t
+(use-package spaceline
   :custom-face
   (spaceline-highlight-face ((t (:foreground "black"))))
   :config
-  (use-package fancy-battery :ensure t
+  (use-package fancy-battery
     :config
     (setq fancy-battery-show-percentage t)
     (fancy-battery-mode)))
@@ -1423,14 +1392,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (spaceline-toggle-time-on)
   (spaceline-emacs-theme 'date 'time))
 
-(use-package auto-complete :ensure t)
+(use-package auto-complete)
 (use-package auto-complete-config
   :disabled
-  :requires auto-complete
-  :ensure t)
+  :requires auto-complete)
 
 (use-package company
-  :ensure t
   :hook (prog-mode . company-mode)
   :config
   (message "es/use-package-company")
@@ -1440,8 +1407,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          company-minimum-prefix-length 1))
 
 (use-package company-posframe
-  :ensure t
-  :pin melpa-stable
+  :pin melpa
   :config
   (company-posframe-mode))
 
@@ -1449,8 +1415,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :pin melpa
   :hook (company-mode . company-box-mode))
 
+(use-package
+  company-box
+  :hook (company-mode . company-box-mode)
+  :custom (company-box-icons-alist 'company-box-icons-all-the-icons)
+  :diminish "")
+
 (use-package company-lsp
-  :ensure t
   :commands company-lsp
   :config
   (push 'company-lsp company-backends)
@@ -1458,8 +1429,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (company-lsp-cache-cadidates 'auto))
 
 ;; ansible
-(use-package yaml-mode
-  :pin melpa-stable)
+(use-package yaml-mode)
 (use-package ansible
   :init
   (add-hook 'yaml-mode-hook '(lambda () (ansible 1))))
@@ -1467,7 +1437,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; Python
 (use-package elpy
-  :ensure t
   :init
   (advice-add 'python-mode :before 'elpy-enable)
   (add-hook 'python-mode-hook 'elpy-mode)
@@ -1484,14 +1453,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 ;; enable autopep8 formatting on save
 (use-package py-autopep8
-  :ensure t
   :init
   (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save))
 
 ;; C/C++
-(use-package company-c-headers :ensure t )
+(use-package company-c-headers
+  :pin melpa)
+
 (use-package ccls
+  :pin melpa
   :diminish
+  :disabled
   :config
   (message "es/use-package-ccls")
   (defvar ccls-executable "/snap/bin/ccls")
@@ -1501,20 +1473,31 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                                       (next-error-follow-minor-mode t)))
   :hook ((c-mode c++-mode objc-mode) .
          (lambda () (require 'ccls) (lsp))))
+
 (use-package ggtags
-  :ensure t
   :diminish)
 
 (use-package company-c-headers
-  :ensure t
   :diminish)
 
 (use-package clang-format+
+  :disabled
   :custom
   (clang-format-executable "clang-format-9")
   (clang-format-style "Google")
   :hook
   ((c-mode c++-mode glsl-mode) . clang-format+-mode))
+
+(use-package clang-format
+  :disabled
+  :custom
+   (clang-format-executable "clang-format-9" t)
+   (clang-format-style "Google" t)
+   (c-basic-offset 3)
+   (c-echo-syntactic-information-p t)
+   (c-insert-tab-function 'insert-tab)
+   (c-report-syntactic-errors t))
+
 
 ;; YAS
 (use-package yasnippet
@@ -1530,12 +1513,62 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 ;; Rust
 (use-package rust-mode
   :config
-  (setq rust-format-on-save t))
-(setq-default abbrev-mode 1)
+  (setq rust-format-on-save t)
+  :hook (rust-mode . lsp))
+
+(use-package toml-mode
+  :pin melpa)
+
+;; Add keybindings for interacting with Cargo
+(use-package cargo
+  :hook (rust-mode . cargo-minor-mode))
+
+(use-package flycheck-rust
+  :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
+
+;; GO LANG ;;
+(use-package go-autocomplete
+  :pin melpa)
+(require 'auto-complete-config)
+(defconst es/_goroot "/home/farazl/excubito_workspace/scratch/go/golang/go"  "Go toolchain root.")
+(defun ac-go-mode-setup()
+  "Auto complete setup for go."
+  ;;(setenv "PATH" (concat (getenv "PATH") ":" (concat es/_goroot "/bin")))
+  (local-set-key (kbd "M-.") 'godef-jump)
+)
+
+(setenv "GOPATH" (getenv "WRK"))
+(defun go-set-gopath(_gopath)
+  "Set up the path for GO workspace."
+  (interactive "Set Go PATH:")
+  (setenv "GOPATH" _gopath)
+  )
+
+(add-hook 'go-mode-hook 'ac-go-mode-setup)
+(add-hook 'go-mode-hook 'ac-go-mode-setup)
+
+
+;; JavaScript ;;
+(defun js2-mode-setup()
+  "Setup Tern mode for javascript."
+  (tern-mode)
+  (company-mode)
+  (add-to-list 'company-backends 'company-tern)
+  ;;  (auto-complete-mode)  // either AC + or company may Complete
+  ;; Disable completion keybindings, as we use xref-js2 instead
+  (define-key tern-mode-keymap (kbd "M-.") nil)
+  (define-key tern-mode-keymap (kbd "M-,") nil)
+  (local-set-key (kbd "s-a") 'adbShake)
+)
+
+(add-hook 'js2-mode-hook 'js2-mode-setup)
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+
+(put 'downcase-region 'disabled nil)
+(message "es/legacy-lang-setup")
 
 ;; Some custom configuration to ediff
 (use-package ediff
-  :ensure t
   :functions
   ediff-janitor ediff-cleanup-mess
   :custom
@@ -1617,13 +1650,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (es/setup-project-dfn)
 
 ;; Setup projectile
-(use-package counsel-projectile
-  :ensure
-  :pin melpa-stable)
+(use-package counsel-projectile)
 
 (use-package projectile
-  :ensure t
-  :pin melpa-stable
   :config
   (projectile-mode 1)
   (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
@@ -1861,55 +1890,6 @@ mouse-2: EXWM Workspace menu.
   (start-process-shell-command
    "/usr/bin/adb" nil  "adb shell input keyevent 82"))
 (message "es/helper-utilities")
-
-
-;;;;;;;;;;;;;
-;; GO LANG ;;
-;;;;;;;;;;;;;
-(require 'go-autocomplete)
-(require 'auto-complete-config)
-(defconst es/_goroot "/home/farazl/excubito_workspace/scratch/go/golang/go"  "Go toolchain root.")
-(defun ac-go-mode-setup()
-  "Auto complete setup for go."
-  ;;(setenv "PATH" (concat (getenv "PATH") ":" (concat es/_goroot "/bin")))
-  (local-set-key (kbd "M-.") 'godef-jump)
-)
-
-(setenv "GOPATH" (getenv "WRK"))
-(defun go-set-gopath(_gopath)
-  "Set up the path for GO workspace."
-  (interactive "Set Go PATH:")
-  (setenv "GOPATH" _gopath)
-  )
-
-;;(require 'go-eldoc)
-(add-hook 'go-mode-hook 'ac-go-mode-setup)
-;;(add-hook 'go-mode-hook 'go-eldoc-setup)
-(add-hook 'go-mode-hook 'ac-go-mode-setup)
-
-
-;;;;;;;;;;;;;;;;
-;; JavaScript ;;
-;;;;;;;;;;;;;;;;
-(require 'company)
-;;(require 'company-tern)
-(defun js2-mode-setup()
-  "Setup Tern mode for javascript."
-  (tern-mode)
-  (company-mode)
-  (add-to-list 'company-backends 'company-tern)
-  ;;  (auto-complete-mode)  // either AC + or company may Complete
-  ;; Disable completion keybindings, as we use xref-js2 instead
-  (define-key tern-mode-keymap (kbd "M-.") nil)
-  (define-key tern-mode-keymap (kbd "M-,") nil)
-  (local-set-key (kbd "s-a") 'adbShake)
-)
-
-(add-hook 'js2-mode-hook 'js2-mode-setup)
-(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-
-(put 'downcase-region 'disabled nil)
-(message "es/legacy-lang-setup")
 
 ;; Application invocations
 (defun find-named-buffer(buffPrefix)
