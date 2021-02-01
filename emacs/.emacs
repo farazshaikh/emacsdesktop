@@ -125,7 +125,6 @@
   ;;(add-to-list 'package-archives '("elpy" . "http://jorgenschaefer.github.io/packages/") t)
   (package-initialize)
 
-  
   ;;elget
   ;; (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
   ;; (unless (require 'el-get nil t)
@@ -147,7 +146,7 @@
     (package-refresh-contents))
 
   (unless (package-installed-p 'use-package)
-    (package-install 'use-package))  
+    (package-install 'use-package))
   (message "es/setup-package-mgmt"))
 (es/setup-package-mgmt)
 
@@ -164,107 +163,36 @@
 ;;(es/unsafe-signature-override)
 
 
-
-;; (defun es/install-packages ()
-;;   "DEPRECATED: in favor of use-package. Install all required packages."
-;;   (interactive)
-;;   (message "installing missing packages")
-;;   (package-refresh-contents)
-;;   (setq package-selected-packages
-;;         '(auto-complete
-;;           auto-complete-c-headers
-;;           auto-complete-chunk
-;;           auto-complete-clang
-;;           auto-complete-clang-async
-;; 	  auto-complete-exuberant-ctags
-;;           auto-complete-nxml
-
-;;           ;; COMPANY & ITS BACKENDS
-;;           company
-;;           company-lsp
-;;           company-quickhelp
-;;           company-c-headers
-;;           ;;company-cmake
-;;           company-irony
-;;           company-irony-c-headers
-;;           company-go
-;;           company-jedi
-
-;;           ;; Completion engines
-;;           function-args
-;;           irony
-;;           irony-eldoc
-;;           jedi
-;;           elpy
-;;           ggtags
-
-;;           ;; Snippets
-;;           yasnippet
-;;           yasnippet-snippets
-;;           yasnippet-classic-snippets
-
-;;           ;; go goodies
-;;           go-autocomplete
-;;           spacemacs-theme
-;;           go-direx
-;;           go-eldoc
-;;           go-errcheck
-;;           go-mode
-;;           ;;go-play
-;;           go-projectile
-;;           go-snippets
-;;           go-stacktracer
-;;           golint
-;;           go-eldoc
-
-;;           ;; flycheck
-;;           google-c-style
-;;           flycheck
-;;           flycheck-irony
-;;           py-autopep8
-
-;;           ;; javascript setup from emacs.cafe Nicolas Petton
-;;           js2-mode
-;;           xref-js2
-
-;;           ;; emacs goodies
-;;           free-keys
-;;           ido-vertical-mode
-;;           diminish
-
-;;           ;; emacs next gen
-;;           use-package))
-;;   (unless package-archive-contents
-;;     (package-refresh-contents))
-
-;;   (dolist (package package-selected-packages)
-;;     (unless (package-installed-p package)
-;;       (package-install package)))
-
-;;   (write-region "" "" "~/.eosinstall")
-;;   (message "es/setup-package-mgmt"))
-
-;; (defvar
-;;   es/eosinstallation nil
-;;   "Are we in installation mode.  In installation mode all you are doing in downloading and setting up the packages.")
-
-;; (defun es/install-if-needed()
-;;   "DEPRECATED: Check if Emacs is being invoked in the installation mode."
-;;   (interactive)
-;;   (when (or (member "-eosinstall" command-line-args)
-;;             (eq package-archive-contents nil)
-;;             (not (file-exists-p "~/.eosinstall")))
-;;     (progn
-;;      (es/install-packages)
-;;      (setq es/eosinstallation t))))
-;;(es/install-if-needed)
-
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; Package Setup     ;;
 ;;;;;;;;;;;;;;;;;;;;;;;
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
-(setq use-package-always-pin "melpa-stable")
+(setq use-package-always-pin "melpa")
+
+(use-package writeroom-mode
+  :init
+  (setq writeroom-width 220)
+  (writeroom-toggle-mode-line)
+  (add-hook 'writeroom-mode-hook (lambda () (display-line-numbers-mode -1)))
+  :bind (:map writeroom-mode-map
+              ("C-c C-w <" . #'writeroom-decrease-width)
+              ("C-c C-w >" . #'writeroom-increase-width)
+              ("C-c C-w =" . #'writeroom-adjust-width)
+              ("s-?" . nil)
+              ("C-c C-w SPC" . #'writeroom-toggle-mode-line))
+  (:map global-map
+        ("C-c z" . #'writeroom-mode)))
+
+(use-package vterm
+  :config
+  (add-hook 'vterm-mode-hook (lambda ()
+                             (setf truncate-lines nil)
+                             (setq-local show-paren-mode nil)
+			     (setq-local show-trailing-whitespace nil)
+                             (yas-minor-mode -1)
+                             (flycheck-mode -1)
+			     (whitespace-mode -1))))
 
 (use-package auto-package-update
   :disabled
@@ -280,7 +208,7 @@
 
 (use-package doom-themes
   :config
-  (load-theme 'doom-molokai t))
+  (load-theme 'doom-gruvbox t))
 
 (use-package org
   :mode (("\\.org$" . org-mode))
@@ -297,7 +225,6 @@
 
 (use-package treemacs
   :disabled
-  :demand
   :init
   (with-eval-after-load 'winum
     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
@@ -404,7 +331,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
 (use-package centaur-tabs
   :disabled
-  :demand
   :init (setq centaur-tabs-set-bar 'over)
   :function centaur-tabs-force-update
   :config
@@ -481,7 +407,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 
   ;; some issues with systray
   ;;(start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
-;;  (start-process "" nil "zeitgeist-datahub")
+  ;;  (start-process "" nil "zeitgeist-datahub")
   (start-process "" nil "update-notifier")
   (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")
 
@@ -524,8 +450,10 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
 (if (and window-system (getenv "EOS_DESKTOP") (getenv "EOS_EMACS_GNOME_SHELL_SETUP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
 
 (use-package use-package-hydra)
+(use-package diminish)
 
 (use-package undo-tree
+  :pin gnu
   :diminish (undo-tree-mode . "")
   :after hydra
   :bind ("C-x u" . hydra-undo-tree/undo-tree-undo)
@@ -534,14 +462,14 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   :custom
   (undo-tree-auto-save-history t)
   :hydra (hydra-undo-tree (:hint nil)
-  "
+			  "
   _p_: undo  _n_: redo _s_: save _l_: load   "
-  ("p"   undo-tree-undo)
-  ("n"   undo-tree-redo)
-  ("s"   undo-tree-save-history)
-  ("l"   undo-tree-load-history)
-  ("u"   undo-tree-visualize "visualize" :color blue)
-  ("q"   nil "quit" :color blue)))
+			  ("p"   undo-tree-undo)
+			  ("n"   undo-tree-redo)
+			  ("s"   undo-tree-save-history)
+			  ("l"   undo-tree-load-history)
+			  ("u"   undo-tree-visualize "visualize" :color blue)
+			  ("q"   nil "quit" :color blue)))
 
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;Setup alt-tab     ;;
@@ -604,21 +532,15 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
     (global-set-key (kbd "<M-<tab>>") 'timed-iflipb-next-buffer)
     (global-set-key (kbd "C-M-i") 'timed-iflipb-next-buffer)
     (global-set-key (kbd "<M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
-    (exwm-input-set-key (kbd "M-<tab>") 'timed-iflipb-next-buffer)
-    (exwm-input-set-key (kbd "M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
-
 
     (global-set-key (kbd "<s-<tab>>") 'timed-iflipb-next-buffer)
-    (global-set-key (kbd "<s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
-    (exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
-    (exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer))
+    (global-set-key (kbd "<s-<iso-lefttab>") 'timed-iflipb-previous-buffer))
 
   (setupIFlipb))
 (message "es/alt-tab")
 
 
 (use-package windmove
-  :demand t
   :pin gnu
   :functions split-window-horizontally-and-follow split-window-vertically-and-follow winner-undo
   :config
@@ -653,7 +575,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ("<find>" . beginning-of-line))
 
 (use-package windower
-  :demand
   :pin gnu
   :config
   (global-set-key (kbd "<s-S-left>") 'windower-swap-left)
@@ -669,7 +590,6 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
        (getenv "EOS_DESKTOP"))
   :ensure windmove
   :pin gnu
-  :demand
   :functions exwm-workspace-rename-buffer exwm-systemtray-enable exwm-randr-enable
   :hook
   (('exwm-update-class .
@@ -682,7 +602,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                               (when (or (not exwm-instance-name)
                                         (string-prefix-p "sun-awt-X11-" exwm-instance-name)
                                         (string= "gimp" exwm-instance-name))
-                               (exwm-workspace-rename-buffer exwm-title)))))
+				(exwm-workspace-rename-buffer exwm-title)))))
   :config
   ;; Disable dialog boxes since they are unusable in EXWM
   (setq use-dialog-box nil)
@@ -705,9 +625,9 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
     (progn
       (setq exwm-randr-workspace-monitor-plist '(1 "eDP-1" 2 "DP-1" 0 "HDMI-1"))
       (add-hook 'exwm-randr-screen-change-hook
-      (lambda ()
-        (start-process-shell-command
-         "xrandr" nil "xrandr --output eDP-1 --output DP-1 --output HDMI-1 --auto")))))
+		(lambda ()
+		  (start-process-shell-command
+		   "xrandr" nil "xrandr --output eDP-1 --output DP-1 --output HDMI-1 --auto")))))
 
   ;; Access buffers from all workspaces
   (setq exwm-workspace-show-all-buffers t)
@@ -719,26 +639,26 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   ;; and DEST is what EXWM actually sends to application.  Note that both SRC
   ;; and DEST should be key sequences (vector or string).
   (setq exwm-input-simulation-keys
-   '(
-     ;; movement
-     ([?\C-b] . [left])
-     ([?\M-b] . [C-left])
-     ([?\C-f] . [right])
-     ([?\M-f] . [C-right])
-     ([?\C-p] . [up])
-     ([?\C-n] . [down])
-     ([?\C-a] . [home])
-     ([?\C-e] . [end])
-     ([?\M-v] . [prior])
-     ([?\C-v] . [next])
-     ([?\C-d] . [delete])
-     ([?\C-k] . [S-end delete])
-     ;; cut/paste.
-     ([?\C-w] . [?\C-x])  ;; Cut
-     ([?\M-w] . [?\C-c])  ;; copy
-     ([?\C-y] . [?\C-v])  ;; paste
-     ;; search
-     ([?\C-s] . (?\C-f))))
+	'(
+	  ;; movement
+	  ([?\C-b] . [left])
+	  ([?\M-b] . [C-left])
+	  ([?\C-f] . [right])
+	  ([?\M-f] . [C-right])
+	  ([?\C-p] . [up])
+	  ([?\C-n] . [down])
+	  ([?\C-a] . [home])
+	  ([?\C-e] . [end])
+	  ([?\M-v] . [prior])
+	  ([?\C-v] . [next])
+	  ([?\C-d] . [delete])
+	  ([?\C-k] . [S-end delete])
+	  ;; cut/paste.
+	  ([?\C-w] . [?\C-x])  ;; Cut
+	  ([?\M-w] . [?\C-c])  ;; copy
+	  ([?\C-y] . [?\C-v])  ;; paste
+	  ;; search
+	  ([?\C-s] . (?\C-f))))
   (message "es/keyboard-setup")
 
   ;; setup alt-tab
@@ -771,7 +691,7 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
                       (lambda () (interactive) (exwm-layout-enlarge-window             50)))
   (exwm-input-set-key (kbd "s-M-<down>")
                       (lambda () (interactive) (exwm-layout-shrink-window              50)))
-    ;; window splits
+  ;; window splits
   (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally-and-follow)
   (exwm-input-set-key (kbd "s-]") 'split-window-vertically-and-follow)
   (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
@@ -816,11 +736,11 @@ Other buffer group by `centaur-tabs-get-group-name' with project name."
   (defun exwm-workspace--update-ewmh-desktop-names ()
     "Set names for work spaces."
     (xcb:+request exwm--connection
-        (make-instance 'xcb:ewmh:set-_NET_DESKTOP_NAMES
-                       :window exwm--root :data
-                       (mapconcat (lambda (i) (funcall exwm-workspace-index-map i))
-                                  (number-sequence 0 (1- (exwm-workspace--count)))
-                                  "\0"))))
+		  (make-instance 'xcb:ewmh:set-_NET_DESKTOP_NAMES
+				 :window exwm--root :data
+				 (mapconcat (lambda (i) (funcall exwm-workspace-index-map i))
+					    (number-sequence 0 (1- (exwm-workspace--count)))
+					    "\0"))))
 
   (add-hook 'exwm-workspace-list-change-hook
             #'exwm-workspace--update-ewmh-desktop-names)
@@ -899,6 +819,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
   :bind (("C-S-f" . counsel-ag)))   ;; for expanded results use ag command
 
 (use-package rg
+  :init
   (warn-if-executable-not-found "rg" "apt install rip-grep")
   :bind (("C-f" . counsel-git-grep)))    ;; for expanded results use rg command
 
@@ -958,12 +879,12 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (interactive)
   (message "fixing ivy prefixes")
   (setq ivy-initial-inputs-alist
-                        '((counsel-minor . "^+")
-                          (counsel-package . "^+")
-                          (counsel-org-capture . "^")
-                          (counsel-M-x . "")
-                          (counsel-describe-function . "^")
-                          (counsel-describe-variable . "^"))))
+        '((counsel-minor . "^+")
+          (counsel-package . "^+")
+          (counsel-org-capture . "^")
+          (counsel-M-x . "")
+          (counsel-describe-function . "^")
+          (counsel-describe-variable . "^"))))
 
 (use-package swiper
   :bind (("C-s" . swiper-isearch)
@@ -982,10 +903,10 @@ Apps^^                        EXWM^^                     Windows mvmt           
   :config
   (if (and window-system (getenv "EOS_DESKTOP"))
       (setq ivy-posframe-parameters
-        '((parent-frame nil)  ;; Required for EXWM
-          (left-fringe . 30)
-          (right-fringe . 30)
-          (ivy-posframe-border-width 1)))
+            '((parent-frame nil)  ;; Required for EXWM
+              (left-fringe . 30)
+              (right-fringe . 30)
+              (ivy-posframe-border-width 1)))
     (setq ivy-posframe-parameters
           '((left-fringe . 30)
             (right-fringe . 30)
@@ -1005,16 +926,16 @@ Apps^^                        EXWM^^                     Windows mvmt           
           (t               . ivy-posframe-display-at-point)))
   (setq ivy-posframe-width 110
         ivy-posframe-height 30)
-   (ivy-posframe-mode 1))
+  (ivy-posframe-mode 1))
 (setq ivy-posframe-border-width 3)
 
 (use-package whitespace
   :hook
-  (prog-mode-hook . whitespace-mode)
+  (prog-mode . whitespace-mode)
   :init
   (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode VTerm))
   :custom
-  (show-trailing-whitespace t)
+  ;;(show-trailing-whitespace t)
   (whitespace-style (quote (face empty tabs lines-tail whitespace))))
 
 (use-package flyspell
@@ -1050,15 +971,15 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 (use-package direnv
   :init
-    (warn-if-executable-not-found "direnv" "apt install direnv")
+  (warn-if-executable-not-found "direnv" "apt install direnv")
   :custom
-  (direnv-always-show-summary t)
+  (direnv-always-show-summary nil)
   (direnv-show-paths-in-summary nil)
   :config
   (direnv-mode))
 
 (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
-                            :hint nil)
+				      :hint nil)
   "
 Git gutter:
   _j_: next hunk        _s_tage hunk     _q_uit
@@ -1171,9 +1092,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 (use-package yasnippet
   :init
   (yas-global-mode 1))
-
 (use-package yasnippet-snippets)
-(use-package yasnippet-classic-snippets)
+(use-package yasnippet-classic-snippets
+  :pin gnu)
+
 (use-package popup)
 (use-package function-args
   :config
@@ -1191,7 +1113,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :commands lsp
   :functions lsp-session lsp--persist-session
   :config
-  (require 'lsp-clients)
   (defun lsp-clear-session-blacklist()
     "Clear the list of blacklisted folders."
     (interactive)
@@ -1209,7 +1130,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-completion-no-cache nil)
   (lsp-completion-show-detail nil)
   (lsp-completion-show-kind nil)
-
+  (lsp-modeline-code-actions-segments '(count icon name))
   (lsp-signature-auto-activate nil)
   (lsp-signature-doc-lines 0)
 
@@ -1218,12 +1139,12 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-rust-build-on-save t)
   (lsp-rust-jobs 2)
 
+  (lsp-rust-server 'rust-analyzer)
   (lsp-rust-analyzer-display-chaining-hints t)
   (lsp-rust-analyzer-display-parameter-hints t)
   (lsp-rust-analyzer-server-display-inlay-hints t)
-  (lsp-rust-server 'rust-analyzer)
   (lsp-rust-full-docs t)
-  ;; (lsp-headerline-breadcrumb-mode)
+
 
   ;;cpp
   (lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
@@ -1278,16 +1199,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package lsp-ui
   :diminish
-  :demand
   :commands lsp-ui-mode
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
               ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M--?
               ([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
               ("C-c u" . lsp-ui-imenu))
-   :custom-face
-   (lsp-ui-doc-background ((t (:background nil))))
-   (lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
+  :custom-face
+  (lsp-ui-doc-background ((t (:background nil))))
+  (lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
 
   :custom
   (lsp-ui-doc-enable t)
@@ -1349,7 +1269,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package flycheck
   :hook (prog-mode . flycheck-mode)
-  :demand
   :custom
   (flycheck-set-indication-mode 'left-fringe)
   :init
@@ -1366,11 +1285,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :if window-system)
 
 (use-package all-the-icons-dired
-  :if window-system
-  :pin melpa)
+  :if window-system)
 (use-package all-the-icons
   :if window-system
-  :pin melpa
   :hook
   (dired-mode . all-the-icons-dired-mode)
   :config
@@ -1421,19 +1338,17 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :hook (prog-mode . company-mode)
   :config
   (message "es/use-package-company")
-   (setq company-idle-delay 0
-         company-tooltip-align-annotations t
-         company-tooltip-idle-delay 0
-         company-minimum-prefix-length 1))
+  (setq company-idle-delay 0
+        company-tooltip-align-annotations t
+        company-tooltip-idle-delay 0
+        company-minimum-prefix-length 1))
 
 (use-package company-posframe
-  :pin melpa
   :disabled
   :config
   (company-posframe-mode))
 
 (use-package company-box
-  :pin melpa
   :hook (company-mode . company-box-mode))
 
 (use-package
@@ -1478,11 +1393,9 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save))
 
 ;; C/C++
-(use-package company-c-headers
-  :pin melpa)
+(use-package company-c-headers)
 
 (use-package ccls
-  :pin melpa
   :diminish
   :disabled
   :init
@@ -1505,7 +1418,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 
 (use-package clang-format
-  :pin melpa
   :init
   (warn-if-executable-not-found "clang-format" "apt install clang-format")
   (warn-if-executable-not-found "clangd" "sudo apt install clangd")
@@ -1513,14 +1425,13 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (warn-if-executable-not-found "clang" "sudo apt install llvm")
   :config
   :custom
-   (clang-format-executable "clang-format" t)
-   (clang-format-style "Google")
-   (c-echo-syntactic-information-p t)
-   (c-insert-tab-function 'insert-tab)
-   (c-report-syntactic-errors t))
+  (clang-format-executable "clang-format" t)
+  (clang-format-style "Google")
+  (c-echo-syntactic-information-p t)
+  (c-insert-tab-function 'insert-tab)
+  (c-report-syntactic-errors t))
 
 (use-package clang-format+
-  :pin melpa
   :init
   (warn-if-executable-not-found "clang-format" "apt install clang-format")
   :hook
@@ -1545,28 +1456,32 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq rust-format-on-save t)
   :hook (rust-mode . lsp))
 
-(use-package toml-mode
-  :pin melpa)
+(use-package toml-mode)
 
 ;; Add keybindings for interacting with Cargo
 (use-package cargo
   :init
   (warn-if-executable-not-found "cargo" "Install cargo from website")
+  (warn-if-executable-not-found "cargo-add" "cargo install cargo-add")
+  (warn-if-executable-not-found "cargo-expand" "cargo install cargo-expand")
+  (warn-if-executable-not-found "cargo-clippy" "cargo install cargo-clippy")
+  (warn-if-executable-not-found "cargo-rm" "cargo install cargo-rm")
+  (warn-if-executable-not-found "cargo-watch" "cargo install cargo-watch")
+  (warn-if-executable-not-found "cargo-upgrade" "cargo install cargo-upgrade")
   :hook (rust-mode . cargo-minor-mode))
 
 (use-package flycheck-rust
   :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;; GO LANG ;;
-(use-package go-autocomplete
-  :pin melpa)
+(use-package go-autocomplete)
 (require 'auto-complete-config)
 (defconst es/_goroot "/home/farazl/excubito_workspace/scratch/go/golang/go"  "Go toolchain root.")
 (defun ac-go-mode-setup()
   "Auto complete setup for go."
   ;;(setenv "PATH" (concat (getenv "PATH") ":" (concat es/_goroot "/bin")))
   (local-set-key (kbd "M-.") 'godef-jump)
-)
+  )
 
 (setenv "GOPATH" (getenv "WRK"))
 (defun go-set-gopath(_gopath)
@@ -1590,7 +1505,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (define-key tern-mode-keymap (kbd "M-.") nil)
   (define-key tern-mode-keymap (kbd "M-,") nil)
   (local-set-key (kbd "s-a") 'adbShake)
-)
+  )
 
 (add-hook 'js2-mode-hook 'js2-mode-setup)
 (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
@@ -1669,15 +1584,15 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (interactive)
   (setenv "WRK" "/storvisor/work/cypress")
   (setq compile-command
-   "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
-)
+	"cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
+  )
 
 
 (defun es/setup-project-excb()
   "Setup Excubito Project."
   (interactive)
   (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
-)
+  )
 (es/setup-project-dfn)
 
 ;; Setup projectile
@@ -1701,8 +1616,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   ("q"  nil                                      "cancel" :color blue))
 
 (defhydra hydra-projectile (:exit nil
-                            :color teal
-                            :hint nil)
+				  :color teal
+				  :hint nil)
   "
      PROJECTILE: %(projectile-project-root)
 
@@ -1799,11 +1714,11 @@ mouse-2: EXWM Workspace menu.
 ;;https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
 (defun my:force-modes (rule-mode &rest modes)
   "RULE-MODE MODES switch on/off several modes depending of state of the controlling minor mode."
-    (let ((rule-state (if rule-mode 1 -1)
-                      ))
-      (mapcar (lambda (k) (funcall k rule-state)) modes)
-      )
+  (let ((rule-state (if rule-mode 1 -1)
+                    ))
+    (mapcar (lambda (k) (funcall k rule-state)) modes)
     )
+  )
 (defvar my:prev-whitespace-mode nil)
 (make-variable-buffer-local 'my:prev-whitespace-mode)
 (defvar my:prev-whitespace-pushed nil)
@@ -1838,9 +1753,9 @@ mouse-2: EXWM Workspace menu.
 
 ;;  terminal mode settings
 (add-hook 'ansi-term-mode-hook '(lambda ()
-      (setq term-buffer-maximum-size 0)
-      (setq-default show-trailing-whitespace f)
-      ))
+				  (setq term-buffer-maximum-size 0)
+				  (setq-default show-trailing-whitespace nil)
+				  ))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1863,18 +1778,18 @@ mouse-2: EXWM Workspace menu.
   (setq show-trailing-whitespace (not show-trailing-whitespace)))
 
 (defun es/tags-create (dir-name)
-     "Create tags file Arguments DIR-NAME."
-     (interactive "DDirectory: ")
-     (eshell-command
-      (format "find %s -type f -name \"*.hpp\" -o -name \"*.cpp\" -o -name \"*.[ch]\" | xargs etags -f %s/TAGS" dir-name dir-name))
-     (eshell-command
-      (format "cd %s; gtags -i -q" dir-name))
-)
+  "Create tags file Arguments DIR-NAME."
+  (interactive "DDirectory: ")
+  (eshell-command
+   (format "find %s -type f -name \"*.hpp\" -o -name \"*.cpp\" -o -name \"*.[ch]\" | xargs etags -f %s/TAGS" dir-name dir-name))
+  (eshell-command
+   (format "cd %s; gtags -i -q" dir-name))
+  )
 
 (defun es/copy-rectangle-as-kill ()
-    "Copy a rectangle as kill."
-    (interactive)
-    (save-excursion
+  "Copy a rectangle as kill."
+  (interactive)
+  (save-excursion
     (kill-rectangle (mark) (point))
     (exchange-point-and-mark)
     (yank-rectangle)))
@@ -1931,7 +1846,7 @@ mouse-2: EXWM Workspace menu.
            (when (string-prefix-p buffPrefix (buffer-name buf))
              (progn
                (setq named-buffer buf)
-                (cl-return)
+               (cl-return)
                )
              )
            )
@@ -2002,8 +1917,8 @@ mouse-2: EXWM Workspace menu.
         (defvar es/splashinvocation)
         (setq es/splashbinary "feh")
         (setq es/splashinvocation (concat es/splashbinary
-                                      " ~/acme.png"
-                                      ))
+					  " ~/acme.png"
+					  ))
         (message "Opening splash")
         (start-process-shell-command
          es/splashbinary nil es/splashinvocation))
@@ -2112,10 +2027,10 @@ mouse-2: EXWM Workspace menu.
   (setq ssh-bufname "XTerm")
   (setq ssh-binary "/usr/bin/xterm")
   (setq ssh-invocation (concat ssh-binary
-                                " -bg black -fg white "
-                                " -fa 'Ubuntu Mono'"
-                                " -e 'ssh -Y " hostName "'"
-                                ))
+                               " -bg black -fg white "
+                               " -fa 'Ubuntu Mono'"
+                               " -e 'ssh -Y " hostName "'"
+                               ))
   (start-process-shell-command  ssh-binary nil ssh-invocation))
 (message "es/app-setup")
 
@@ -2185,12 +2100,9 @@ mouse-2: EXWM Workspace menu.
 (load custom-file t)
 (message "!!!es/load-complete!!!")
 
-
-
-
-(warn-if-file-not-found "ls")
-(warn-if-file-not-found "git")
-
-
 (provide '.emacs)
 ;;; .emacs ends here
+
+(use-package doom-modeline
+:ensure t
+:hook (after-init . doom-modeline-mode))
