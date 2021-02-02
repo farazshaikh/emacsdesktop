@@ -46,7 +46,7 @@ keep_vars             \
     TERM              \
     TERM_SESSION_ID
 
-source <(direnv apply_dump .envrc.cache)
+DIRENV_LOG_FORMAT="" source <(direnv apply_dump .envrc.cache)
 source <(reset_kept)
 
 watch_file .envrc
