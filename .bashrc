@@ -7,6 +7,7 @@ alias magit='emacsclient -n --eval "(magit)"'
 alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
 alias tmuxa="tmux attach"
+alias tmuxfixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
 export EDITOR=ec
 export HISTCONTROL=ignoredups
 export EOS=~/.eos
@@ -28,8 +29,10 @@ __git_ps1 ()
 
 # powerline-shell integration
 # https://github.com/b-ryan/powerline-shell
+# You will also need to setup a basic segment conf in
+#  ~/.config/powerline-shell/config.json
 function _update_ps1() {
-    PS1=$(powerline-shell $?)
+    PS1=$(powerline-shell)
 }
 
 if [[ $TERM != linux && ! $PROMPT_COMMAND =~ _update_ps1 ]]; then
@@ -150,3 +153,7 @@ PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
 export WRK="$HOME/dfn/dfinity/rs/"
 
 eval "$(direnv hook bash)"
+
+# >>>> Vagrant command completion (start)
+. /opt/vagrant/embedded/gems/2.2.16/gems/vagrant-2.2.16/contrib/bash/completion.sh
+# <<<<  Vagrant command completion (end)

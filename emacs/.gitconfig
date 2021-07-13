@@ -19,6 +19,7 @@
 
 [merge]
         tool = ediff
+	conflictStyle = diff3
 
 [mergetool "ediff"]
         cmd = ~/ediff.sh $LOCAL $REMOTE $MERGED $BASE

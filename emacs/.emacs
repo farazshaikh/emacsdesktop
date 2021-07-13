@@ -173,7 +173,6 @@
 (use-package writeroom-mode
   :init
   (setq writeroom-width 220)
-  (writeroom-toggle-mode-line)
   (add-hook 'writeroom-mode-hook (lambda () (display-line-numbers-mode -1)))
   :bind (:map writeroom-mode-map
               ("C-c C-w <" . #'writeroom-decrease-width)
@@ -183,6 +182,10 @@
               ("C-c C-w SPC" . #'writeroom-toggle-mode-line))
   (:map global-map
         ("C-c z" . #'writeroom-mode)))
+
+(use-package adoc-mode
+  :init
+  (add-to-list 'auto-mode-alist (cons "\\.adoc\\'" 'adoc-mode)))
 
 (use-package vterm
   :config
@@ -845,7 +848,6 @@ Apps^^                        EXWM^^                     Windows mvmt           
    ("s-d" . counsel-linux-app)
    ("M-y" . counsel-yank-pop)
    ("C-x b" . counsel-switch-buffer)
-   ("s-b" . counsel-switch-buffer)
    :map ivy-minibuffer-map
    ("M-y" . ivy-next-line)
 
@@ -857,7 +859,8 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 (use-package ivy
   :diminish (ivy-mode)
-  :bind (("<f5>" . compile))
+  :bind (("<f5>" . compile)
+	 ("s-b" . ivy-switch-buffer))
   :custom
   (global-set-key (kbd "C-d") 'ivy-backward-delete-char)
   (ivy-use-virtual-buffers t)
@@ -1014,6 +1017,10 @@ Git gutter:
     (define-key magit-status-mode-map (kbd "<M-tab>") nil))
   (with-eval-after-load 'magit-diff
     (define-key magit-diff-mode-map (kbd "<M-tab>") nil))
+  :bind (:map magit-file-section-map
+              ("RET" . magit-diff-visit-file-other-window)
+              :map magit-hunk-section-map
+              ("RET" . magit-diff-visit-file-other-window))
   :custom
   ((magit-auto-revert-mode nil)
    (magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")))
@@ -1142,7 +1149,10 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (lsp-rust-server 'rust-analyzer)
   (lsp-rust-analyzer-display-chaining-hints t)
   (lsp-rust-analyzer-display-parameter-hints t)
-  (lsp-rust-analyzer-server-display-inlay-hints t)
+
+  ;; Very useful for writing code but, generally distracting got reading code
+  ;; probably good to only enable if the buffer is dirty
+  (lsp-rust-analyzer-server-display-inlay-hints nil)
   (lsp-rust-full-docs t)
 
 
@@ -1188,7 +1198,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
                             ))
   :bind (:map lsp-mode-map
               ("C-c C-l" . hydra-lsp/body)
-              ("C-c C-f" . lsp-format-buffer))
+              ("C-c C-f" . lsp-format-buffer)
+	      ("s-." . lsp-execute-code-action))
 
   :hook (((prog-mode) . 'display-line-numbers-mode)
 	 ((prog-mode) . lsp)
@@ -1660,57 +1671,6 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
 ;;;;;;;;;;;;;;;
 ;;Workarounds;;
 ;;;;;;;;;;;;;;;
-(defun exwm-workspace-ui()
-  "Workspace UI for exwm."
-  (easy-menu-define exwm-workspace-menu nil
-    "Menu for Exwm Workspace.
-Also used in `exwm-mode-line-workspace-map'."
-    '("Exwm Workspace"
-      ["Add workspace" exwm-workspace-add]
-      ["Delete current workspace" exwm-workspace-delete]
-      ["Move workspace to" exwm-workspace-move]
-      ["Swap workspaces" exwm-workspace-swap]
-      ["Move X window to" exwm-workspace-move-window]
-      ["Move X window from" exwm-workspace-switch-to-buffer]
-      ["Toggle minibuffer" exwm-workspace-toggle-minibuffer]
-      ["Switch workspace" exwm-workspace-switch]
-      ;; Place this entry at bottom to avoid selecting others by accident.
-      ("Switch to" :filter
-       (lambda (&rest _args)
-         (mapcar (lambda (i)
-                   `[,(format "workspace %d" i)
-                     (lambda ()
-                       (interactive)
-                       (exwm-workspace-switch ,i))
-                     (/= ,i exwm-workspace-current-index)])
-                 (number-sequence 0 (1- (exwm-workspace--count))))))))
-
-  (defvar exwm-mode-line-workspace-map
-    (let ((map (make-sparse-keymap)))
-      (define-key map [mode-line mouse-1] 'exwm-workspace-switch)
-      (define-key map [mode-line mouse-3] exwm-workspace-menu)
-      map)
-    "Local keymap for EXWM mode line string.  See `exwm-mode-line-format'.")
-
-  (defvar exwm-mode-line-format)
-  (defcustom exwm-mode-line-format
-    `("["
-      (:propertize (:eval (format "WS-%d" exwm-workspace-current-index))
-                   local-map ,exwm-mode-line-workspace-map
-                   face bold
-                   mouse-face mode-line-highlight
-                   help-echo "mouse-1: Switch to / add / delete to EXWM workspaces.
-mouse-2: EXWM Workspace menu.
-")
-      "]")
-    "EXWM workspace in the mode line."
-    :type 'sexp
-    :group 'exwm)
-  (add-to-list 'mode-line-misc-info exwm-mode-line-format t))
-(exwm-workspace-ui)
-
-
-
 ;;https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
 (defun my:force-modes (rule-mode &rest modes)
   "RULE-MODE MODES switch on/off several modes depending of state of the controlling minor mode."
@@ -2104,5 +2064,5 @@ mouse-2: EXWM Workspace menu.
 ;;; .emacs ends here
 
 (use-package doom-modeline
-:ensure t
-:hook (after-init . doom-modeline-mode))
+  :ensure t
+  :hook (after-init . doom-modeline-mode))
