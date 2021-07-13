@@ -106,10 +106,11 @@
 
 (defun warn-if-executable-not-found(filename help)
   "Check for executable specified by FILENAME.  HELP is printed if file is not found."
-  (if-let (full-path (executable-find filename))
-      (message "%s: %s" filename full-path)
-    (message " %s file not found: Help %s" filename help)))
-
+  (let (full-path (executable-find filename))
+    (if full-path
+	(message "%s: %s" filename full-path)
+    (message " %s file not found: Help %s" filename help))))
+   
 
 ;; Package Mgmt and EOS installation
 (defun es/setup-package-mgmt()
@@ -210,6 +211,7 @@
   (setq custom-safe-themes t))
 
 (use-package doom-themes
+  :if window-system
   :config
   (load-theme 'doom-gruvbox t))
 
@@ -2046,6 +2048,7 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
       (or (cdr (assoc desc real-keyboard-keys))
           (read-kbd-macro desc))))
 
+(setq server-socket-dir "~/.emacs.d")
 (server-start)
 (message "!!!server started!!!")
 
@@ -2064,5 +2067,6 @@ _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache 
 ;;; .emacs ends here
 
 (use-package doom-modeline
+  :if window-system
   :ensure t
   :hook (after-init . doom-modeline-mode))
