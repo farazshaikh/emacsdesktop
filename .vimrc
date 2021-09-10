@@ -14,7 +14,7 @@ syntax on
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 call plug#begin('~/.vim/plugged')
 
-" Install ansible plugin 
+" Install ansible plugin
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
@@ -76,7 +76,7 @@ let g:ale_fixers = { 'rust': ['rustfmt', 'trim_whitespace', 'remove_trailing_lin
 
 " Optional, configure as-you-type completions
 set completeopt=menu,menuone,preview,noselect,noinsert
-let g:ale_completion_enabled = 1
+" let g:ale_completion_enabled = 1
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 inoremap <c-x><c-s> <c-\><c-o>:w<cr>
@@ -86,8 +86,8 @@ let mapleader="\\"
 noremap <Leader>s :update<CR>
 noremap <Leader>f :Files<CR>
 noremap <Leader>b :Buffers<CR>
-noremap <Leader>\ :bprevious<CR> 
-noremap <Leader>gg :GGrep<CR> 
+noremap <Leader>\ :bprevious<CR>
+noremap <Leader>gg :GGrep<CR>
 
 " esc to quit terminal
 :tnoremap <Esc> <C-\><C-n>
