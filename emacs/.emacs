@@ -26,11 +26,11 @@
   ;;(set-background-color "grey2")
   (setq inhibit-startup-screen t)
   (menu-bar-mode -1)
-  (tool-bar-mode -1)
-  (scroll-bar-mode -1)
+  ;;(tool-bar-mode -1)
+  ;;(scroll-bar-mode -1)
   (global-eldoc-mode -1)
   ;; default 8 pixel fringes on both sides
-  (fringe-mode nil)
+  ;;(fringe-mode nil)
   (savehist-mode 1)
 
   (line-number-mode 1)
@@ -38,6 +38,7 @@
   (show-paren-mode 1)
   (global-hl-line-mode 1)
   (which-function-mode 1)
+  (xterm-mouse-mode 1)
 
   (setq scroll-step 1)
   (setq fill-column 80)
@@ -94,7 +95,18 @@
 ;; Make startup faster by reducing the frequency of garbage
 ;; collection.  The default is 800 kilobytes.  Measured in bytes.
 ;; Following setting saves 0.2 seconds an brings startup times down to 1.1sec
-(setq gc-cons-threshold (* 250 1000 1000))
+;; (setq gc-cons-threshold (* 250 1000 1000))
+(setq package-enable-at-startup nil
+      message-log-max 16384
+      gc-cons-threshold 402653184
+      gc-cons-percentage 0.6
+      auto-window-vscroll nil)
+
+(add-hook 'after-init-hook
+          `(lambda ()
+             (setq gc-cons-threshold 800000
+                   gc-cons-percentage 0.1)
+             (garbage-collect)) t)
 
 (defun es/check-version()
   "Check that Emacs version is at the least supported version."
@@ -106,11 +118,10 @@
 
 (defun warn-if-executable-not-found(filename help)
   "Check for executable specified by FILENAME.  HELP is printed if file is not found."
-  (let (full-path (executable-find filename))
-    (if full-path
+  (let ((full-path (executable-find filename)))
+    (if full-path 
 	(message "%s: %s" filename full-path)
     (message " %s file not found: Help %s" filename help))))
-   
 
 ;; Package Mgmt and EOS installation
 (defun es/setup-package-mgmt()
@@ -200,18 +211,17 @@
 
 (use-package auto-package-update
   :disabled
-  :defines auto-package-update-delete-old-versions auto-package-update-hide-results
   :config
-  (auto-package-update-delete-old-versions t)
-  (auto-package-update-hide-results t)
   (auto-package-update-maybe))
 
 (use-package kaolin-themes
   :config
   (setq custom-safe-themes t))
 
+
+;; The theme work in GUI mode.
+;; For terminal mode make sure that the term support True Color
 (use-package doom-themes
-  :if window-system
   :config
   (load-theme 'doom-gruvbox t))
 
@@ -1154,7 +1164,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
   ;; Very useful for writing code but, generally distracting got reading code
   ;; probably good to only enable if the buffer is dirty
-  (lsp-rust-analyzer-server-display-inlay-hints nil)
+  (lsp-rust-analyzer-server-display-inlay-hints t)
   (lsp-rust-full-docs t)
 
 
@@ -1201,7 +1211,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :bind (:map lsp-mode-map
               ("C-c C-l" . hydra-lsp/body)
               ("C-c C-f" . lsp-format-buffer)
-	      ("s-." . lsp-execute-code-action))
+	      ("s-." . lsp-execute-code-action)
+	      ("M-m" . lsp-ui-mode))
 
   :hook (((prog-mode) . 'display-line-numbers-mode)
 	 ((prog-mode) . lsp)
@@ -1215,7 +1226,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :commands lsp-ui-mode
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
-              ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M--?
+              ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M-Shift-/
               ([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
               ("C-c u" . lsp-ui-imenu))
   :custom-face
@@ -1354,7 +1365,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (setq company-idle-delay 0
         company-tooltip-align-annotations t
         company-tooltip-idle-delay 0
-        company-minimum-prefix-length 1))
+        company-minimum-prefix-length 1
+	lsp-completion-provider :capf))
 
 (use-package company-posframe
   :disabled
@@ -1369,13 +1381,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :hook (company-mode . company-box-mode)
   :custom (company-box-icons-alist 'company-box-icons-all-the-icons)
   :diminish "")
-
-(use-package company-lsp
-  :commands company-lsp
-  :config
-  (push 'company-lsp company-backends)
-  :custom
-  (company-lsp-cache-cadidates 'auto))
 
 ;; ansible
 (use-package yaml-mode)

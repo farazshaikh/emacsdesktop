@@ -2,7 +2,7 @@
 	email = faraz.shaikh@gmail.com
 	name = Faraz Shaikh
 [core]
-	editor = "emacsclient "
+	editor = "emacsclient -s ~/.emacs.d/server "
 	excludesfile = ~/.gitignore
 [user]
         name = faraz
@@ -13,7 +13,7 @@
         guitool = edifftwin
 
 [difftool "edifftwin"]
-        cmd = emacsclient --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
+        cmd = emacsclient -s ~/.emacs.d/server --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
 [difftool "ediff"]
         cmd = ~/ediff.sh $LOCAL $REMOTE  $MERGED
 
@@ -39,7 +39,7 @@
     lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
     ls = ls-files
     l = log --graph --decorate --pretty=oneline --abbrev-commit --max-count=5
-    
+
     # Show files ignored by git:
     ign = ls-files -o -i --exclude-standard
     graph = log --all --graph --oneline --decorate

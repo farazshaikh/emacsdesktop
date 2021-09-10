@@ -1,9 +1,21 @@
-alias ssho='ssh -o "StrictHostKeyChecking no"'
+# If not running interactively, don't do anything
+[ -z "$PS1" ] && return
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+
+alias ssh='ssh -o "StrictHostKeyChecking no" -A'
 alias ff="find . -name"
+alias gg="git grep -n"
 alias ffg="find . -type f | xargs grep -nH "
 alias pssh='parallel-ssh -i -t0 -h ~/.vmcluster $@'
-alias ec='emacsclient -n '
-alias magit='emacsclient -n --eval "(magit)"'
+alias ec='emacsclient -n -s  ~/.emacs.d/server'
+alias magit='ec --eval "(magit)"'
 alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
 alias tmuxa="tmux attach"
@@ -143,7 +155,17 @@ case "$TERM" in
          export PS1=$PS1'\$ '
 esac
 
+
+#fzf
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# nvim
+if command -v nvim &> /dev/null
+then
+alias vimdiff='nvim -d'
+alias vim='nvim'
+alias vi='nvim'
+fi
 
 
 
@@ -153,7 +175,19 @@ PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
 export WRK="$HOME/dfn/dfinity/rs/"
 
 eval "$(direnv hook bash)"
+. "$HOME/.cargo/env"
 
 # >>>> Vagrant command completion (start)
-. /opt/vagrant/embedded/gems/2.2.16/gems/vagrant-2.2.16/contrib/bash/completion.sh
+GEM_COMPLETION=/opt/vagrant/embedded/gems/2.2.16/gems/vagrant-2.2.16/contrib/bash/completion.sh
+[ -s ${GEM_COMPLETION} ] && \. ${GEM_COMPLETION}
 # <<<<  Vagrant command completion (end)
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+#~/24bit.sh
+if [ -f ~/24bit.sh ]; then
+    echo -n  "Color test: "
+   ~/24bit.sh
+fi
