@@ -38,6 +38,8 @@ Plug 'rust-lang/rust.vim'
     Plug 'ncm2/ncm2-path'
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+let g:fzf_layout = { 'down':  '40%'}
+
 " GoTo code navigation.
 nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
@@ -88,6 +90,15 @@ noremap <Leader>f :Files<CR>
 noremap <Leader>b :Buffers<CR>
 noremap <Leader>\ :bprevious<CR>
 noremap <Leader>gg :GGrep<CR>
+
+" clipboard copy paste
+noremap <Leader>y "*y
+noremap <Leader>p "*p
+noremap <Leader>Y "+y
+noremap <Leader>P "+p
+
+
+
 
 " esc to quit terminal
 :tnoremap <Esc> <C-\><C-n>
