@@ -1,0 +1,11 @@
+#sudo apt-get install gnupg2
+killall gpg-agent
+gpg --version
+gpgconf --launch gpg-agent
+export GPG_TTY=$(tty)
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+echo $SSH_AUTH_SOCK
+ssh-add -L
+echo ssh readonly@ip
+echo ssh admin@ip
+

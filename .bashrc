@@ -24,6 +24,7 @@ export EDITOR=ec
 export HISTCONTROL=ignoredups
 export EOS=~/.eos
 alias scr="screen -DAR -h 10000"
+alias prodssh="source $EOS/emacsdesktop/.prodssh.rc"
 
 untarall ()
 {
