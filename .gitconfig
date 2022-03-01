@@ -1,26 +1,33 @@
-[core]
-	editor = "emacs -nw"
 [user]
-	name = faraz
-	email = faraz.shaikh@gmail.com 
+	email = faraz.shaikh@gmail.com
+	name = Faraz Shaikh
+[core]
+#	editor = nvim
+	editor = "emacsclient -s ~/.emacs.d/server "
+	excludesfile = ~/.gitignore
+[user]
+        name = faraz
+        email = faraz.shaikh@gmail.com
 
 [diff]
         tool = edifftwin
         guitool = edifftwin
 
-[difftool "ediff"]
-        cmd = /home/faraz/ediff.sh $LOCAL $REMOTE  $MERGED
 [difftool "edifftwin"]
-	cmd = emacsclient -t -nw --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
+        cmd = emacsclient -s ~/.emacs.d/server --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
+[difftool "ediff"]
+        cmd = ~/ediff.sh $LOCAL $REMOTE  $MERGED
 
 [merge]
         tool = ediff
+	conflictStyle = diff3
 
 [mergetool "ediff"]
-        cmd = /home/faraz/ediff.sh $LOCAL $REMOTE $MERGED $BASE
+        cmd = ~/ediff.sh $LOCAL $REMOTE $MERGED $BASE
         trustExitCode = true
+
 [commit]
-	template = /home/faraz/.gitmessage
+        template = ~/.gitmessage
 
 [alias]
     st = status
@@ -33,6 +40,13 @@
     lol = log --graph --decorate --pretty=oneline --abbrev-commit
     lola = log --graph --decorate --pretty=oneline --abbrev-commit --all
     ls = ls-files
+    l = log --graph --decorate --pretty=oneline --abbrev-commit --max-count=5
 
     # Show files ignored by git:
     ign = ls-files -o -i --exclude-standard
+    graph = log --all --graph --oneline --decorate
+[rerere]
+    enabled = true
+
+[format]
+    outputdirectory=patches

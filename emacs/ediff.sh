@@ -38,13 +38,13 @@ fi
 # console vs. X
 if [ "${TERM}" = "linux" ]; then
     unset DISPLAY
-    _EMACSCLIENTOPTS=" -t "
+    _EMACSCLIENTOPTS=" -t -s ~/.emacs.d/server"
 else
-    _EMACSCLIENTOPTS=" -n "
+    _EMACSCLIENTOPTS=" -n -s ~/.emacs.d/server"
 fi
 
 # run emacsclient
-echo ${_EMACSCLIENT} ${_EMACSCLIENTOPTS} --eval "(${_EVAL})" 2>&1
+echo faraz ${_EMACSCLIENT} ${_EMACSCLIENTOPTS} --eval "(${_EVAL})" 2>&1
 ${_EMACSCLIENT} ${_EMACSCLIENTOPTS} --eval "(${_EVAL})" 2>&1
 
 # check modified file
@@ -58,4 +58,3 @@ if [ ! $(egrep -c '^(<<<<<<<|=======|>>>>>>>|####### Ancestor)' ${_MERGED}) = 0 
 fi
 
 exit 0
-
