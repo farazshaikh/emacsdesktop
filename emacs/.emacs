@@ -1389,21 +1389,29 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   (add-hook 'yaml-mode-hook '(lambda () (ansible 1))))
 (use-package company-ansible)
 
+
+
+(use-package lsp-mode
+  :hook
+  ((python-mode . lsp)))
+
+
+
 ;; Python
-(use-package elpy
-  :init
-  (advice-add 'python-mode :before 'elpy-enable)
-  (add-hook 'python-mode-hook 'elpy-mode)
-  (add-hook 'python-mode-hook 'jedi:setup)
-  (add-hook 'elpy-mode-hook 'flycheck-mode)
-  :config
-  (message "es/use-package-elpy")
-  :custom
-  ((elpy-rpc-python-command "python3")
-   (elpy-rpc-backend "jedi")
-   (jedi:setup-keys t)                      ; optional
-   (jedi:complete-on-dot t)
-   (python-python-command "/usr/bin/ipython")))
+;; (use-package elpy
+;;   :init
+;;   (advice-add 'python-mode :before 'elpy-enable)
+;;   (add-hook 'python-mode-hook 'elpy-mode)
+;;   (add-hook 'python-mode-hook 'jedi:setup)
+;;   (add-hook 'elpy-mode-hook 'flycheck-mode)
+;;   :config
+;;   (message "es/use-package-elpy")
+;;   :custom
+;;   ((elpy-rpc-python-command "python3")
+;;    (elpy-rpc-backend "jedi")
+;;    (jedi:setup-keys t)                      ; optional
+;;    (jedi:complete-on-dot t)
+;;    (python-python-command "/usr/bin/ipython")))
 
 ;; enable autopep8 formatting on save
 (use-package py-autopep8

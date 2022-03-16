@@ -15,16 +15,18 @@ alias gg="git grep -n"
 alias ffg="find . -type f | xargs grep -nH "
 alias pssh='parallel-ssh -i -t0 -h ~/.vmcluster $@'
 alias ec='emacsclient -n -s  ~/.emacs.d/server'
+alias ef='emacsclient -n -s  ~/.emacs.d/server $(fzf)'
 alias magit='ec --eval "(magit)"'
 alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
-alias tmuxa="tmux attach"
+alias tmuxa="tmux detach-client -a"
 alias tmuxfixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
 export EDITOR=ec
 export HISTCONTROL=ignoredups
 export EOS=~/.eos
 alias scr="screen -DAR -h 10000"
 alias prodssh="source $EOS/emacsdesktop/.prodssh.rc"
+alias rcd='cd $(git rev-parse --show-cdup)'
 
 untarall ()
 {
@@ -35,39 +37,7 @@ untarall ()
     tar -zxvf $filegz -C `echo $filegz | cut -d "." -f1` > /dev/null
     done
 }
-
-cdbug () {
-      bugNum=$1
-      baseBugDir="/qa/bugs"
-      tmpBugDir="/tmp/bugs"
-      bugNumDir=""
-      zeroDir=""
-      targDir=""
-
-      numDigit=${#bugNum}
-      for i in $(seq 0 1 $numDigit)
-      do
-        bugNumDir=$bugNumDir"/"${bugNum:$i:1}
-      done
-
-      echo $bugNumdir
-
-      for i in $(seq 0 1 10)
-      do
-        targDir=$baseBugDir$zeroDir$bugNumDir
-        echo $targDir
-        if [ -d $targDir ]; then
-           mkdir -p $tmpBugDir/$bugNum
-           echo "Copy bugs from $targDir to $tmpBugDir/$bugNum"
-           cp ${targDir}* $tmpBugDir/$bugNum/
-           cd $tmpBugDir/$bugNum
-           untarall
-           break
-        fi
-        zeroDir=$zeroDir"/0"
-      done
-}
-
+ 
 prune() {
         if [ $# -eq 0 ]
           then
