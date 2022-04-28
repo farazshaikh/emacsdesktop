@@ -14,7 +14,8 @@ alias ff="find . -name"
 alias gg="git grep -n"
 alias ffg="find . -type f | xargs grep -nH "
 alias pssh='parallel-ssh -i -t0 -h ~/.vmcluster $@'
-alias ec='emacsclient -n -s  ~/.emacs.d/server'
+alias ecx='emacsclient -n -c -s  ~/.emacs.d/server'
+alias ec='emacsclient -t -s  ~/.emacs.d/server'
 alias ef='emacsclient -n -s  ~/.emacs.d/server $(fzf)'
 alias magit='ec --eval "(magit)"'
 alias toff="tmux set-window-option synchronize-panes off"
@@ -107,8 +108,8 @@ fi
 # sync bash commands to file always
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
-export WRK="/wrk/dfn/dfinity/rs/"
-
+export WRK="/wrk/dfn/release"
+export WRK2="/wrk/sfn"
 eval "$(direnv hook bash)"
 . "$HOME/.cargo/env"
 
