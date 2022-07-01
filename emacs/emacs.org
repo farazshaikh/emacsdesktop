@@ -382,7 +382,7 @@
     :demand
     :config
     ;;(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
-    (setq dashboard-startup-banner "~/acme.png")
+    (setq dashboard-startup-banner "~/.eos/emacsdesktop/emacs/acme.png")
     (setq dashboard-banner-logo-title "Cogito, ergo sum")
     (setq dashboard-center-content t)
     (setq dashboard-items '((recents  . 30)
@@ -457,7 +457,7 @@
 (use-package windmove
   :pin gnu
   :functions split-window-horizontally-and-follow split-window-vertically-and-follow winner-undo
-  :config
+  :init
   (defun split-window-horizontally-and-follow()
     "Focus follows the newly created window."
     (interactive)
@@ -479,7 +479,7 @@
   ("s-]" . 'split-window-vertically-and-follow)
   ("s-<backspace>" . 'delete-window)
   ("s-[" . 'delete-other-windows)
-  ("s-u" . 'winner-undo)
+  ("M-u" . 'winner-undo)
 
   ;; fast moves
   ("C-<left>". backward-word)
@@ -502,19 +502,20 @@
 * ORG Mode
 #+BEGIN_SRC emacs-lisp
   (use-package org-superstar)
-   (use-package org
-     :pin gnu
-     :mode (("\\.org$" . org-mode))
-     :ensure org-plus-contrib
-     :hook
-     (org-mode . org-superstar-mode)
-     :config
-     (progn
-       ;; config stuff
-       (if (file-exists-p "~/todo.org")
-	   (add-to-list 'org-agenda-files "~/todo.org"))
-       (if (file-exists-p "~/notes.org")
-	   (add-to-list 'org-agenda-files "~/notes.org"))))
+  (use-package toc-org)
+  (use-package org
+    :pin gnu
+    :mode (("\\.org$" . org-mode))
+    :hook
+    (org-mode . org-superstar-mode)
+    (org-mode . toc-org)
+    :config
+    (progn
+      ;; config stuff
+      (if (file-exists-p "~/todo.org")
+	  (add-to-list 'org-agenda-files "~/todo.org"))
+      (if (file-exists-p "~/notes.org")
+	  (add-to-list 'org-agenda-files "~/notes.org"))))
 #+END_SRC
 
 * Emacs Desktop Support GDM+EDE+EmacsWindowManager
@@ -1623,6 +1624,12 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (use-package flycheck-rust
     :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+END_SRC
+* Haskell
+#+BEGIN_SRC emacs-lisp
+(use-package haskell-mode)
+(use-package lsp-haskell)
+
+#+END_SRC
 * Rust Cargo
 #+BEGIN_SRC emacs-lisp
   ;; Add keybindings for interacting with Cargo
@@ -2253,4 +2260,12 @@ Apps^^                        EXWM^^                     Windows mvmt           
   :if window-system
   :ensure t
   :hook (after-init . doom-modeline-mode))
+
+  (use-package grammarly
+  :ensure t
+  :hook (text-mode . (lambda ()
+  (require 'lsp-grammarly)
+  (lsp))))
+  (use-package lsp-grammarly)
+  (use-package flycheck-grammarly)
 #+END_SRC
