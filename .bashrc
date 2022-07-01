@@ -20,7 +20,7 @@ alias ef='emacsclient -n -s  ~/.emacs.d/server $(fzf)'
 alias magit='ec --eval "(magit)"'
 alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
-alias tmuxa="tmux detach-client -a"
+alias tmuxa="tmux attach || tmux new"
 alias tmuxfixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
 export EDITOR=ec
 export HISTCONTROL=ignoredups
@@ -108,7 +108,7 @@ fi
 # sync bash commands to file always
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
-export WRK="/wrk/dfn/release"
+export WRK="/home/faraz/dfn/release"
 export WRK2="/wrk/sfn"
 eval "$(direnv hook bash)"
 . "$HOME/.cargo/env"

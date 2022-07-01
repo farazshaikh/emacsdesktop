@@ -2228,8 +2228,8 @@ Apps^^                        EXWM^^                     Windows mvmt           
 * Emacs server
 #+BEGIN_SRC emacs-lisp
   (setq server-socket-dir "~/.emacs.d")
-  (server-start)
-  (message "!!!server started!!!")
+  (load "server")
+  (unless (server-running-p) (server-start) (message "!!!server started!!!"))
 #+END_SRC
 
 * Emacs Customs to<>from another file
