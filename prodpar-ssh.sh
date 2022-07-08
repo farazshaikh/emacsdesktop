@@ -8,7 +8,7 @@ parallel_ssh() {
     echo faraz $1
     local SSH="ssh -o \"UserKnownHostsFile=/dev/null\" -o \"StrictHostKeyChecking=no\""
     local SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket);
-    local SESSION=`date +"%d%b%Y%M%S"`i
+    local SESSION=pssh`date +"%d%b%Y%M%S"`
     local hosts=( ${HOSTS:=$*} )
     echo $hosts $SESSION
 
@@ -20,13 +20,12 @@ parallel_ssh() {
   
     #create the base window as first session
     tmux new-window -t ${SESSION} "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; ${SSH} ${hosts[0]}; echo \"Thank you exiting in 60..\"; sleep 60"
-    #tmux new-window -t ${SESSION} "ssh ${hosts[0]}"
+
     unset hosts[0];
 
     #split remaining sessions in the same window
     for i in "${hosts[@]}"; do
 	tmux split-window -t ${SESSION} -h  "SSH_AUTH_SOCK=${SSH_AUTH_SOCK}; ${SSH} $i; echo \"Thank you exiting in 60..\"; sleep 60"
-        #tmux split-window -t ${SESSION} -h  "ssh $i;echo \"Thank you exiting in 60..\"; sleep 60"
         tmux select-layout -t ${SESSION} tiled > /dev/null
     done
     tmux select-pane -t 0 -t ${SESSION}
