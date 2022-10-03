@@ -28,6 +28,8 @@ export EOS=~/.eos
 alias scr="screen -DAR -h 10000"
 alias prodssh="source $EOS/emacsdesktop/.prodssh.rc"
 alias rcd='cd $(git rev-parse --show-cdup)'
+alias fixsound="pactl list short sinks | pactl set-default-sink alsa_output.pci-0000_06_00.1.hdmi-stereo;\
+       pactl list short sources | pactl set-default-source alsa_output.usb-Blue_Microphones_Yeti_X_2046SG003K88_888-000313110306-00.iec958-stereo.monitor"
 
 untarall ()
 {
@@ -108,7 +110,7 @@ fi
 # sync bash commands to file always
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
-export WRK="/home/faraz/dfn/release"
+export WRK="/wrk/dfn/release"
 export WRK2="/wrk/sfn"
 eval "$(direnv hook bash)"
 . "$HOME/.cargo/env"

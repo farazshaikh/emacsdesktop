@@ -1,3 +1,4 @@
+;; -*- flycheck-checker-error-threshold: 10;  -*-
 * Emacs configuration file
 #+BEGIN_SRC emacs-lisp
   ;;; package -- Summary EOS_DESKTOP
@@ -81,14 +82,16 @@
     ;;;;;;;;;;;;;;;;;;;;;;;
     (require 'use-package-ensure)
     (setq use-package-always-ensure t)
+    (setq use-package-compute-statistics t)
     (setq use-package-always-pin "melpa")
     (use-package auto-package-update
       :disabled
       :config
       (auto-package-update-maybe))
 
-  (use-package use-package-hydra)
-  (use-package diminish)
+    (use-package use-package-hydra)
+    (use-package diminish
+      :demand)
 #+END_SRC
 * Base settings
 #+BEGIN_SRC emacs-lisp
@@ -96,8 +99,8 @@
     "Base editor customization."
     ;;(set-background-color "grey2")
     (setq inhibit-startup-screen t)
-    (menu-bar-mode -1)
-    ;;(tool-bar-mode -1)
+    ;;(menu-bar-mode -1)
+    (tool-bar-mode -1)
     ;;(scroll-bar-mode -1)
     (global-eldoc-mode -1)
     ;; default 8 pixel fringes on both sides
@@ -191,6 +194,7 @@
 #+BEGIN_SRC emacs-lisp
   (use-package kaolin-themes
     :config
+    :defer
     (setq custom-safe-themes t))
 
   ;; The theme work in GUI mode.
@@ -208,103 +212,104 @@
 ** Dashboard
 #+BEGIN_SRC emacs-lisp
     (use-package writeroom-mode
-      :init
+      :commands (writeroom-mode)
+      :bind ("C-c z" . 'writeroom-mode)
+      :config
       (setq writeroom-width 220)
       (add-hook 'writeroom-mode-hook (lambda () (display-line-numbers-mode -1)))
       :bind (:map writeroom-mode-map
-		  ("C-c C-w <" . #'writeroom-decrease-width)
-		  ("C-c C-w >" . #'writeroom-increase-width)
-		  ("C-c C-w =" . #'writeroom-adjust-width)
-		  ("s-?" . nil)
-		  ("C-c C-w SPC" . #'writeroom-toggle-mode-line))
-      (:map global-map
-	    ("C-c z" . #'writeroom-mode)))
+                  ("C-c C-w <" . #'writeroom-decrease-width)
+                  ("C-c C-w >" . #'writeroom-increase-width)
+                  ("C-c C-w =" . #'writeroom-adjust-width)
+                  ("s-?" . nil)
+                  ("C-c C-w SPC" . #'writeroom-toggle-mode-line)))
 
     (use-package default-text-scale
       :config
       (default-text-scale-mode t))
 
     (use-package adoc-mode
-      :init
-      (add-to-list 'auto-mode-alist (cons "\\.adoc\\'" 'adoc-mode)))
+      :mode ("\\.adoc\\'" . adoc-mode))
 
     (use-package vterm
+      :commands (vterm)
       :config
       (add-hook 'vterm-mode-hook (lambda ()
-				   (setf truncate-lines nil)
-				   (setq-local show-paren-mode nil)
-				   (setq-local show-trailing-whitespace nil)
-				   (yas-minor-mode -1)
-				   (flycheck-mode -1)
-				   (whitespace-mode -1))))
+                                   (setf truncate-lines nil)
+                                   (setq-local show-paren-mode nil)
+                                   (setq-local show-trailing-whitespace nil)
+                                   (yas-minor-mode -1)
+                                   (flycheck-mode -1)
+                                   (whitespace-mode -1))))
 
     (use-package hydra)
 
     (use-package treemacs
+      :commands (treemacs)
       :disabled
       :init
       (with-eval-after-load 'winum
-	(define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+        (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
       :config
       (progn
-	(setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
-	      treemacs-deferred-git-apply-delay      0.5
-	      treemacs-directory-name-transformer    #'identity
-	      treemacs-display-in-side-window        t
-	      treemacs-eldoc-display                 nil
-	      treemacs-file-event-delay              5000
-	      treemacs-file-extension-regex          treemacs-last-period-regex-value
-	      treemacs-file-follow-delay             0.2
-	      treemacs-file-name-transformer         #'identity
-	      treemacs-follow-after-init             t
-	      treemacs-git-command-pipe              ""
-	      treemacs-goto-tag-strategy             'refetch-index
-	      treemacs-indentation                   1
-	      treemacs-indentation-string            " "
-	      treemacs-is-never-other-window         nil
-	      treemacs-max-git-entries               5000
-	      treemacs-missing-project-action        'ask
-	      treemacs-no-png-images                 nil
-	      treemacs-no-delete-other-windows       t
-	      treemacs-project-follow-cleanup        nil
-	      treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-	      treemacs-position                      'left
-	      treemacs-recenter-distance             0.1
-	      treemacs-recenter-after-file-follow    nil
-	      treemacs-recenter-after-tag-follow     nil
-	      treemacs-recenter-after-project-jump   'always
-	      treemacs-recenter-after-project-expand 'on-distance
-	      treemacs-show-cursor                   nil
-	      treemacs-show-hidden-files             t
-	      treemacs-silent-filewatch              nil
-	      treemacs-silent-refresh                nil
-	      treemacs-sorting                       'alphabetic-asc
-	      treemacs-space-between-root-nodes      t
-	      treemacs-tag-follow-cleanup            t
-	      treemacs-tag-follow-delay              1.5
-	      treemacs-width                         20)
+        (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+              treemacs-deferred-git-apply-delay      0.5
+              treemacs-directory-name-transformer    #'identity
+              treemacs-display-in-side-window        t
+              treemacs-eldoc-display                 nil
+              treemacs-file-event-delay              5000
+              treemacs-file-extension-regex          treemacs-last-period-regex-value
+              treemacs-file-follow-delay             0.2
+              treemacs-file-name-transformer         #'identity
+              treemacs-follow-after-init             t
+              treemacs-git-command-pipe              ""
+              treemacs-goto-tag-strategy             'refetch-index
+              treemacs-indentation                   1
+              treemacs-indentation-string            " "
+              treemacs-is-never-other-window         nil
+              treemacs-max-git-entries               5000
+              treemacs-missing-project-action        'ask
+              treemacs-no-png-images                 nil
+              treemacs-no-delete-other-windows       t
+              treemacs-project-follow-cleanup        nil
+              treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+              treemacs-position                      'left
+              treemacs-recenter-distance             0.1
+              treemacs-recenter-after-file-follow    nil
+              treemacs-recenter-after-tag-follow     nil
+              treemacs-recenter-after-project-jump   'always
+              treemacs-recenter-after-project-expand 'on-distance
+              treemacs-show-cursor                   nil
+              treemacs-show-hidden-files             t
+              treemacs-silent-filewatch              nil
+              treemacs-silent-refresh                nil
+              treemacs-sorting                       'alphabetic-asc
+              treemacs-space-between-root-nodes      t
+              treemacs-tag-follow-cleanup            t
+              treemacs-tag-follow-delay              1.5
+              treemacs-width                         20)
 
-	;; The default width and height of the icons is 22 pixels. If you are
-	;; using a Hi-DPI display, uncomment this to double the icon size.
-	;; (treemacs-resize-icons 10)
-	(treemacs-follow-mode t)
-	(treemacs-filewatch-mode t)
-	(treemacs-fringe-indicator-mode t)
-	(pcase (cons (not (null (executable-find "git")))
-		     (not (null treemacs-python-executable)))
-	  (`(t . t)
-	   (treemacs-git-mode 'deferred))
-	  (`(t . _)
-	   (treemacs-git-mode 'simple)))
-	(message "es/use-package-treemacs"))
+        ;; The default width and height of the icons is 22 pixels. If you are
+        ;; using a Hi-DPI display, uncomment this to double the icon size.
+        ;; (treemacs-resize-icons 10)
+        (treemacs-follow-mode t)
+        (treemacs-filewatch-mode t)
+        (treemacs-fringe-indicator-mode t)
+        (pcase (cons (not (null (executable-find "git")))
+                     (not (null treemacs-python-executable)))
+          (`(t . t)
+           (treemacs-git-mode 'deferred))
+          (`(t . _)
+           (treemacs-git-mode 'simple)))
+        (message "es/use-package-treemacs"))
       :bind
       (:map global-map
-	    ("M-0"       . treemacs-select-window)
-	    ("C-x t 1"   . treemacs-delete-other-windows)
-	    ("C-x t t"   . treemacs)
-	    ("C-x t B"   . treemacs-bookmark)
-	    ("C-x t C-t" . treemacs-find-file)
-	    ("C-x t M-t" . treemacs-find-tag)))
+            ("M-0"       . treemacs-select-window)
+            ("C-x t 1"   . treemacs-delete-other-windows)
+            ("C-x t t"   . treemacs)
+            ("C-x t B"   . treemacs-bookmark)
+            ("C-x t C-t" . treemacs-find-file)
+            ("C-x t M-t" . treemacs-find-tag)))
 
 
     (defun centaur-tabs-custom-buffer-groups ()
@@ -315,35 +320,35 @@
     Other buffer group by `centaur-tabs-get-group-name' with project name."
       (list
        (cond
-	((or (string-equal "*" (substring (buffer-name) 0 1))
-	     (memq major-mode '(magit-process-mode
-				magit-status-mode
-				magit-diff-mode
-				magit-log-mode
-				magit-file-mode
-				magit-blob-mode
-				magit-blame-mode
-				)))
-	 "Emacs")
-	((derived-mode-p 'prog-mode)
-	 "Editing")
-	((derived-mode-p 'dired-mode)
-	 "Dired")
-	((memq major-mode '(helpful-mode
-			    help-mode))
-	 "Help")
-	((memq major-mode '(org-mode
-			    org-agenda-clockreport-mode
-			    org-src-mode
-			    org-agenda-mode
-			    org-beamer-mode
-			    org-indent-mode
-			    org-bullets-mode
-			    org-cdlatex-mode
-			    org-agenda-log-mode
-			    diary-mode))
-	 "OrgMode")
-	(t "Editing"))))
+        ((or (string-equal "*" (substring (buffer-name) 0 1))
+             (memq major-mode '(magit-process-mode
+                                magit-status-mode
+                                magit-diff-mode
+                                magit-log-mode
+                                magit-file-mode
+                                magit-blob-mode
+                                magit-blame-mode
+                                )))
+         "Emacs")
+        ((derived-mode-p 'prog-mode)
+         "Editing")
+        ((derived-mode-p 'dired-mode)
+         "Dired")
+        ((memq major-mode '(helpful-mode
+                            help-mode))
+         "Help")
+        ((memq major-mode '(org-mode
+                            org-agenda-clockreport-mode
+                            org-src-mode
+                            org-agenda-mode
+                            org-beamer-mode
+                            org-indent-mode
+                            org-bullets-mode
+                            org-cdlatex-mode
+                            org-agenda-log-mode
+                            diary-mode))
+         "OrgMode")
+        (t "Editing"))))
 
 
     (use-package centaur-tabs
@@ -354,20 +359,20 @@
       (centaur-tabs-mode +1)
       (centaur-tabs-headline-match)
       (setq centaur-tabs-set-modified-marker t
-	    centaur-tabs-modified-marker " ● "
-	    centaur-tabs-cycle-scope 'tabs
-	    centaur-tabs-height 10
-	    centaur-tabs-set-icons t
-	    centaur-tabs-close-button " × "
-	    centaur-tabs-show-navigation-buttons t)
+            centaur-tabs-modified-marker " ● "
+            centaur-tabs-cycle-scope 'tabs
+            centaur-tabs-height 10
+            centaur-tabs-set-icons t
+            centaur-tabs-close-button " × "
+            centaur-tabs-show-navigation-buttons t)
       (centaur-tabs-change-fonts "ubuntu-mono" 100)
 
       (defun centaur-tabs-group-by-custom ()
-	"Custom grouping for Centaur tabs."
-	(interactive)
-	(defvar centaur-tabs-buffer-groups-function)
-	(setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
-	(centaur-tabs-force-update))
+        "Custom grouping for Centaur tabs."
+        (interactive)
+        (defvar centaur-tabs-buffer-groups-function)
+        (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
+        (centaur-tabs-force-update))
       (centaur-tabs-group-by-custom)
       (message "es/setup-package-centaur-tabs")
       :bind
@@ -386,10 +391,10 @@
     (setq dashboard-banner-logo-title "Cogito, ergo sum")
     (setq dashboard-center-content t)
     (setq dashboard-items '((recents  . 30)
-			    (bookmarks . 5)
-			    (projects . 5)
-			    (agenda . 5)
-			    (registers . 5)))
+                            (bookmarks . 5)
+                            (projects . 5)
+                            (agenda . 5)
+                            (registers . 5)))
     (setq dashboard-set-heading-icons t)
     (setq dashboard-set-file-icons t)
     (dashboard-setup-startup-hook)
@@ -401,7 +406,7 @@
     (winner-mode 1))
 #+END_SRC
 
-* SPACE LINE
+* MODE LINE (SPACE LINE VS DOOM LINE)
 #+BEGIN_SRC emacs-lisp
   (use-package unicode-fonts
     :if window-system)
@@ -417,7 +422,14 @@
     (when (not (member "all-the-icons" (font-family-list)))
       (all-the-icons-install-fonts t)))
 
+  (use-package doom-modeline
+    :if window-system
+    :ensure t
+    :hook (after-init . doom-modeline-mode))
+
+
   (use-package spaceline
+    :disabled
     :custom-face
     (spaceline-highlight-face ((t (:foreground "black"))))
     :config
@@ -427,6 +439,7 @@
       (fancy-battery-mode)))
 
   (use-package spaceline-config
+    :disabled
     :ensure spaceline
     :functions
     spaceline-toggle-minor-modes-off
@@ -454,68 +467,72 @@
 
 * Window Mgmt (Windmove Windower)
 #+BEGIN_SRC emacs-lisp
-(use-package windmove
-  :pin gnu
-  :functions split-window-horizontally-and-follow split-window-vertically-and-follow winner-undo
-  :init
-  (defun split-window-horizontally-and-follow()
-    "Focus follows the newly created window."
-    (interactive)
-    (split-window-horizontally)
-    (other-window 1))
-  (defun split-window-vertically-and-follow()
-    "Focus follows the newly created window."
-    (interactive)
-    (split-window-vertically)
-    (other-window 1))
-  :bind
-  (("M-<left>" . 'windmove-left)
-   ("M-<right>" .'windmove-right)
-   ("M-<up>" .  'windmove-up)
-   ("M-<down>" . 'windmove-down))
+  (use-package windmove
+    :pin gnu
+    :functions split-window-horizontally-and-follow split-window-vertically-and-follow winner-undo
+    :init
+    (windmove-default-keybindings 'meta)
+    (defun split-window-horizontally-and-follow()
+      "Focus follows the newly created window."
+      (interactive)
+      (split-window-horizontally)
+      (other-window 1))
+    (defun split-window-vertically-and-follow()
+      "Focus follows the newly created window."
+      (interactive)
+      (split-window-vertically)
+      (other-window 1))
+    :bind
+   ;; splits
+    ("s-\\" . 'split-window-horizontally-and-follow)
+    ("s-]" . 'split-window-vertically-and-follow)
+    ("s-<backspace>" . 'delete-window)
+    ("s-[" . 'delete-other-windows)
+    ("M-u" . 'winner-undo))
 
-  ;; splits
-  ("s-\\" . 'split-window-horizontally-and-follow)
-  ("s-]" . 'split-window-vertically-and-follow)
-  ("s-<backspace>" . 'delete-window)
-  ("s-[" . 'delete-other-windows)
-  ("M-u" . 'winner-undo)
 
-  ;; fast moves
-  ("C-<left>". backward-word)
-  ("C-<right>". forward-word)
-  ("C-<up>". backward-paragraph)
-  ("C-<down>" . forward-paragraph)
-  ("<find>" . beginning-of-line))
-
-(use-package windower
-  :pin gnu
-  :config
-  (global-set-key (kbd "<s-S-left>") 'windower-swap-left)
-  (global-set-key (kbd "<s-S-down>") 'windower-swap-below)
-  (global-set-key (kbd "<s-S-up>") 'windower-swap-above)
-  (global-set-key (kbd "<s-S-right>") 'windower-swap-right)
-  (global-set-key (kbd "<s-tab>") 'windower-switch-to-last-buffer)
-  (global-set-key (kbd "<s-o>") 'windower-toggle-single))
+  (use-package windower
+    :pin gnu
+    :config
+    (global-set-key (kbd "<s-S-left>") 'windower-swap-left)
+    (global-set-key (kbd "<s-S-down>") 'windower-swap-below)
+    (global-set-key (kbd "<s-S-up>") 'windower-swap-above)
+    (global-set-key (kbd "<s-S-right>") 'windower-swap-right)
+    (global-set-key (kbd "<s-tab>") 'windower-switch-to-last-buffer)
+    (global-set-key (kbd "<s-o>") 'windower-toggle-single))
 #+END_SRC
 
 * ORG Mode
 #+BEGIN_SRC emacs-lisp
-  (use-package org-superstar)
-  (use-package toc-org)
   (use-package org
     :pin gnu
     :mode (("\\.org$" . org-mode))
     :hook
     (org-mode . org-superstar-mode)
     (org-mode . toc-org)
+    (org-mode . org-bullets)
     :config
+    (setq org-startup-folded t)
+    (setq org-startup-indented t)
+    (setq org-startup-with-inline-images t)
     (progn
       ;; config stuff
       (if (file-exists-p "~/todo.org")
-	  (add-to-list 'org-agenda-files "~/todo.org"))
+          (add-to-list 'org-agenda-files "~/todo.org"))
       (if (file-exists-p "~/notes.org")
-	  (add-to-list 'org-agenda-files "~/notes.org"))))
+          (add-to-list 'org-agenda-files "~/notes.org"))))
+  (use-package org-superstar
+    :after org
+    :config
+    (org-superstar-mode 1))
+  (use-package org-bullets
+    :after org
+    :config
+    (org-bullets-mode 1))
+  (use-package toc-org
+    :after org
+    :config
+    (toc-org-mode 1))
 #+END_SRC
 
 * Emacs Desktop Support GDM+EDE+EmacsWindowManager
@@ -913,11 +930,13 @@ Apps^^                        EXWM^^                     Windows mvmt           
 ** persistent-scratch
 #+BEGIN_SRC emacs-lisp
   (use-package ag
+    :commands ag
     :init
     (warn-if-executable-not-found "ag" "apt install the-silver-searcher")
     :bind (("C-S-f" . counsel-ag)))   ;; for expanded results use ag command
 
   (use-package rg
+    :commands rg
     :init
     (warn-if-executable-not-found "rg" "apt install rip-grep")
     :bind (("C-f" . counsel-git-grep)))    ;; for expanded results use rg command
@@ -960,15 +979,16 @@ Apps^^                        EXWM^^                     Windows mvmt           
      ("M-y" . ivy-next-line)
 
      :map counsel-find-file-map
-     ("M-."  . ivy-switch-file-search)
-     ("C-h"     . counsel-up-directory)
-     ("RET" . ivy-alt-done)
-     ))
+     ("M-." . ivy-switch-file-search)
+     ("C-h" . counsel-up-directory)
+     ("RET" . ivy-alt-done))
+    :config
+    (counsel-mode 1))
 
   (use-package ivy
     :diminish (ivy-mode)
     :bind (("<f5>" . compile)
-	   ("s-b" . ivy-switch-buffer))
+           ("s-b" . ivy-switch-buffer))
     :custom
     (global-set-key (kbd "C-d") 'ivy-backward-delete-char)
     (ivy-use-virtual-buffers t)
@@ -989,25 +1009,25 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (interactive)
     (message "fixing ivy prefixes")
     (setq ivy-initial-inputs-alist
-	  '((counsel-minor . "^+")
-	    (counsel-package . "^+")
-	    (counsel-org-capture . "^")
-	    (counsel-M-x . "")
-	    (counsel-describe-function . "^")
-	    (counsel-describe-variable . "^"))))
+          '((counsel-minor . "^+")
+            (counsel-package . "^+")
+            (counsel-org-capture . "^")
+            (counsel-M-x . "")
+            (counsel-describe-function . "^")
+            (counsel-describe-variable . "^"))))
 
   (use-package ivy-posframe
     :config
     (if (and window-system (getenv "EOS_DESKTOP"))
-	(setq ivy-posframe-parameters
-	      '((parent-frame nil)  ;; Required for EXWM
-		(left-fringe . 30)
-		(right-fringe . 30)
-		(ivy-posframe-border-width 1)))
+        (setq ivy-posframe-parameters
+              '((parent-frame nil)  ;; Required for EXWM
+                (left-fringe . 30)
+                (right-fringe . 30)
+                (ivy-posframe-border-width 1)))
       (setq ivy-posframe-parameters
-	    '((left-fringe . 30)
-	      (right-fringe . 30)
-	      (ivy-posframe-border-width 1))))
+            '((left-fringe . 30)
+              (right-fringe . 30)
+              (ivy-posframe-border-width 1))))
     ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
     ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
     ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-center)))
@@ -1015,21 +1035,21 @@ Apps^^                        EXWM^^                     Windows mvmt           
     ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-bottom-left)))
     ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
     (setq ivy-posframe-display-functions-alist
-	  '((swiper-isearch  . ivy-posframe-display-at-window-bottom-left)
-	    (complete-symbol . ivy-posframe-display-at-point)
-	    (counsel-M-x     . ivy-posframe-display-at-point)
-	    (counsel-mark-ring . ivy-posframe-display-at-window-bottom-left)
-	    (ivy-switch-buffer . ivy-posframe-display-at-window-bottom-left)
-	    (t               . ivy-posframe-display-at-point)))
+          '((swiper-isearch  . ivy-posframe-display-at-window-bottom-left)
+            (complete-symbol . ivy-posframe-display-at-point)
+            (counsel-M-x     . ivy-posframe-display-at-point)
+            (counsel-mark-ring . ivy-posframe-display-at-window-bottom-left)
+            (ivy-switch-buffer . ivy-posframe-display-at-window-bottom-left)
+            (t               . ivy-posframe-display-at-point)))
     (setq ivy-posframe-width 110
-	  ivy-posframe-height 30)
+          ivy-posframe-height 30)
     (ivy-posframe-mode 1))
   (setq ivy-posframe-border-width 3)
 
   (use-package swiper
     :bind (("C-s" . swiper-isearch)
-	   ("C-r" . swiper-isearch)
-	   ("C-c C-r" . ivy-resume))
+           ("C-r" . swiper-isearch)
+           ("C-c C-r" . ivy-resume))
     :hook (window-setup . ivy-fix)
     :custom
     ((ivy-use-virtual-buffers t)
@@ -1479,18 +1499,25 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 * Fly check
 #+BEGIN_SRC emacs-lisp
-(use-package flycheck
-  :hook (prog-mode . flycheck-mode)
-  :custom
-  (flycheck-set-indication-mode 'left-fringe)
-  :init
-  (global-flycheck-mode)
-  (setq flycheck-global-modes '(not exwm-mode treemacs-mode))
-  (add-hook 'sh-mode-hook
-            (lambda ()
-              (defvar lsp-diagnostics-provider :none)
-              (when (flycheck-may-enable-checker 'sh-shellcheck)
-                (flycheck-select-checker 'sh-shellcheck)))))
+  (use-package flycheck
+    :hook (prog-mode . flycheck-mode)
+    :custom
+    (flycheck-set-indication-mode 'left-fringe)
+    :init
+    (global-flycheck-mode)
+    (setq flycheck-global-modes '(not exwm-mode treemacs-mode))
+    (add-to-list 'display-buffer-alist
+             `(,(rx bos "*Flycheck errors*" eos)
+              (display-buffer-reuse-window
+               display-buffer-in-side-window)
+              (side            . bottom)
+              (reusable-frames . visible)
+              (window-height   . 0.33)))
+    (add-hook 'sh-mode-hook
+              (lambda ()
+                (defvar lsp-diagnostics-provider :none)
+                (when (flycheck-may-enable-checker 'sh-shellcheck)
+                  (flycheck-select-checker 'sh-shellcheck)))))
 #+END_SRC
 
 
@@ -1528,24 +1555,27 @@ Apps^^                        EXWM^^                     Windows mvmt           
 #+END_SRC
 
 * Languages
-* Org mode  Latex
+* ORG mode  Latex
 #+BEGIN_SRC emacs-lisp
   (use-package tex
-    :ensure auctex)
+    :mode ("\\.tex\\'" . tex-mode)
+    :config
+    (tex-mode 1))
   (use-package lsp-latex
+    :after tex
     :custom
     (lsp-latex-build-is-continuous t)
     (lsp-latex-chktex-on-edit t)
     (lsp-latex-chktex-on-open-and-save t)
     (lsp-latex-build-on-save t)
     :hook ((LaTeX-mode . lsp)
-	   (TeX-mode . lsp)
-	   (tex-mode . lsp)
-	   (latex-mode . lsp)))
+           (TeX-mode . lsp)
+           (tex-mode . lsp)
+           (latex-mode . lsp)))
   (use-package latex-preview-pane
+    :after tex
     :config
-    ;; (latex-preview-pane-mode)
-   )
+    (latex-preview-pane-mode 1))
 #+END_SRC
 * YAML+ANSIBLE
 #+BEGIN_SRC emacs-lisp
@@ -2256,11 +2286,6 @@ Apps^^                        EXWM^^                     Windows mvmt           
 #+END_SRC
 * File Experimental
 #+BEGIN_SRC emacs-lisp
-  (use-package doom-modeline
-  :if window-system
-  :ensure t
-  :hook (after-init . doom-modeline-mode))
-
   (use-package grammarly
   :ensure t
   :hook (text-mode . (lambda ()
