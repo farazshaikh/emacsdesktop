@@ -28,7 +28,7 @@
   (defun es/check-version()
     "Check that Emacs version is at the least supported version."
     (if (version< emacs-version  "24.4")
-	(error "Script depends on Emacs version being greater than 24.4")
+        (error "Script depends on Emacs version being greater than 24.4")
       (message "Version greater or equal to 24.4")))
   (es/check-version)
 #+END_SRC
@@ -39,62 +39,62 @@
   ;; Following setting saves 0.2 seconds an brings startup times down to 1.1sec
   ;; (setq gc-cons-threshold (* 250 1000 1000))
   (setq package-enable-at-startup nil
-	message-log-max 16384
-	gc-cons-threshold 402653184
-	gc-cons-percentage 0.6
-	auto-window-vscroll nil)
+        message-log-max 16384
+        gc-cons-threshold 402653184
+        gc-cons-percentage 0.6
+        auto-window-vscroll nil)
 
   (add-hook 'after-init-hook
-	    `(lambda ()
-	       (setq gc-cons-threshold 800000
-		     gc-cons-percentage 0.1)
-	       (garbage-collect)) t)
+            `(lambda ()
+               (setq gc-cons-threshold 800000
+                     gc-cons-percentage 0.1)
+               (garbage-collect)) t)
 #+END_SRC
 
 * Package Mgmt and EOS installation
 #+BEGIN_SRC emacs-lisp
-(defun es/setup-package-mgmt()
-  "Setup the package management for EOS."
-  (message "installing use package")
-  (require 'package)
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-  ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
-  ;; and `package-pinned-packages`. Most users will not need or want to do this.
-  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
-  (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
-  ;;(add-to-list 'package-archives '("elpy" . "http://jorgenschaefer.github.io/packages/") t)
-  (package-initialize)
+  (defun es/setup-package-mgmt()
+    "Setup the package management for EOS."
+    (message "installing use package")
+    (require 'package)
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+    ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
+    ;; and `package-pinned-packages`. Most users will not need or want to do this.
+    (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+    (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
+    (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+    ;;(add-to-list 'package-archives '("elpy" . "http://jorgenschaefer.github.io/packages/") t)
+    (package-initialize)
 
-  (unless package-archive-contents
-    (package-refresh-contents))
+    (unless package-archive-contents
+      (package-refresh-contents))
 
-  (unless (package-installed-p 'use-package)
-    (package-install 'use-package))
-  (message "es/setup-package-mgmt"))
-(es/setup-package-mgmt)
+    (unless (package-installed-p 'use-package)
+      (package-install 'use-package))
+    (message "es/setup-package-mgmt"))
+  (es/setup-package-mgmt)
 #+END_SRC
 * Bootstrap use package
 #+BEGIN_SRC emacs-lisp
-    ;;;;;;;;;;;;;;;;;;;;;;;
-    ;; Package Setup     ;;
-    ;;;;;;;;;;;;;;;;;;;;;;;
-    (require 'use-package-ensure)
-    (setq use-package-always-ensure t)
-    (setq use-package-compute-statistics t)
-    (setq use-package-always-pin "melpa")
-    (use-package auto-package-update
-      :disabled
-      :config
-      (auto-package-update-maybe))
+  ;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Package Setup     ;;
+  ;;;;;;;;;;;;;;;;;;;;;;;
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
+  (setq use-package-compute-statistics t)
+  (setq use-package-always-pin "melpa")
+  (use-package auto-package-update
+    :disabled
+    :config
+    (auto-package-update-maybe))
 
-    (use-package use-package-hydra)
-    (use-package diminish
-      :demand)
+  (use-package use-package-hydra)
+  (use-package diminish
+    :demand)
 #+END_SRC
 * Base settings
 #+BEGIN_SRC emacs-lisp
-    (defun es/emacs-base-settings()
+  (defun es/emacs-base-settings()
     "Base editor customization."
     ;;(set-background-color "grey2")
     (setq inhibit-startup-screen t)
@@ -124,22 +124,22 @@
 
     ;; window/frame selection preference
     (setq display-buffer-base-action
-	  '((display-buffer-reuse-window
-	     display-buffer-same-window
-	     display-buffer-in-previous-window
-	     display-buffer-use-some-window)))
+          '((display-buffer-reuse-window
+             display-buffer-same-window
+             display-buffer-in-previous-window
+             display-buffer-use-some-window)))
 
     (setq ring-bell-function
-	  (lambda nil
-	    (let
-		((orig-fg
-		  (face-foreground 'mode-line)))
-	      (set-face-foreground 'mode-line "#6495ED")
-	      (run-with-idle-timer 0.1 nil
-				   (lambda
-				     (fg)
-				     (set-face-foreground 'mode-line fg))
-				   orig-fg))))
+          (lambda nil
+            (let
+                ((orig-fg
+                  (face-foreground 'mode-line)))
+              (set-face-foreground 'mode-line "#6495ED")
+              (run-with-idle-timer 0.1 nil
+                                   (lambda
+                                     (fg)
+                                     (set-face-foreground 'mode-line fg))
+                                   orig-fg))))
     (set-face-background 'vertical-border "grey2")
     (message "es/emacs-base-settings"))
   (es/emacs-base-settings)
@@ -157,34 +157,34 @@
     "Choose Terminal Type."
     :group 'emacs-desktop-environment
     :type '(choice (const :tag "gnome-terminal" gnome-terminal)
-		   (const :tag "xterm" xterm)
-		   (const :tag "uxterm" uxterm)))
+                   (const :tag "xterm" xterm)
+                   (const :tag "uxterm" uxterm)))
 
   (defcustom ede-browser 'firefox
     "Choose Terminal Type."
     :group 'emacs-desktop-environment
     :type '(choice (const :tag "firefox" firefox)
-		   (const :tag "chrome" chrome)))
+                   (const :tag "chrome" chrome)))
 #+END_SRC
 
 * Helper functions
 #+BEGIN_SRC emacs-lisp
-    (defun warn-if-executable-not-found(filename help)
-      "Check for executable specified by FILENAME.  HELP is printed if file is not found."
+  (defun warn-if-executable-not-found(filename help)
+    "Check for executable specified by FILENAME.  HELP is printed if file is not found."
     (let ((full-path (executable-find filename)))
       (if full-path
-	  (message "%s: %s" filename full-path)
-      (message " %s file not found: Help %s" filename help))))
+          (message "%s: %s" filename full-path)
+        (message " %s file not found: Help %s" filename help))))
 
-    (defun es/unsafe-signature-override()
+  (defun es/unsafe-signature-override()
     "DEPRECATED: Override package signature check requirements."
     (package-initialize)
     (unless (package-installed-p 'gnu-elpa-keyring-update)
       (progn
-	(setq package-check-signature nil)
-	(es/setup-package-mgmt)
-	(package-install 'gnu-elpa-keyring-update)
-	(setq package-check-signature t)))
+        (setq package-check-signature nil)
+        (es/setup-package-mgmt)
+        (package-install 'gnu-elpa-keyring-update)
+        (setq package-check-signature t)))
     (message "es/setup-package-mgmt"))
   ;;(es/unsafe-signature-override)
 #+END_SRC
@@ -210,175 +210,175 @@
 ** hydra treemacs centaurtabs
 ** Dashboard
 #+BEGIN_SRC emacs-lisp
-    (use-package writeroom-mode
-      :commands (writeroom-mode)
-      :bind ("C-c z" . 'writeroom-mode)
-      :config
-      (setq writeroom-width 220)
-      (add-hook 'writeroom-mode-hook (lambda () (display-line-numbers-mode -1)))
-      :bind (:map writeroom-mode-map
-                  ("C-c C-w <" . #'writeroom-decrease-width)
-                  ("C-c C-w >" . #'writeroom-increase-width)
-                  ("C-c C-w =" . #'writeroom-adjust-width)
-                  ("s-?" . nil)
-                  ("C-c C-w SPC" . #'writeroom-toggle-mode-line)))
+  (use-package writeroom-mode
+    :commands (writeroom-mode)
+    :bind ("C-c z" . 'writeroom-mode)
+    :config
+    (setq writeroom-width 220)
+    (add-hook 'writeroom-mode-hook (lambda () (display-line-numbers-mode -1)))
+    :bind (:map writeroom-mode-map
+                ("C-c C-w <" . #'writeroom-decrease-width)
+                ("C-c C-w >" . #'writeroom-increase-width)
+                ("C-c C-w =" . #'writeroom-adjust-width)
+                ("s-?" . nil)
+                ("C-c C-w SPC" . #'writeroom-toggle-mode-line)))
 
-    (use-package default-text-scale
-      :config
-      (default-text-scale-mode t))
+  (use-package default-text-scale
+    :config
+    (default-text-scale-mode t))
 
-    (use-package adoc-mode
-      :mode ("\\.adoc\\'" . adoc-mode))
+  (use-package adoc-mode
+    :mode ("\\.adoc\\'" . adoc-mode))
 
-    (use-package vterm
-      :commands (vterm)
-      :config
-      (add-hook 'vterm-mode-hook (lambda ()
-                                   (setf truncate-lines nil)
-                                   (setq-local show-paren-mode nil)
-                                   (setq-local show-trailing-whitespace nil)
-                                   (yas-minor-mode -1)
-                                   (flycheck-mode -1)
-                                   (whitespace-mode -1))))
+  (use-package vterm
+    :commands (vterm)
+    :config
+    (add-hook 'vterm-mode-hook (lambda ()
+                                 (setf truncate-lines nil)
+                                 (setq-local show-paren-mode nil)
+                                 (setq-local show-trailing-whitespace nil)
+                                 (yas-minor-mode -1)
+                                 (flycheck-mode -1)
+                                 (whitespace-mode -1))))
 
-    (use-package hydra)
+  (use-package hydra)
 
-    (use-package treemacs
-      :commands (treemacs)
-      :disabled
-      :init
-      (with-eval-after-load 'winum
-        (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-      :config
-      (progn
-        (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
-              treemacs-deferred-git-apply-delay      0.5
-              treemacs-directory-name-transformer    #'identity
-              treemacs-display-in-side-window        t
-              treemacs-eldoc-display                 nil
-              treemacs-file-event-delay              5000
-              treemacs-file-extension-regex          treemacs-last-period-regex-value
-              treemacs-file-follow-delay             0.2
-              treemacs-file-name-transformer         #'identity
-              treemacs-follow-after-init             t
-              treemacs-git-command-pipe              ""
-              treemacs-goto-tag-strategy             'refetch-index
-              treemacs-indentation                   1
-              treemacs-indentation-string            " "
-              treemacs-is-never-other-window         nil
-              treemacs-max-git-entries               5000
-              treemacs-missing-project-action        'ask
-              treemacs-no-png-images                 nil
-              treemacs-no-delete-other-windows       t
-              treemacs-project-follow-cleanup        nil
-              treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-              treemacs-position                      'left
-              treemacs-recenter-distance             0.1
-              treemacs-recenter-after-file-follow    nil
-              treemacs-recenter-after-tag-follow     nil
-              treemacs-recenter-after-project-jump   'always
-              treemacs-recenter-after-project-expand 'on-distance
-              treemacs-show-cursor                   nil
-              treemacs-show-hidden-files             t
-              treemacs-silent-filewatch              nil
-              treemacs-silent-refresh                nil
-              treemacs-sorting                       'alphabetic-asc
-              treemacs-space-between-root-nodes      t
-              treemacs-tag-follow-cleanup            t
-              treemacs-tag-follow-delay              1.5
-              treemacs-width                         20)
+  (use-package treemacs
+    :commands (treemacs)
+    :disabled
+    :init
+    (with-eval-after-load 'winum
+      (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+    :config
+    (progn
+      (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+            treemacs-deferred-git-apply-delay      0.5
+            treemacs-directory-name-transformer    #'identity
+            treemacs-display-in-side-window        t
+            treemacs-eldoc-display                 nil
+            treemacs-file-event-delay              5000
+            treemacs-file-extension-regex          treemacs-last-period-regex-value
+            treemacs-file-follow-delay             0.2
+            treemacs-file-name-transformer         #'identity
+            treemacs-follow-after-init             t
+            treemacs-git-command-pipe              ""
+            treemacs-goto-tag-strategy             'refetch-index
+            treemacs-indentation                   1
+            treemacs-indentation-string            " "
+            treemacs-is-never-other-window         nil
+            treemacs-max-git-entries               5000
+            treemacs-missing-project-action        'ask
+            treemacs-no-png-images                 nil
+            treemacs-no-delete-other-windows       t
+            treemacs-project-follow-cleanup        nil
+            treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+            treemacs-position                      'left
+            treemacs-recenter-distance             0.1
+            treemacs-recenter-after-file-follow    nil
+            treemacs-recenter-after-tag-follow     nil
+            treemacs-recenter-after-project-jump   'always
+            treemacs-recenter-after-project-expand 'on-distance
+            treemacs-show-cursor                   nil
+            treemacs-show-hidden-files             t
+            treemacs-silent-filewatch              nil
+            treemacs-silent-refresh                nil
+            treemacs-sorting                       'alphabetic-asc
+            treemacs-space-between-root-nodes      t
+            treemacs-tag-follow-cleanup            t
+            treemacs-tag-follow-delay              1.5
+            treemacs-width                         20)
 
-        ;; The default width and height of the icons is 22 pixels. If you are
-        ;; using a Hi-DPI display, uncomment this to double the icon size.
-        ;; (treemacs-resize-icons 10)
-        (treemacs-follow-mode t)
-        (treemacs-filewatch-mode t)
-        (treemacs-fringe-indicator-mode t)
-        (pcase (cons (not (null (executable-find "git")))
-                     (not (null treemacs-python-executable)))
-          (`(t . t)
-           (treemacs-git-mode 'deferred))
-          (`(t . _)
-           (treemacs-git-mode 'simple)))
-        (message "es/use-package-treemacs"))
-      :bind
-      (:map global-map
-            ("M-0"       . treemacs-select-window)
-            ("C-x t 1"   . treemacs-delete-other-windows)
-            ("C-x t t"   . treemacs)
-            ("C-x t B"   . treemacs-bookmark)
-            ("C-x t C-t" . treemacs-find-file)
-            ("C-x t M-t" . treemacs-find-tag)))
+      ;; The default width and height of the icons is 22 pixels. If you are
+      ;; using a Hi-DPI display, uncomment this to double the icon size.
+      ;; (treemacs-resize-icons 10)
+      (treemacs-follow-mode t)
+      (treemacs-filewatch-mode t)
+      (treemacs-fringe-indicator-mode t)
+      (pcase (cons (not (null (executable-find "git")))
+                   (not (null treemacs-python-executable)))
+        (`(t . t)
+         (treemacs-git-mode 'deferred))
+        (`(t . _)
+         (treemacs-git-mode 'simple)))
+      (message "es/use-package-treemacs"))
+    :bind
+    (:map global-map
+          ("M-0"       . treemacs-select-window)
+          ("C-x t 1"   . treemacs-delete-other-windows)
+          ("C-x t t"   . treemacs)
+          ("C-x t B"   . treemacs-bookmark)
+          ("C-x t C-t" . treemacs-find-file)
+          ("C-x t M-t" . treemacs-find-tag)))
 
 
-    (defun centaur-tabs-custom-buffer-groups ()
-      "`centaur-tabs-buffer-groups' control buffers' group rules.
+  (defun centaur-tabs-custom-buffer-groups ()
+    "`centaur-tabs-buffer-groups' control buffers' group rules.
     Group centaur-tabs with mode if buffer is derived from
     `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
     All buffer name start with * will group to \"Emacs\".
     Other buffer group by `centaur-tabs-get-group-name' with project name."
-      (list
-       (cond
-        ((or (string-equal "*" (substring (buffer-name) 0 1))
-             (memq major-mode '(magit-process-mode
-                                magit-status-mode
-                                magit-diff-mode
-                                magit-log-mode
-                                magit-file-mode
-                                magit-blob-mode
-                                magit-blame-mode
-                                )))
-         "Emacs")
-        ((derived-mode-p 'prog-mode)
-         "Editing")
-        ((derived-mode-p 'dired-mode)
-         "Dired")
-        ((memq major-mode '(helpful-mode
-                            help-mode))
-         "Help")
-        ((memq major-mode '(org-mode
-                            org-agenda-clockreport-mode
-                            org-src-mode
-                            org-agenda-mode
-                            org-beamer-mode
-                            org-indent-mode
-                            org-bullets-mode
-                            org-cdlatex-mode
-                            org-agenda-log-mode
-                            diary-mode))
-         "OrgMode")
-        (t "Editing"))))
+    (list
+     (cond
+      ((or (string-equal "*" (substring (buffer-name) 0 1))
+           (memq major-mode '(magit-process-mode
+                              magit-status-mode
+                              magit-diff-mode
+                              magit-log-mode
+                              magit-file-mode
+                              magit-blob-mode
+                              magit-blame-mode
+                              )))
+       "Emacs")
+      ((derived-mode-p 'prog-mode)
+       "Editing")
+      ((derived-mode-p 'dired-mode)
+       "Dired")
+      ((memq major-mode '(helpful-mode
+                          help-mode))
+       "Help")
+      ((memq major-mode '(org-mode
+                          org-agenda-clockreport-mode
+                          org-src-mode
+                          org-agenda-mode
+                          org-beamer-mode
+                          org-indent-mode
+                          org-bullets-mode
+                          org-cdlatex-mode
+                          org-agenda-log-mode
+                          diary-mode))
+       "OrgMode")
+      (t "Editing"))))
 
 
-    (use-package centaur-tabs
-      :disabled
-      :init (setq centaur-tabs-set-bar 'over)
-      :function centaur-tabs-force-update
-      :config
-      (centaur-tabs-mode +1)
-      (centaur-tabs-headline-match)
-      (setq centaur-tabs-set-modified-marker t
-            centaur-tabs-modified-marker " ● "
-            centaur-tabs-cycle-scope 'tabs
-            centaur-tabs-height 10
-            centaur-tabs-set-icons t
-            centaur-tabs-close-button " × "
-            centaur-tabs-show-navigation-buttons t)
-      (centaur-tabs-change-fonts "ubuntu-mono" 100)
+  (use-package centaur-tabs
+    :disabled
+    :init (setq centaur-tabs-set-bar 'over)
+    :function centaur-tabs-force-update
+    :config
+    (centaur-tabs-mode +1)
+    (centaur-tabs-headline-match)
+    (setq centaur-tabs-set-modified-marker t
+          centaur-tabs-modified-marker " ● "
+          centaur-tabs-cycle-scope 'tabs
+          centaur-tabs-height 10
+          centaur-tabs-set-icons t
+          centaur-tabs-close-button " × "
+          centaur-tabs-show-navigation-buttons t)
+    (centaur-tabs-change-fonts "ubuntu-mono" 100)
 
-      (defun centaur-tabs-group-by-custom ()
-        "Custom grouping for Centaur tabs."
-        (interactive)
-        (defvar centaur-tabs-buffer-groups-function)
-        (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
-        (centaur-tabs-force-update))
-      (centaur-tabs-group-by-custom)
-      (message "es/setup-package-centaur-tabs")
-      :bind
-      ("C-S-<tab>" . centaur-tabs-backward)
-      ("C-<tab>" . centaur-tabs-forward)
-      :hook
-      (dired-mode . centaur-tabs-local-mode))
+    (defun centaur-tabs-group-by-custom ()
+      "Custom grouping for Centaur tabs."
+      (interactive)
+      (defvar centaur-tabs-buffer-groups-function)
+      (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
+      (centaur-tabs-force-update))
+    (centaur-tabs-group-by-custom)
+    (message "es/setup-package-centaur-tabs")
+    :bind
+    ("C-S-<tab>" . centaur-tabs-backward)
+    ("C-<tab>" . centaur-tabs-forward)
+    :hook
+    (dired-mode . centaur-tabs-local-mode))
 
 
   (use-package dashboard
@@ -452,14 +452,14 @@
     (setq powerline-default-separator 'slant)
     ;;(setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
     (spaceline-define-segment line-column
-      "The current line and column numbers."
-      "l:%l c:%2c")
+                              "The current line and column numbers."
+                              "l:%l c:%2c")
     (spaceline-define-segment time
-      "The current time."
-      (format-time-string "%H:%M"))
+                              "The current time."
+                              (format-time-string "%H:%M"))
     (spaceline-define-segment date
-      "The current date."
-      (format-time-string "%h %d"))
+                              "The current date."
+                              (format-time-string "%h %d"))
     (spaceline-toggle-time-on)
     (spaceline-emacs-theme 'date 'time))
 #+END_SRC
@@ -482,7 +482,7 @@
       (split-window-vertically)
       (other-window 1))
     :bind
-   ;; splits
+    ;; splits
     ("s-\\" . 'split-window-horizontally-and-follow)
     ("s-]" . 'split-window-vertically-and-follow)
     ("s-<backspace>" . 'delete-window)
@@ -536,74 +536,74 @@
 
 * Emacs Desktop Support GDM+EDE+EmacsWindowManager
 #+BEGIN_SRC emacs-lisp
-      (defun es/windowsetup()
-      "After init hook for setting up windows."
-      (interactive)
-      ;; (customize-set-variable
-      ;;  'display-buffer-base-action
-      ;;  '((display-buffer-reuse-window display-buffer-pop-up-frame)
-      ;;    (reusable-frames . 0)))
-      (customize-set-variable
-       'display-buffer-base-action
-       '((display-buffer-reuse-window display-buffer-same-window
-				      display-buffer-in-previous-window
-				      display-buffer-use-some-window))))
+  (defun es/windowsetup()
+    "After init hook for setting up windows."
+    (interactive)
+    ;; (customize-set-variable
+    ;;  'display-buffer-base-action
+    ;;  '((display-buffer-reuse-window display-buffer-pop-up-frame)
+    ;;    (reusable-frames . 0)))
+    (customize-set-variable
+     'display-buffer-base-action
+     '((display-buffer-reuse-window display-buffer-same-window
+                                    display-buffer-in-previous-window
+                                    display-buffer-use-some-window))))
 
 
-    ;; Start with the /run folder as  TMPDIR
-    (if (eq  system-type 'gnu/linux) (setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid)))))
+  ;; Start with the /run folder as  TMPDIR
+  (if (eq  system-type 'gnu/linux) (setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid)))))
 
-    ;; Load EXWM.
-    (defun es/setup-systray()
-      "Setup system tray."
-      (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
-      (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/indicator-messages-service")
+  ;; Load EXWM.
+  (defun es/setup-systray()
+    "Setup system tray."
+    (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
+    (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/indicator-messages-service")
 
-      ;; some issues with systray
-      ;;(start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
-      ;;  (start-process "" nil "zeitgeist-datahub")
-      (start-process "" nil "update-notifier")
-      (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")
+    ;; some issues with systray
+    ;;(start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
+    ;;  (start-process "" nil "zeitgeist-datahub")
+    (start-process "" nil "update-notifier")
+    (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")
 
-      (start-process "" nil "/usr/bin/nm-applet")
-      (start-process "" nil "/usr/bin/blueman-applet")
-      (start-process "" nil "/usr/bin/pasystray")
-      (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
-      (message "es/setupsystray"))
-    (if (and window-system (getenv "EOS_DESKTOP") (eq system-type 'gnu/linux)) (es/setup-systray))
+    (start-process "" nil "/usr/bin/nm-applet")
+    (start-process "" nil "/usr/bin/blueman-applet")
+    (start-process "" nil "/usr/bin/pasystray")
+    (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
+    (message "es/setupsystray"))
+  (if (and window-system (getenv "EOS_DESKTOP") (eq system-type 'gnu/linux)) (es/setup-systray))
 
-    (defun es/set-up-gnome-desktop()
-      "GNOME is used for most of the system settings."
-      (setenv "XDG_CURRENT_DESKTOP" "GNOME")
-      (start-process "" nil "/usr/bin/gnome-flashback")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gnome-settings-daemon")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-power")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-print-notifications")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-rfkill")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-screensaver-proxy")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sharing")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-smartcard")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-xsettings")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-wacom")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sound")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-a11y-settings")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-clipboard")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-color")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-datetime")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-housekeeping")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-keyboard")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-media-keys")
-      (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-mouse")
-      (start-process "" nil "/usr/lib/gnome-disk-utility/gsd-disk-utility-notify")
+  (defun es/set-up-gnome-desktop()
+    "GNOME is used for most of the system settings."
+    (setenv "XDG_CURRENT_DESKTOP" "GNOME")
+    (start-process "" nil "/usr/bin/gnome-flashback")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gnome-settings-daemon")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-power")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-print-notifications")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-rfkill")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-screensaver-proxy")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sharing")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-smartcard")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-xsettings")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-wacom")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sound")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-a11y-settings")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-clipboard")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-color")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-datetime")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-housekeeping")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-keyboard")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-media-keys")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-mouse")
+    (start-process "" nil "/usr/lib/gnome-disk-utility/gsd-disk-utility-notify")
 
-      ;; setup gnome-keyring
-      (defvar ssh-auth-sock  (shell-command-to-string  "/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh"))
-      (setq-default ssh-auth-sock (split-string (replace-regexp-in-string "\n$" ""  ssh-auth-sock) "="))
-      (setenv (car ssh-auth-sock) (car (cdr ssh-auth-sock)))
-      (message "es/setup-up-gnome-desktop"))
-    (if (and window-system (getenv "EOS_DESKTOP") (getenv "EOS_EMACS_GNOME_SHELL_SETUP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
+    ;; setup gnome-keyring
+    (defvar ssh-auth-sock  (shell-command-to-string  "/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh"))
+    (setq-default ssh-auth-sock (split-string (replace-regexp-in-string "\n$" ""  ssh-auth-sock) "="))
+    (setenv (car ssh-auth-sock) (car (cdr ssh-auth-sock)))
+    (message "es/setup-up-gnome-desktop"))
+  (if (and window-system (getenv "EOS_DESKTOP") (getenv "EOS_EMACS_GNOME_SHELL_SETUP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
 
-    (use-package undo-tree
+  (use-package undo-tree
     :pin gnu
     :diminish (undo-tree-mode . "")
     :after hydra
@@ -613,14 +613,14 @@
     :custom
     (undo-tree-auto-save-history t)
     :hydra (hydra-undo-tree (:hint nil)
-			    "
+                            "
     _p_: undo  _n_: redo _s_: save _l_: load   "
-			    ("p"   undo-tree-undo)
-			    ("n"   undo-tree-redo)
-			    ("s"   undo-tree-save-history)
-			    ("l"   undo-tree-load-history)
-			    ("u"   undo-tree-visualize "visualize" :color blue)
-			    ("q"   nil "quit" :color blue)))
+                            ("p"   undo-tree-undo)
+                            ("n"   undo-tree-redo)
+                            ("s"   undo-tree-save-history)
+                            ("l"   undo-tree-load-history)
+                            ("u"   undo-tree-visualize "visualize" :color blue)
+                            ("q"   nil "quit" :color blue)))
 
   ;;;;;;;;;;;;;;;;;;;;;;
   ;;Setup alt-tab     ;;
@@ -642,8 +642,8 @@
       (iflipb-next-buffer arg)
 
       (when iflipbTimerObj
-	(cancel-timer iflipbTimerObj)
-	(setq iflipbTimerObj nil))
+        (cancel-timer iflipbTimerObj)
+        (setq iflipbTimerObj nil))
 
       (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
 
@@ -652,15 +652,15 @@
       (interactive)
       (iflipb-previous-buffer)
       (when iflipbTimerObj
-	(cancel-timer iflipbTimerObj)
-	(setq iflipbTimerObj nil))
+        (cancel-timer iflipbTimerObj)
+        (setq iflipbTimerObj nil))
       (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
 
     (defun iflipb-first-iflipb-buffer-switch-command ()
       "Determines whether this is the first invocation of iflipb-next-buffer or iflipb-previous-buffer this round."
       ;; (message "FR %s" last-command)
       (not (and (or (eq last-command 'timed-iflipb-next-buffer)
-		    (eq last-command 'timed-iflipb-previous-buffer)))))
+                    (eq last-command 'timed-iflipb-previous-buffer)))))
 
 
     ;; in iflip just flip with candidate windows that are not currently being displayed in a window
@@ -669,10 +669,10 @@
     (defun iflipb-ignore-windowed-buffers(buffer)
       ;;(message buffer)
       (if
-	  (or (eq (get-buffer-window buffer "visible") nil)
-	      (string= (buffer-name) buffer)
-	      )
-	  nil t))
+          (or (eq (get-buffer-window buffer "visible") nil)
+              (string= (buffer-name) buffer)
+              )
+          nil t))
 
     (defun setupIFlipb()
       "Alt-tab Super-tab for window switch."
@@ -694,231 +694,231 @@
 * EXWM
 #+BEGIN_SRC emacs-lisp
   (use-package exwm
-  :if (and
-       window-system
-       (getenv "EOS_DESKTOP"))
-  :ensure windmove
-  :pin gnu
-  :functions exwm-workspace-rename-buffer exwm-systemtray-enable exwm-randr-enable
-  :hook
-  (('exwm-update-class .
-                       (lambda ()
-                         (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
-                                     (string= "gimp" exwm-instance-name))
-                           (exwm-workspace-rename-buffer exwm-class-name))))
-   ('exwm-update-title-hook .
-                            (lambda ()
-                              (when (or (not exwm-instance-name)
-                                        (string-prefix-p "sun-awt-X11-" exwm-instance-name)
-                                        (string= "gimp" exwm-instance-name))
-				(exwm-workspace-rename-buffer exwm-title)))))
-  :config
-  ;; Disable dialog boxes since they are unusable in EXWM
-  (setq use-dialog-box nil)
+    :if (and
+         window-system
+         (getenv "EOS_DESKTOP"))
+    :ensure windmove
+    :pin gnu
+    :functions exwm-workspace-rename-buffer exwm-systemtray-enable exwm-randr-enable
+    :hook
+    (('exwm-update-class .
+                         (lambda ()
+                           (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                                       (string= "gimp" exwm-instance-name))
+                             (exwm-workspace-rename-buffer exwm-class-name))))
+     ('exwm-update-title-hook .
+                              (lambda ()
+                                (when (or (not exwm-instance-name)
+                                          (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                                          (string= "gimp" exwm-instance-name))
+                                  (exwm-workspace-rename-buffer exwm-title)))))
+    :config
+    ;; Disable dialog boxes since they are unusable in EXWM
+    (setq use-dialog-box nil)
 
-  ;; Set floating window border
-  (setq exwm-floating-border-width 3)
-  (setq exwm-floating-border-color "orange")
+    ;; Set floating window border
+    (setq exwm-floating-border-width 3)
+    (setq exwm-floating-border-color "orange")
 
-  (setq exwm-workspace-number 4)
-  ;; Per host dual monitor setup.
-  ;; Map workspace 0 to the primary monitor. i.e. the attached monitor.
-  ;; This is because the system tray is attached to the main workspace.
-  ;; DP-1 HDMI-1 are usually the attached monitors.
-  ;;
-  ;; XXX: A simpler display/workspace mapping policy is to have the
-  ;; highest/lowest resolution display host workspace 0
-  (defvar exwm-randr-workspace-monitor-plist)
-  (setq exwm-randr-workspace-monitor-plist '(0 "DP-1" 0 "HDMI-1"))
-  (when (string= (system-name) "faraz-dfn-x1")
-    (progn
-      (setq exwm-randr-workspace-monitor-plist '(1 "eDP-1" 2 "DP-1" 0 "HDMI-1"))
-      (add-hook 'exwm-randr-screen-change-hook
-		(lambda ()
-		  (start-process-shell-command
-		   "xrandr" nil "xrandr --output eDP-1 --output DP-1 --output HDMI-1 --auto")))))
+    (setq exwm-workspace-number 4)
+    ;; Per host dual monitor setup.
+    ;; Map workspace 0 to the primary monitor. i.e. the attached monitor.
+    ;; This is because the system tray is attached to the main workspace.
+    ;; DP-1 HDMI-1 are usually the attached monitors.
+    ;;
+    ;; XXX: A simpler display/workspace mapping policy is to have the
+    ;; highest/lowest resolution display host workspace 0
+    (defvar exwm-randr-workspace-monitor-plist)
+    (setq exwm-randr-workspace-monitor-plist '(0 "DP-1" 0 "HDMI-1"))
+    (when (string= (system-name) "faraz-dfn-x1")
+      (progn
+        (setq exwm-randr-workspace-monitor-plist '(1 "eDP-1" 2 "DP-1" 0 "HDMI-1"))
+        (add-hook 'exwm-randr-screen-change-hook
+                  (lambda ()
+                    (start-process-shell-command
+                     "xrandr" nil "xrandr --output eDP-1 --output DP-1 --output HDMI-1 --auto")))))
 
-  ;; Access buffers from all workspaces
-  (setq exwm-workspace-show-all-buffers t)
-  (setq exwm-layout-show-all-buffers t)
+    ;; Access buffers from all workspaces
+    (setq exwm-workspace-show-all-buffers t)
+    (setq exwm-layout-show-all-buffers t)
 
-  ;; The following example demonstrates how to use simulation keys to mimic
-  ;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
-  ;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
-  ;; and DEST is what EXWM actually sends to application.  Note that both SRC
-  ;; and DEST should be key sequences (vector or string).
-  (setq exwm-input-simulation-keys
-	'(
-	  ;; movement
-	  ([?\C-b] . [left])
-	  ([?\M-b] . [C-left])
-	  ([?\C-f] . [right])
-	  ([?\M-f] . [C-right])
-	  ([?\C-p] . [up])
-	  ([?\C-n] . [down])
-	  ([?\C-a] . [home])
-	  ([?\C-e] . [end])
-	  ([?\M-v] . [prior])
-	  ([?\C-v] . [next])
-	  ([?\C-d] . [delete])
-	  ([?\C-k] . [S-end delete])
-	  ;; cut/paste.
-	  ([?\C-w] . [?\C-x])  ;; Cut
-	  ([?\M-w] . [?\C-c])  ;; copy
-	  ([?\C-y] . [?\C-v])  ;; paste
-	  ;; search
-	  ([?\C-s] . (?\C-f))))
-  (message "es/keyboard-setup")
+    ;; The following example demonstrates how to use simulation keys to mimic
+    ;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
+    ;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
+    ;; and DEST is what EXWM actually sends to application.  Note that both SRC
+    ;; and DEST should be key sequences (vector or string).
+    (setq exwm-input-simulation-keys
+          '(
+            ;; movement
+            ([?\C-b] . [left])
+            ([?\M-b] . [C-left])
+            ([?\C-f] . [right])
+            ([?\M-f] . [C-right])
+            ([?\C-p] . [up])
+            ([?\C-n] . [down])
+            ([?\C-a] . [home])
+            ([?\C-e] . [end])
+            ([?\M-v] . [prior])
+            ([?\C-v] . [next])
+            ([?\C-d] . [delete])
+            ([?\C-k] . [S-end delete])
+            ;; cut/paste.
+            ([?\C-w] . [?\C-x])  ;; Cut
+            ([?\M-w] . [?\C-c])  ;; copy
+            ([?\C-y] . [?\C-v])  ;; paste
+            ;; search
+            ([?\C-s] . (?\C-f))))
+    (message "es/keyboard-setup")
 
-  ;; setup alt-tab
-  (exwm-input-set-key (kbd "<M-tab>") 'timed-iflipb-next-buffer)
-  (exwm-input-set-key (kbd "<M-S-iso-lefttab>") 'timed-iflipb-previous-buffer)
-  ;;(exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
-  ;;(exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+    ;; setup alt-tab
+    (exwm-input-set-key (kbd "<M-tab>") 'timed-iflipb-next-buffer)
+    (exwm-input-set-key (kbd "<M-S-iso-lefttab>") 'timed-iflipb-previous-buffer)
+    ;;(exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
+    ;;(exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
 
-  ;; applications
-  (exwm-input-set-key (kbd "s-l") 'es/lock-screen)
-  (exwm-input-set-key (kbd "s-g") 'es/app-browser)
-  (exwm-input-set-key (kbd "s-t") 'es/app-terminal)
-  (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
-  (exwm-input-set-key (kbd "s-e") 'hydra-eos/body)
-  (exwm-input-set-key (kbd "s-r") 'exwm-reset)
-  (exwm-input-set-key (kbd "s-<space>") 'es/save-edit-position)
-  (exwm-input-set-key (kbd "s-j") 'counsel-mark-ring)
+    ;; applications
+    (exwm-input-set-key (kbd "s-l") 'es/lock-screen)
+    (exwm-input-set-key (kbd "s-g") 'es/app-browser)
+    (exwm-input-set-key (kbd "s-t") 'es/app-terminal)
+    (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
+    (exwm-input-set-key (kbd "s-e") 'hydra-eos/body)
+    (exwm-input-set-key (kbd "s-r") 'exwm-reset)
+    (exwm-input-set-key (kbd "s-<space>") 'es/save-edit-position)
+    (exwm-input-set-key (kbd "s-j") 'counsel-mark-ring)
 
-  ;; window move
-  (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
-  (exwm-input-set-key (kbd "s-<down>") 'windmove-down)
-  (exwm-input-set-key (kbd "s-<up>") 'windmove-up)
-  (exwm-input-set-key (kbd "s-<right>") 'windmove-right)
-  ;; window resize
-  (exwm-input-set-key (kbd "s-M-<right>")
-                      (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 50)))
-  (exwm-input-set-key (kbd "s-M-<left>")
-                      (lambda () (interactive) (exwm-layout-shrink-window-horizontally 50)))
-  (exwm-input-set-key (kbd "s-M-<up>")
-                      (lambda () (interactive) (exwm-layout-enlarge-window             50)))
-  (exwm-input-set-key (kbd "s-M-<down>")
-                      (lambda () (interactive) (exwm-layout-shrink-window              50)))
-  ;; window splits
-  (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally-and-follow)
-  (exwm-input-set-key (kbd "s-]") 'split-window-vertically-and-follow)
-  (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
-  (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
-  (exwm-input-set-key (kbd "s-b") 'counsel-switch-buffer)
-  (exwm-input-set-key (kbd "s-d") 'counsel-linux-app)
+    ;; window move
+    (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
+    (exwm-input-set-key (kbd "s-<down>") 'windmove-down)
+    (exwm-input-set-key (kbd "s-<up>") 'windmove-up)
+    (exwm-input-set-key (kbd "s-<right>") 'windmove-right)
+    ;; window resize
+    (exwm-input-set-key (kbd "s-M-<right>")
+                        (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 50)))
+    (exwm-input-set-key (kbd "s-M-<left>")
+                        (lambda () (interactive) (exwm-layout-shrink-window-horizontally 50)))
+    (exwm-input-set-key (kbd "s-M-<up>")
+                        (lambda () (interactive) (exwm-layout-enlarge-window             50)))
+    (exwm-input-set-key (kbd "s-M-<down>")
+                        (lambda () (interactive) (exwm-layout-shrink-window              50)))
+    ;; window splits
+    (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally-and-follow)
+    (exwm-input-set-key (kbd "s-]") 'split-window-vertically-and-follow)
+    (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
+    (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
+    (exwm-input-set-key (kbd "s-b") 'counsel-switch-buffer)
+    (exwm-input-set-key (kbd "s-d") 'counsel-linux-app)
 
-  ;; window undo
-  (exwm-input-set-key (kbd "s-u") 'winner-undo)
-  (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
-  (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
-  (global-unset-key (kbd "C-z"))
-  (setq exwm-input-global-keys
-        `(
-          ,@(mapcar (lambda (i)
-                      `(,(kbd (format "s-%d" i)) .
-                        (lambda ()
-                          (interactive)
-                          (exwm-workspace-switch ,i))))
-                    (number-sequence 0 9))
-          ([?\s-&] . (lambda (command)
-                       (interactive (list (read-shell-command "$ ")))
-                       (start-process-shell-command command nil command)))))
+    ;; window undo
+    (exwm-input-set-key (kbd "s-u") 'winner-undo)
+    (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
+    (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
+    (global-unset-key (kbd "C-z"))
+    (setq exwm-input-global-keys
+          `(
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch ,i))))
+                      (number-sequence 0 9))
+            ([?\s-&] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))))
 
-  (require 'exwm-systemtray)
-  (exwm-systemtray-enable)
+    (require 'exwm-systemtray)
+    (exwm-systemtray-enable)
 
-  (require 'exwm-randr)
-  (exwm-randr-enable)
+    (require 'exwm-randr)
+    (exwm-randr-enable)
 
-  ;; start the emacs x'window manager.
-  (exwm-enable)
+    ;; start the emacs x'window manager.
+    (exwm-enable)
 
-  ;; set work psace names
-  (setq exwm-workspace-index-map
-        (lambda (index)
-          (let ((named-workspaces ["code" "term" "brow" "slac" "extr"]))
-            (if (< index (length named-workspaces))
-                (elt named-workspaces index)
-              (number-to-string index)))))
+    ;; set work psace names
+    (setq exwm-workspace-index-map
+          (lambda (index)
+            (let ((named-workspaces ["code" "term" "brow" "slac" "extr"]))
+              (if (< index (length named-workspaces))
+                  (elt named-workspaces index)
+                (number-to-string index)))))
 
-  (defun exwm-workspace--update-ewmh-desktop-names ()
-    "Set names for work spaces."
-    (xcb:+request exwm--connection
-		  (make-instance 'xcb:ewmh:set-_NET_DESKTOP_NAMES
-				 :window exwm--root :data
-				 (mapconcat (lambda (i) (funcall exwm-workspace-index-map i))
-					    (number-sequence 0 (1- (exwm-workspace--count)))
-					    "\0"))))
+    (defun exwm-workspace--update-ewmh-desktop-names ()
+      "Set names for work spaces."
+      (xcb:+request exwm--connection
+                    (make-instance 'xcb:ewmh:set-_NET_DESKTOP_NAMES
+                                   :window exwm--root :data
+                                   (mapconcat (lambda (i) (funcall exwm-workspace-index-map i))
+                                              (number-sequence 0 (1- (exwm-workspace--count)))
+                                              "\0"))))
 
-  (add-hook 'exwm-workspace-list-change-hook
-            #'exwm-workspace--update-ewmh-desktop-names)
+    (add-hook 'exwm-workspace-list-change-hook
+              #'exwm-workspace--update-ewmh-desktop-names)
 
-  ;; you may need to call the function once manually
-  (exwm-workspace--update-ewmh-desktop-names)
+    ;; you may need to call the function once manually
+    (exwm-workspace--update-ewmh-desktop-names)
 
-  :init
-  (message "es/use-package/exwm"))
+    :init
+    (message "es/use-package/exwm"))
 #+END_SRC
 * EXWM Hydra
 #+BEGIN_SRC emacs-lisp
   (defhydra hydra-eos (:exit nil :hint nil)
+    "
+  Emacs Deskop EOS: Binding ALSO accessible under Super key i.e. s-b switch buffer
+  Apps^^                        EXWM^^                     Windows mvmt                Windows split
+  -------------------------------------------------------------------------------------------------------------
+  [_d_] Linux application       [_w_] Workspace switch     [_<up>_] up                 [_\\_] Vertical split
+  [_g_] Browser                 [_r_] Reset                [_<down>_] down             [_]_] Horizontal split
+  [_t_] Terminal                [_L_] Monitor Move left    [_<left>_] left             [<backspace>] delete win
+  [_T_] New Terminal            [_R_] Monitor Move right   [_<right>_] right           [_[_] delete other win
+  [_E_] Treemacs Explorer       [_-_] Text size decrease   [_S-<up>_] move window up   [_u_] winner-undo
+  [_l_] lock screen             [_=_] Text size increase   [_S-<down>_] move wind down [_b_] switch buffer
+  [_a_] Splash                  [_s_] Save edit Position   [_S-<left>_] move left      [_G_] GDM Tweaks
+  [_n_] Netflix                 [_j_] Jump edit position   [_S-<right>_] move right    [_S_] GDM Set Scale
+  [_s_] ssh
+  [_v_] Volume 200pct
+  [_f_] rip grep
+  [_F_] ag silver searcher
   "
-Emacs Deskop EOS: Binding ALSO accessible under Super key i.e. s-b switch buffer
-Apps^^                        EXWM^^                     Windows mvmt                Windows split
--------------------------------------------------------------------------------------------------------------
-[_d_] Linux application       [_w_] Workspace switch     [_<up>_] up                 [_\\_] Vertical split
-[_g_] Browser                 [_r_] Reset                [_<down>_] down             [_]_] Horizontal split
-[_t_] Terminal                [_L_] Monitor Move left    [_<left>_] left             [<backspace>] delete win
-[_T_] New Terminal            [_R_] Monitor Move right   [_<right>_] right           [_[_] delete other win
-[_E_] Treemacs Explorer       [_-_] Text size decrease   [_S-<up>_] move window up   [_u_] winner-undo
-[_l_] lock screen             [_=_] Text size increase   [_S-<down>_] move wind down [_b_] switch buffer
-[_a_] Splash                  [_s_] Save edit Position   [_S-<left>_] move left      [_G_] GDM Tweaks
-[_n_] Netflix                 [_j_] Jump edit position   [_S-<right>_] move right    [_S_] GDM Set Scale
-[_s_] ssh
-[_v_] Volume 200pct
-[_f_] rip grep
-[_F_] ag silver searcher
-"
-  ("d"  counsel-linux-app)
-  ("g" es/app-browser)
-  ("t" es/terminal)
-  ("T" es/app-terminal)
-  ("E" treemacs)
-  ("l" es/lock-screen)
-  ("a" es/app-splash)
-  ("n" es/app-netflix)
-  ("s" es/ssh)
-  ("v" es/volumeset)
-  ("f" counsel-rg)
-  ("F" counsel-ag)
-  ("G" es/gdm-tweaks)
-  ("S" es/gdm-set-scale)
+    ("d"  counsel-linux-app)
+    ("g" es/app-browser)
+    ("t" es/terminal)
+    ("T" es/app-terminal)
+    ("E" treemacs)
+    ("l" es/lock-screen)
+    ("a" es/app-splash)
+    ("n" es/app-netflix)
+    ("s" es/ssh)
+    ("v" es/volumeset)
+    ("f" counsel-rg)
+    ("F" counsel-ag)
+    ("G" es/gdm-tweaks)
+    ("S" es/gdm-set-scale)
 
-  ("w" exwm-workspace-switch)
-  ("r" exwm-workspace-reset)
-  ("L" es/monitor-monitor-move-left)
-  ("R" es/monitor-monitor-move-right)
-  ("-" text-scale-decrease)
-  ("=" text-scale-increase)
-  ("<space>" es/save-edit-position)
-  ("j" counsel-mark-ring)
+    ("w" exwm-workspace-switch)
+    ("r" exwm-workspace-reset)
+    ("L" es/monitor-monitor-move-left)
+    ("R" es/monitor-monitor-move-right)
+    ("-" text-scale-decrease)
+    ("=" text-scale-increase)
+    ("<space>" es/save-edit-position)
+    ("j" counsel-mark-ring)
 
-  ("<up>" windmove-up)
-  ("<down>" windmove-down)
-  ("<left>" windmove-left)
-  ("<right>" windmove-right)
-  ("S-<up>" windower-swap-up)
-  ("S-<down>" windower-swap-down)
-  ("S-<left>" windower-swap-left)
-  ("S-<right>" windower-swap-right)
-  ("\\" split-window-horizontally-and-follow)
-  ("]" split-window-vertically-and-follow)
-  ("<backpsace>" delete-window)
-  ("[" delete-other-windows)
-  ("u" winner-undo)
-  ("b" counsel-switch-buffer)
-  ("q" nil :color blue))
+    ("<up>" windmove-up)
+    ("<down>" windmove-down)
+    ("<left>" windmove-left)
+    ("<right>" windmove-right)
+    ("S-<up>" windower-swap-up)
+    ("S-<down>" windower-swap-down)
+    ("S-<left>" windower-swap-left)
+    ("S-<right>" windower-swap-right)
+    ("\\" split-window-horizontally-and-follow)
+    ("]" split-window-vertically-and-follow)
+    ("<backpsace>" delete-window)
+    ("[" delete-other-windows)
+    ("u" winner-undo)
+    ("b" counsel-switch-buffer)
+    ("q" nil :color blue))
 #+END_SRC
 
 * End
@@ -1061,7 +1061,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
 #+END_SRC
 * Tools Whitespace flyspell
 #+BEGIN_SRC emacs-lisp
-    (use-package whitespace
+  (use-package whitespace
     :hook
     (prog-mode . whitespace-mode)
     (prog-mode . display-fill-column-indicator-mode)
@@ -1097,10 +1097,10 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (global-flycheck-mode)
     (setq flycheck-global-modes '(not exwm-mode treemacs-mode))
     (add-hook 'sh-mode-hook
-	      (lambda ()
-		(defvar lsp-diagnostics-provider :none)
-		(when (flycheck-may-enable-checker 'sh-shellcheck)
-		  (flycheck-select-checker 'sh-shellcheck)))))
+              (lambda ()
+                (defvar lsp-diagnostics-provider :none)
+                (when (flycheck-may-enable-checker 'sh-shellcheck)
+                  (flycheck-select-checker 'sh-shellcheck)))))
 #+END_SRC
 
 * Git (Git, Git-Gutter, Git-timemachine, magit, smerge, direnv)
@@ -1109,15 +1109,15 @@ Apps^^                        EXWM^^                     Windows mvmt           
     :diminish
     :hook (after-init . global-git-gutter-mode)
     :init (setq git-gutter:visual-line t
-		git-gutter:disabled-modes '(asm-mode image-mode)
-		git-gutter:modified-sign "*"
-		git-gutter:added-sign "+"
-		git-gutter:deleted-sign "x")
+                git-gutter:disabled-modes '(asm-mode image-mode)
+                git-gutter:modified-sign "*"
+                git-gutter:added-sign "+"
+                git-gutter:deleted-sign "x")
     (warn-if-executable-not-found "git" "apt install git")
     :bind
     ("C-c g" . hydra-git-gutter/body))
   (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
-					:hint nil)
+                                        :hint nil)
     "
     Git gutter:
       _j_: next hunk        _s_tage hunk     _q_uit
@@ -1129,9 +1129,9 @@ Apps^^                        EXWM^^                     Windows mvmt           
     ("j" git-gutter:next-hunk)
     ("k" git-gutter:previous-hunk)
     ("h" (progn (goto-char (point-min))
-		(git-gutter:next-hunk 1)))
+                (git-gutter:next-hunk 1)))
     ("l" (progn (goto-char (point-min))
-		(git-gutter:previous-hunk 1)))
+                (git-gutter:previous-hunk 1)))
     ("s" git-gutter:stage-hunk)
     ("r" git-gutter:revert-hunk)
     ("p" git-gutter:popup-hunk)
@@ -1155,9 +1155,9 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (with-eval-after-load 'magit-diff
       (define-key magit-diff-mode-map (kbd "<M-tab>") nil))
     :bind (:map magit-file-section-map
-		("RET" . magit-diff-visit-file-other-window)
-		:map magit-hunk-section-map
-		("RET" . magit-diff-visit-file-other-window))
+                ("RET" . magit-diff-visit-file-other-window)
+                :map magit-hunk-section-map
+                ("RET" . magit-diff-visit-file-other-window))
     :custom
     ((magit-auto-revert-mode nil)
      (magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")))
@@ -1186,8 +1186,8 @@ Apps^^                        EXWM^^                     Windows mvmt           
     :preface
     (with-eval-after-load 'hydra
       (defhydra smerge-hydra
-	(:color pink :hint nil :post (smerge-auto-leave))
-	"
+        (:color pink :hint nil :post (smerge-auto-leave))
+        "
   ^Move^       ^Keep^               ^Diff^                 ^Other^
   ^^-----------^^-------------------^^---------------------^^-------
   _n_ext       _b_ase               _<_: upper/base        _C_ombine
@@ -1196,36 +1196,36 @@ Apps^^                        EXWM^^                     Windows mvmt           
   ^^           _a_ll                _R_efine
   ^^           _RET_: current       _E_diff
   "
-	("n" smerge-next)
-	("p" smerge-prev)
-	("b" smerge-keep-base)
-	("u" smerge-keep-upper)
-	("l" smerge-keep-lower)
-	("a" smerge-keep-all)
-	("RET" smerge-keep-current)
-	("\C-m" smerge-keep-current)
-	("<" smerge-diff-base-upper)
-	("=" smerge-diff-upper-lower)
-	(">" smerge-diff-base-lower)
-	("R" smerge-refine)
-	("E" smerge-ediff)
-	("C" smerge-combine-with-next)
-	("r" smerge-resolve)
-	("k" smerge-kill-current)
-	("ZZ" (lambda ()
-		(interactive)
-		(save-buffer)
-		(bury-buffer))
-	 "Save and bury buffer" :color blue)
-	("q" nil "cancel" :color blue)))
+        ("n" smerge-next)
+        ("p" smerge-prev)
+        ("b" smerge-keep-base)
+        ("u" smerge-keep-upper)
+        ("l" smerge-keep-lower)
+        ("a" smerge-keep-all)
+        ("RET" smerge-keep-current)
+        ("\C-m" smerge-keep-current)
+        ("<" smerge-diff-base-upper)
+        ("=" smerge-diff-upper-lower)
+        (">" smerge-diff-base-lower)
+        ("R" smerge-refine)
+        ("E" smerge-ediff)
+        ("C" smerge-combine-with-next)
+        ("r" smerge-resolve)
+        ("k" smerge-kill-current)
+        ("ZZ" (lambda ()
+                (interactive)
+                (save-buffer)
+                (bury-buffer))
+         "Save and bury buffer" :color blue)
+        ("q" nil "cancel" :color blue)))
     :hook ((find-file . (lambda ()
-			  (save-excursion
-			    (goto-char (point-min))
-			    (when (re-search-forward "^<<<<<<< " nil t)
-			      (smerge-mode 1)))))
-	   (magit-diff-visit-file . (lambda ()
-				      (when smerge-mode
-					(smerge-hydra/body))))))
+                          (save-excursion
+                            (goto-char (point-min))
+                            (when (re-search-forward "^<<<<<<< " nil t)
+                              (smerge-mode 1)))))
+           (magit-diff-visit-file . (lambda ()
+                                      (when smerge-mode
+                                        (smerge-hydra/body))))))
 
   (use-package direnv
     :init
@@ -1248,8 +1248,8 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (yas-global-mode 1)
     :bind
     (:map yas-minor-mode-map
-	  ("C-c & t" . yas-describe-tables)
-	  ("C-c & &" . org-mark-ring-goto)))
+          ("C-c & t" . yas-describe-tables)
+          ("C-c & &" . org-mark-ring-goto)))
   (use-package yasnippet-snippets
     :pin gnu
     :defer)
@@ -1298,22 +1298,22 @@ Apps^^                        EXWM^^                     Windows mvmt           
       "Function to be called before any buffers or window setup for ediff."
       (setq my-ediff-bwin-config (current-window-configuration))
       (when (characterp my-ediff-bwin-reg)
-	(set-register my-ediff-bwin-reg
-		      (list my-ediff-bwin-config (point-marker)))))
+        (set-register my-ediff-bwin-reg
+                      (list my-ediff-bwin-config (point-marker)))))
 
     (defun my-ediff-ash ()
       "Function to be called after buffers and window setup for ediff."
       (setq my-ediff-awin-config (current-window-configuration))
       (when (characterp my-ediff-awin-reg)
-	(set-register my-ediff-awin-reg
-		      (list my-ediff-awin-config (point-marker)))))
+        (set-register my-ediff-awin-reg
+                      (list my-ediff-awin-config (point-marker)))))
 
     (defun my-ediff-qh ()
       "Function to be called when ediff quits."
       (ediff-janitor nil nil)
       (ediff-cleanup-mess)
       (when my-ediff-bwin-config
-	(set-window-configuration my-ediff-bwin-config)))
+        (set-window-configuration my-ediff-bwin-config)))
 
     ;; FRZ: TODO hooks cannot be placed in :hook section
     (add-hook 'ediff-before-setup-hook 'my-ediff-bsh)
@@ -1370,58 +1370,58 @@ Apps^^                        EXWM^^                     Windows mvmt           
     ;; `company-lsp' is automatically enabled
     ;; (lsp-enable-completion-at-point nil)
     (lsp-file-watch-ignored '(
-			      "[/\\\\]\\.direnv$"
-					  ; SCM tools
-			      "[/\\\\]\\.git$"
-			      "[/\\\\]\\.cargo$"
-			      "[/\\\\]\\.hg$"
-			      "[/\\\\]\\.bzr$"
-			      "[/\\\\]_darcs$"
-			      "[/\\\\]\\.svn$"
-			      "[/\\\\]_FOSSIL_$"
-					  ; IDE tools
-			      "[/\\\\]\\.idea$"
-			      "[/\\\\]\\.ensime_cache$"
-			      "[/\\\\]\\.eunit$"
-			      "[/\\\\]node_modules$"
-			      "[/\\\\]\\.fslckout$"
-			      "[/\\\\]\\.tox$"
-			      "[/\\\\]\\.stack-work$"
-			      "[/\\\\]\\.bloop$"
-			      "[/\\\\]\\.metals$"
-			      "[/\\\\]target$"
-					  ; Autotools output
-			      "[/\\\\]\\.deps$"
-			      "[/\\\\]build-aux$"
-			      "[/\\\\]autom4te.cache$"
-			      "[/\\\\]\\.reference$"
-					  ; rls cargo etc
-			      "[/\\\\]\\result???$"
-			      "[/\\\\]\\target???$"
-			      "[/\\\\]\\.cargo-home???$"
-					  ; ccls cache
-			      "[/\\\\]\\.ccls-cache$"
-					  ; all hidden folders
-			      "[/\\\\]\\.$"
-			      ))
+                              "[/\\\\]\\.direnv$"
+                                          ; SCM tools
+                              "[/\\\\]\\.git$"
+                              "[/\\\\]\\.cargo$"
+                              "[/\\\\]\\.hg$"
+                              "[/\\\\]\\.bzr$"
+                              "[/\\\\]_darcs$"
+                              "[/\\\\]\\.svn$"
+                              "[/\\\\]_FOSSIL_$"
+                                          ; IDE tools
+                              "[/\\\\]\\.idea$"
+                              "[/\\\\]\\.ensime_cache$"
+                              "[/\\\\]\\.eunit$"
+                              "[/\\\\]node_modules$"
+                              "[/\\\\]\\.fslckout$"
+                              "[/\\\\]\\.tox$"
+                              "[/\\\\]\\.stack-work$"
+                              "[/\\\\]\\.bloop$"
+                              "[/\\\\]\\.metals$"
+                              "[/\\\\]target$"
+                                          ; Autotools output
+                              "[/\\\\]\\.deps$"
+                              "[/\\\\]build-aux$"
+                              "[/\\\\]autom4te.cache$"
+                              "[/\\\\]\\.reference$"
+                                          ; rls cargo etc
+                              "[/\\\\]\\result???$"
+                              "[/\\\\]\\target???$"
+                              "[/\\\\]\\.cargo-home???$"
+                                          ; ccls cache
+                              "[/\\\\]\\.ccls-cache$"
+                                          ; all hidden folders
+                              "[/\\\\]\\.$"
+                              ))
     :bind (:map lsp-mode-map
-		("C-c C-l" . hydra-lsp/body)
-		("C-c C-f" . lsp-format-buffer)
-		("s-." . lsp-execute-code-action)
-		("M-m" . lsp-ui-mode))
+                ("C-c C-l" . hydra-lsp/body)
+                ("C-c C-f" . lsp-format-buffer)
+                ("s-." . lsp-execute-code-action)
+                ("M-m" . lsp-ui-mode))
 
     :hook (((prog-mode) . 'display-line-numbers-mode)
-	   (LaTeX-mode . lsp)
-	   (TeX-mode . lsp)
-	   (tex-mode . lsp)
-	   (latex-mode . lsp)
-	   ((prog-mode) . lsp)
-	   ;; (lsp-mode . lsp-enable-which-key-integration)
-	   (lsp-managed-mode . lsp-modeline-diagnostics-mode)
-	   (lsp-mode . lsp-headerline-breadcrumb-mode)
-	   (lsp-mode . lsp-modeline-code-actions-mode)))
+           (LaTeX-mode . lsp)
+           (TeX-mode . lsp)
+           (tex-mode . lsp)
+           (latex-mode . lsp)
+           ((prog-mode) . lsp)
+           ;; (lsp-mode . lsp-enable-which-key-integration)
+           (lsp-managed-mode . lsp-modeline-diagnostics-mode)
+           (lsp-mode . lsp-headerline-breadcrumb-mode)
+           (lsp-mode . lsp-modeline-code-actions-mode)))
 
-  #+END_SRC
+#+END_SRC
 
 * LSP UI
 #+BEGIN_SRC emacs-lisp
@@ -1429,10 +1429,10 @@ Apps^^                        EXWM^^                     Windows mvmt           
     :diminish
     :commands lsp-ui-mode
     :bind (:map lsp-ui-mode-map
-		([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
-		([remap xref-find-references] . lsp-ui-peek-find-references) ;; M-Shift-/
-		([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
-		("C-c u" . lsp-ui-imenu))
+                ([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
+                ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M-Shift-/
+                ([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
+                ("C-c u" . lsp-ui-imenu))
     :custom-face
     (lsp-ui-doc-background ((t (:background nil))))
     (lsp-ui-doc-header ((t (:inherit (font-lock-string-face italic)))))
@@ -1506,19 +1506,18 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (global-flycheck-mode)
     (setq flycheck-global-modes '(not exwm-mode treemacs-mode))
     (add-to-list 'display-buffer-alist
-             `(,(rx bos "*Flycheck errors*" eos)
-              (display-buffer-reuse-window
-               display-buffer-in-side-window)
-              (side            . bottom)
-              (reusable-frames . visible)
-              (window-height   . 0.33)))
+                 `(,(rx bos "*Flycheck errors*" eos)
+                   (display-buffer-reuse-window
+                    display-buffer-in-side-window)
+                   (side            . bottom)
+                   (reusable-frames . visible)
+                   (window-height   . 0.33)))
     (add-hook 'sh-mode-hook
               (lambda ()
                 (defvar lsp-diagnostics-provider :none)
                 (when (flycheck-may-enable-checker 'sh-shellcheck)
                   (flycheck-select-checker 'sh-shellcheck)))))
 #+END_SRC
-
 
 
 * Autocomplete (autocomplete company company-posframe company-box)
@@ -1533,10 +1532,10 @@ Apps^^                        EXWM^^                     Windows mvmt           
     :config
     (message "es/use-package-company")
     (setq company-idle-delay 0
-	  company-tooltip-align-annotations t
-	  company-tooltip-idle-delay 0
-	  company-minimum-prefix-length 1
-	  lsp-completion-provider :capf))
+          company-tooltip-align-annotations t
+          company-tooltip-idle-delay 0
+          company-minimum-prefix-length 1
+          lsp-completion-provider :capf))
 
   (use-package company-posframe
     :disabled
@@ -1607,9 +1606,9 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (defvar lsp-prefer-flymake nil)
     (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
     (add-hook 'compilation-mode '(lamda ()
-					(next-error-follow-minor-mode t)))
+                                        (next-error-follow-minor-mode t)))
     :hook ((c-mode c++-mode objc-mode) .
-	   (lambda () (require 'ccls) (lsp))))
+           (lambda () (require 'ccls) (lsp))))
 
   (use-package ggtags
     :diminish)
@@ -1651,8 +1650,8 @@ Apps^^                        EXWM^^                     Windows mvmt           
 #+END_SRC
 * Haskell
 #+BEGIN_SRC emacs-lisp
-(use-package haskell-mode)
-(use-package lsp-haskell)
+  (use-package haskell-mode)
+  (use-package lsp-haskell)
 
 #+END_SRC
 * Rust Cargo
@@ -1698,7 +1697,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 * Javascript
 #+BEGIN_SRC emacs-lisp
-    ;; JavaScript ;;
+  ;; JavaScript ;;
   (defun js2-mode-setup()
     "Setup Tern mode for javascript."
     (tern-mode)
@@ -1719,149 +1718,149 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 * Projects/Projectile
 #+BEGIN_SRC emacs-lisp
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; Project Specific Setup                   ;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    (defun es/setup-project-dfn()
-      "Setup DFN project."
-      (interactive)
-      (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/rs")))
-      (setq compile-command
-	    "cd $WRK/;source ~/.nix-profile/etc/profile.d/nix.sh;nix-shell --run \"cargo build\"")
-      )
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Project Specific Setup                   ;;
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (defun es/setup-project-dfn()
+    "Setup DFN project."
+    (interactive)
+    (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/rs")))
+    (setq compile-command
+          "cd $WRK/;source ~/.nix-profile/etc/profile.d/nix.sh;nix-shell --run \"cargo build\"")
+    )
 
 
-    (defun es/setup-project-sp()
-      "Setup SP project."
-      (interactive)
-      (setenv "WRK" "/storvisor/work/cypress")
-      (setq compile-command
-	    "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
-      )
+  (defun es/setup-project-sp()
+    "Setup SP project."
+    (interactive)
+    (setenv "WRK" "/storvisor/work/cypress")
+    (setq compile-command
+          "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
+    )
 
 
-    (defun es/setup-project-excb()
-      "Setup Excubito Project."
-      (interactive)
-      (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
-      )
-    (es/setup-project-dfn)
+  (defun es/setup-project-excb()
+    "Setup Excubito Project."
+    (interactive)
+    (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
+    )
+  (es/setup-project-dfn)
 
-    ;; Setup projectile
-    (use-package counsel-projectile)
+  ;; Setup projectile
+  (use-package counsel-projectile)
 
-    (use-package projectile
-      :config
-      (projectile-mode 1)
-      (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-      :init
-      (projectile-add-known-project (getenv "WRK"))
-      :bind
-      ("C-c p" . hydra-projectile/body))
+  (use-package projectile
+    :config
+    (projectile-mode 1)
+    (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+    :init
+    (projectile-add-known-project (getenv "WRK"))
+    :bind
+    ("C-c p" . hydra-projectile/body))
 
-    (defhydra hydra-projectile-other-window (:color teal)
-      "projectile-other-window"
-      ("f"  projectile-find-file-other-window        "file")
-      ("g"  projectile-find-file-dwim-other-window   "file dwim")
-      ("d"  projectile-find-dir-other-window         "dir")
-      ("b"  projectile-switch-to-buffer-other-window "buffer")
-      ("q"  nil                                      "cancel" :color blue))
+  (defhydra hydra-projectile-other-window (:color teal)
+    "projectile-other-window"
+    ("f"  projectile-find-file-other-window        "file")
+    ("g"  projectile-find-file-dwim-other-window   "file dwim")
+    ("d"  projectile-find-dir-other-window         "dir")
+    ("b"  projectile-switch-to-buffer-other-window "buffer")
+    ("q"  nil                                      "cancel" :color blue))
 
-    (defhydra hydra-projectile (:exit nil
-				      :color teal
-				      :hint nil)
-      "
-	 PROJECTILE: %(projectile-project-root)
-
-	 Find File            Search/Tags          Buffers                Cache
-    ------------------------------------------------------------------------------------------
-    _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear
-     _ff_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project
-     _fd_: file curr dir   _o_: multi-occur     _s-k_: Kill all buffers  _X_: cleanup non-existing
-      _r_: recent file                                               ^^^^_z_: cache current
-      _d_: dir
-
+  (defhydra hydra-projectile (:exit nil
+                                    :color teal
+                                    :hint nil)
     "
-      ("a"   counsel-projectile-ag)
-      ("b"   counsel-projectile-switch-to-buffer)
-      ("c"   projectile-invalidate-cache)
-      ("d"   counsel-projectile-find-dir)
-      ("s-f" counsel-projectile-find-file)
-      ("ff"  counsel-projectile-find-file-dwim)
-      ("fd"  projectile-find-file-in-directory)
-      ("g"   ggtags-update-tags)
-      ("s-g" ggtags-update-tags)
-      ("i"   projectile-ibuffer)
-      ("K"   projectile-kill-buffers)
-      ("s-k" projectile-kill-buffers)
-      ("m"   projectile-multi-occur)
-      ("o"   projectile-multi-occur)
-      ("s-p" counsel-projectile-switch-project "switch project")
-      ("p"   counsel-projectile-switch-project)
-      ("s"   counsel-projectile-switch-project)
-      ("r"   projectile-recentf)
-      ("x"   projectile-remove-known-project)
-      ("X"   projectile-cleanup-known-projects)
-      ("z"   projectile-cache-current-file)
-      ("`"   hydra-projectile-other-window/body "other window")
-      ("q"   nil "cancel" :color blue))
+       PROJECTILE: %(projectile-project-root)
+
+       Find File            Search/Tags          Buffers                Cache
+  ------------------------------------------------------------------------------------------
+  _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear
+   _ff_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project
+   _fd_: file curr dir   _o_: multi-occur     _s-k_: Kill all buffers  _X_: cleanup non-existing
+    _r_: recent file                                               ^^^^_z_: cache current
+    _d_: dir
+
+  "
+    ("a"   counsel-projectile-ag)
+    ("b"   counsel-projectile-switch-to-buffer)
+    ("c"   projectile-invalidate-cache)
+    ("d"   counsel-projectile-find-dir)
+    ("s-f" counsel-projectile-find-file)
+    ("ff"  counsel-projectile-find-file-dwim)
+    ("fd"  projectile-find-file-in-directory)
+    ("g"   ggtags-update-tags)
+    ("s-g" ggtags-update-tags)
+    ("i"   projectile-ibuffer)
+    ("K"   projectile-kill-buffers)
+    ("s-k" projectile-kill-buffers)
+    ("m"   projectile-multi-occur)
+    ("o"   projectile-multi-occur)
+    ("s-p" counsel-projectile-switch-project "switch project")
+    ("p"   counsel-projectile-switch-project)
+    ("s"   counsel-projectile-switch-project)
+    ("r"   projectile-recentf)
+    ("x"   projectile-remove-known-project)
+    ("X"   projectile-cleanup-known-projects)
+    ("z"   projectile-cache-current-file)
+    ("`"   hydra-projectile-other-window/body "other window")
+    ("q"   nil "cancel" :color blue))
 #+END_SRC
 
 * Package loading done
 #+BEGIN_SRC emacs-lisp
-    (message "!!es/packages-loaded!!")
+  (message "!!es/packages-loaded!!")
 #+END_SRC
 
 * Emacs workarounds
 #+BEGIN_SRC emacs-lisp
-;;;;;;;;;;;;;;;
-;;Workarounds;;
-;;;;;;;;;;;;;;;
-;;https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
-(defun my:force-modes (rule-mode &rest modes)
-  "RULE-MODE MODES switch on/off several modes depending of state of the controlling minor mode."
-  (let ((rule-state (if rule-mode 1 -1)
-                    ))
-    (mapcar (lambda (k) (funcall k rule-state)) modes)
+  ;;;;;;;;;;;;;;;
+  ;;Workarounds;;
+  ;;;;;;;;;;;;;;;
+  ;;https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
+  (defun my:force-modes (rule-mode &rest modes)
+    "RULE-MODE MODES switch on/off several modes depending of state of the controlling minor mode."
+    (let ((rule-state (if rule-mode 1 -1)
+                      ))
+      (mapcar (lambda (k) (funcall k rule-state)) modes)
+      )
     )
-  )
-(defvar my:prev-whitespace-mode nil)
-(make-variable-buffer-local 'my:prev-whitespace-mode)
-(defvar my:prev-whitespace-pushed nil)
-(make-variable-buffer-local 'my:prev-whitespace-pushed)
-(defun my:push-whitespace (&rest skip)
-  "SKIP docstring :(."
-  (if my:prev-whitespace-pushed () (progn
-                                     (setq my:prev-whitespace-mode whitespace-mode)
-                                     (setq my:prev-whitespace-pushed t)
-                                     (my:force-modes nil 'whitespace-mode)
-                                     ))
-  )
+  (defvar my:prev-whitespace-mode nil)
+  (make-variable-buffer-local 'my:prev-whitespace-mode)
+  (defvar my:prev-whitespace-pushed nil)
+  (make-variable-buffer-local 'my:prev-whitespace-pushed)
+  (defun my:push-whitespace (&rest skip)
+    "SKIP docstring :(."
+    (if my:prev-whitespace-pushed () (progn
+                                       (setq my:prev-whitespace-mode whitespace-mode)
+                                       (setq my:prev-whitespace-pushed t)
+                                       (my:force-modes nil 'whitespace-mode)
+                                       ))
+    )
 
-(defun my:pop-whitespace (&rest skip)
-  "SKIP docstring :(."
-  (if my:prev-whitespace-pushed (progn
-                                  (setq my:prev-whitespace-pushed nil)
-                                  (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
-                                  ))
-  )
-(advice-add 'popup-draw :before #'my:push-whitespace)
-(advice-add 'popup-delete :after #'my:pop-whitespace)
-;; End workaround auto complete and whitespace
+  (defun my:pop-whitespace (&rest skip)
+    "SKIP docstring :(."
+    (if my:prev-whitespace-pushed (progn
+                                    (setq my:prev-whitespace-pushed nil)
+                                    (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
+                                    ))
+    )
+  (advice-add 'popup-draw :before #'my:push-whitespace)
+  (advice-add 'popup-delete :after #'my:pop-whitespace)
+  ;; End workaround auto complete and whitespace
 
 
-;; Compilation buffer colorize
-(when (require 'ansi-color nil t)
-  (defun colorize-compilation-buffer ()
-    (when (eq major-mode 'compilation-mode)
-      (ansi-color-apply-on-region compilation-filter-start (point-max))))
-  (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
+  ;; Compilation buffer colorize
+  (when (require 'ansi-color nil t)
+    (defun colorize-compilation-buffer ()
+      (when (eq major-mode 'compilation-mode)
+        (ansi-color-apply-on-region compilation-filter-start (point-max))))
+    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
 
-;;  terminal mode settings
-(add-hook 'ansi-term-mode-hook '(lambda ()
-				  (setq term-buffer-maximum-size 0)
-				  (setq-default show-trailing-whitespace nil)
-				  ))
+  ;;  terminal mode settings
+  (add-hook 'ansi-term-mode-hook '(lambda ()
+                                    (setq term-buffer-maximum-size 0)
+                                    (setq-default show-trailing-whitespace nil)
+                                    ))
 #+END_SRC
 
 
@@ -1874,7 +1873,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (defun my:force-modes (rule-mode &rest modes)
     "RULE-MODE MODES switch on/off several modes depending of state of the controlling minor mode."
     (let ((rule-state (if rule-mode 1 -1)
-		      ))
+                      ))
       (mapcar (lambda (k) (funcall k rule-state)) modes)
       )
     )
@@ -1885,18 +1884,18 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (defun my:push-whitespace (&rest skip)
     "SKIP docstring :(."
     (if my:prev-whitespace-pushed () (progn
-				       (setq my:prev-whitespace-mode whitespace-mode)
-				       (setq my:prev-whitespace-pushed t)
-				       (my:force-modes nil 'whitespace-mode)
-				       ))
+                                       (setq my:prev-whitespace-mode whitespace-mode)
+                                       (setq my:prev-whitespace-pushed t)
+                                       (my:force-modes nil 'whitespace-mode)
+                                       ))
     )
 
   (defun my:pop-whitespace (&rest skip)
     "SKIP docstring :(."
     (if my:prev-whitespace-pushed (progn
-				    (setq my:prev-whitespace-pushed nil)
-				    (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
-				    ))
+                                    (setq my:prev-whitespace-pushed nil)
+                                    (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
+                                    ))
     )
   (advice-add 'popup-draw :before #'my:push-whitespace)
   (advice-add 'popup-delete :after #'my:pop-whitespace)
@@ -1907,14 +1906,14 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (when (require 'ansi-color nil t)
     (defun colorize-compilation-buffer ()
       (when (eq major-mode 'compilation-mode)
-	(ansi-color-apply-on-region compilation-filter-start (point-max))))
+        (ansi-color-apply-on-region compilation-filter-start (point-max))))
     (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
 
   ;;  terminal mode settings
   (add-hook 'ansi-term-mode-hook '(lambda ()
-				    (setq term-buffer-maximum-size 0)
-				    (setq-default show-trailing-whitespace nil)
-				    ))
+                                    (setq term-buffer-maximum-size 0)
+                                    (setq-default show-trailing-whitespace nil)
+                                    ))
 #+END_SRC
 
 * Emacs Desktop Helpers
@@ -1972,8 +1971,8 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (message (concat "Created : " name))
     (unless (file-exists-p name)
       (progn
-	(write-region "" nil name)
-	(f-append-text "((nil . ((buffer-reado-only . t))))" 'utf-8 name))))
+        (write-region "" nil name)
+        (f-append-text "((nil . ((buffer-reado-only . t))))" 'utf-8 name))))
 
   (defun es/adb-reverse()
     "Start a reverse ADB session to debug android applications running a emulator."
@@ -2003,13 +2002,13 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (defvar named-buffer)
     (setq named-buffer nil)
     (cl-loop for buf in (buffer-list)  do
-	     (when (string-prefix-p buffPrefix (buffer-name buf))
-	       (progn
-		 (setq named-buffer buf)
-		 (cl-return)
-		 )
-	       )
-	     )
+             (when (string-prefix-p buffPrefix (buffer-name buf))
+               (progn
+                 (setq named-buffer buf)
+                 (cl-return)
+                 )
+               )
+             )
     named-buffer)
 
   (defun es/app-netflix()
@@ -2043,24 +2042,24 @@ Apps^^                        EXWM^^                     Windows mvmt           
 
 
     (cond ((eq ede-browser 'chrome)
-	   (setq es/browser-bufname "Google-chrome")
-	   (setq es/browser-binary "/usr/bin/google-chrome")
-	   (setq es/browser-invocation (concat es/browser-binary)))
-	  ((eq ede-browser 'firefox)
-	   (setq es/browser-bufname "Firefox")
-	   (setq es/browser-binary "/usr/bin/firefox --private-window")
-	   (setq es/browser-invocation (concat es/browser-binary))))
+           (setq es/browser-bufname "Google-chrome")
+           (setq es/browser-binary "/usr/bin/google-chrome")
+           (setq es/browser-invocation (concat es/browser-binary)))
+          ((eq ede-browser 'firefox)
+           (setq es/browser-bufname "Firefox")
+           (setq es/browser-binary "/usr/bin/firefox --private-window")
+           (setq es/browser-invocation (concat es/browser-binary))))
 
     (defvar es/browser)
     (setq es/browser (find-named-buffer es/browser-bufname))
     (if (eq es/browser nil)
-	(progn
-	  (message "Opening Web browser")
-	  (start-process-shell-command
-	   es/browser-binary nil  es/browser-invocation))
+        (progn
+          (message "Opening Web browser")
+          (start-process-shell-command
+           es/browser-binary nil  es/browser-invocation))
       (progn
-	(message "Web browser")
-	(switch-to-buffer es/browser))
+        (message "Web browser")
+        (switch-to-buffer es/browser))
       ))
 
 
@@ -2072,19 +2071,19 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (defvar es/splash)
     (setq es/splash (find-named-buffer es/splashbufname))
     (if (eq es/splash nil)
-	(progn
-	  (defvar es/splashbinary)
-	  (defvar es/splashinvocation)
-	  (setq es/splashbinary "feh")
-	  (setq es/splashinvocation (concat es/splashbinary
-					    " ~/acme.png"
-					    ))
-	  (message "Opening splash")
-	  (start-process-shell-command
-	   es/splashbinary nil es/splashinvocation))
+        (progn
+          (defvar es/splashbinary)
+          (defvar es/splashinvocation)
+          (setq es/splashbinary "feh")
+          (setq es/splashinvocation (concat es/splashbinary
+                                            " ~/acme.png"
+                                            ))
+          (message "Opening splash")
+          (start-process-shell-command
+           es/splashbinary nil es/splashinvocation))
       (progn
-	(message "splash")
-	(switch-to-buffer es/splash))
+        (message "splash")
+        (switch-to-buffer es/splash))
       ))
 
   (defun es/app-terminal()
@@ -2093,19 +2092,19 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (defvar es/terminal)
     (defvar es/termbufname)
     (setq es/termbufname
-	  (cond ((eq ede-term-type 'xterm)  "UXTerm")
-		((eq ede-term-type 'xterm)  "XTerm")
-		((eq ede-term-type 'gnome-terminal)  "Gnome-terminal")
-		(t "UXTerm")))
+          (cond ((eq ede-term-type 'xterm)  "UXTerm")
+                ((eq ede-term-type 'xterm)  "XTerm")
+                ((eq ede-term-type 'gnome-terminal)  "Gnome-terminal")
+                (t "UXTerm")))
 
     (setq es/terminal (find-named-buffer es/termbufname))
     (if (eq es/terminal nil)
-	(progn
-	  (message "Opening terminal")
-	  (es/app-terminal-new))
+        (progn
+          (message "Opening terminal")
+          (es/app-terminal-new))
       (progn
-	(message "terminal")
-	(switch-to-buffer es/terminal))
+        (message "terminal")
+        (switch-to-buffer es/terminal))
       ))
 
   (defun es/app-terminal-new()
@@ -2116,13 +2115,13 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (defvar es/term-invocation)
 
     (setq es/term-binary
-	  (cond ((eq ede-term-type 'uxterm)
-		 "/usr/bin/dbus-launch /usr/bin/uxterm -fa \"Ubuntu Mono for Powerline\" -fs 12")
-		((eq ede-term-type 'xterm)
-		 "/usr/bin/dbus-launch /usr/bin/xterm  -fa \"Ubuntu Mono for Powerline\" -fs 12")
-		((eq ede-term-type 'gnome-terminal)
-		 "/usr/bin/dbus-launch /usr/bin/gnome-terminal")
-		(t "/usr/bin/dbus-launch /usr/bin/uxterm")))
+          (cond ((eq ede-term-type 'uxterm)
+                 "/usr/bin/dbus-launch /usr/bin/uxterm -fa \"Ubuntu Mono for Powerline\" -fs 12")
+                ((eq ede-term-type 'xterm)
+                 "/usr/bin/dbus-launch /usr/bin/xterm  -fa \"Ubuntu Mono for Powerline\" -fs 12")
+                ((eq ede-term-type 'gnome-terminal)
+                 "/usr/bin/dbus-launch /usr/bin/gnome-terminal")
+                (t "/usr/bin/dbus-launch /usr/bin/uxterm")))
 
     (setq es/term-invocation es/term-binary)
     (progn
@@ -2147,7 +2146,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (interactive)
     (defvar es/commandMoveLeft)
     (setq es/commandMoveLeft
-	  "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --left-of /;s/^/xrandr --output /'`")
+          "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --left-of /;s/^/xrandr --output /'`")
     (shell-command es/commandMoveLeft))
 
   (defun es/monitor-move-right()
@@ -2155,7 +2154,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (interactive)
     (defvar es/commandMoveRight)
     (setq es/commandMoveRight
-	  "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --right-of /;s/^/xrandr --output /'`")
+          "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --right-of /;s/^/xrandr --output /'`")
     (shell-command es/commandMoveRight))
 
   ;; Scale/Descale gdm
@@ -2166,7 +2165,7 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (defvar es/gsettings-invocation)
     (setq es/gsettings-binary "/usr/bin/gsettings")
     (setq es/gsettings-invocation
-	  (concat es/gsettings-binary  " set org.gnome.desktop.interface text-scaling-factor "  scale-factor))
+          (concat es/gsettings-binary  " set org.gnome.desktop.interface text-scaling-factor "  scale-factor))
     (message es/gsettings-invocation)
     (start-process-shell-command
      es/gsettings-binary nil es/gsettings-invocation))
@@ -2187,10 +2186,10 @@ Apps^^                        EXWM^^                     Windows mvmt           
     (setq ssh-bufname "XTerm")
     (setq ssh-binary "/usr/bin/xterm")
     (setq ssh-invocation (concat ssh-binary
-				 " -bg black -fg white "
-				 " -fa 'Ubuntu Mono'"
-				 " -e 'ssh -Y " hostName "'"
-				 ))
+                                 " -bg black -fg white "
+                                 " -fa 'Ubuntu Mono'"
+                                 " -e 'ssh -Y " hostName "'"
+                                 ))
     (start-process-shell-command  ssh-binary nil ssh-invocation))
   (message "es/app-setup")
 #+END_SRC
@@ -2246,8 +2245,8 @@ Apps^^                        EXWM^^                     Windows mvmt           
   (defun key (desc)
     "Elint DESC suppress."
     (or (and window-system (read-kbd-macro desc))
-	(or (cdr (assoc desc real-keyboard-keys))
-	    (read-kbd-macro desc))))
+        (or (cdr (assoc desc real-keyboard-keys))
+            (read-kbd-macro desc))))
 #+END_SRC
 
 * Restore GC
@@ -2282,10 +2281,10 @@ Apps^^                        EXWM^^                     Windows mvmt           
 * File Experimental
 #+BEGIN_SRC emacs-lisp
   (use-package grammarly
-  :ensure t
-  :hook (text-mode . (lambda ()
-  (require 'lsp-grammarly)
-  (lsp))))
+    :ensure t
+    :hook (text-mode . (lambda ()
+                         (require 'lsp-grammarly)
+                         (lsp))))
   (use-package lsp-grammarly)
   (use-package flycheck-grammarly)
 #+END_SRC
