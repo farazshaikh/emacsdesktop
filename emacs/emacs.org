@@ -1522,11 +1522,6 @@
 
 * Autocomplete (autocomplete company company-posframe company-box)
 #+BEGIN_SRC emacs-lisp
-  (use-package auto-complete)
-  (use-package auto-complete-config
-    :disabled
-    :requires auto-complete)
-
   (use-package company
     :hook (prog-mode . company-mode)
     :config
@@ -1537,19 +1532,20 @@
           company-minimum-prefix-length 1
           lsp-completion-provider :capf))
 
+  (use-package company-box
+    :hook (company-mode . company-box-mode)
+    :custom (company-box-icons-alist 'company-box-icons-all-the-icons))
+
   (use-package company-posframe
     :disabled
     :config
     (company-posframe-mode))
 
-  (use-package company-box
-    :hook (company-mode . company-box-mode))
-
-  (use-package
-    company-box
-    :hook (company-mode . company-box-mode)
-    :custom (company-box-icons-alist 'company-box-icons-all-the-icons)
-    :diminish "")
+  (use-package auto-complete
+    :disabled)
+  (use-package auto-complete-config
+    :disabled
+    :requires auto-complete)
 #+END_SRC
 
 * Languages
