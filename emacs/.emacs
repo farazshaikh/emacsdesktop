@@ -1,4 +1,3 @@
-
 ;;; packages --- Load the emacs.org file
 ;;;
 ;;; Commentary: Simple loader for a org based initialization file
