@@ -191,8 +191,6 @@
 
 * Themes
 #+BEGIN_SRC emacs-lisp
-  ;;(load-theme 'manoj-dark t)
-
   (use-package kaolin-themes
     :disabled
     :defer
@@ -202,10 +200,8 @@
   ;; The theme work in GUI mode.
   ;; For terminal mode make sure that the term support True Color
   (use-package doom-themes
-    :disabled
-    :defer
     :config
-    (load-theme 'doom-gruvbox t))
+    (load-theme 'doom-dark+ t))
 #+END_SRC
 
 * UX
