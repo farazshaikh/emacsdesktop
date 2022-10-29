@@ -455,6 +455,8 @@
     ("s-[" . 'delete-other-windows)
     ("M-u" . 'winner-undo))
 
+  ;; dedicated buffers
+  (use-package dedicated)
 
   (use-package windower
     :pin gnu
@@ -1473,7 +1475,7 @@
                   (flycheck-select-checker 'sh-shellcheck)))))
 #+END_SRC
 
-* Grammarly
+* Grammarly + LTEX
 #+BEGIN_SRC emacs-lisp
   (use-package grammarly
     :ensure t
@@ -1482,6 +1484,14 @@
                          (lsp))))
   (use-package lsp-grammarly)
   (use-package flycheck-grammarly)
+
+  (use-package lsp-ltex
+  :ensure t
+  :hook (text-mode . (lambda ()
+                       (require 'lsp-ltex)
+                       (lsp)))  ; or lsp-deferred
+  :init
+  (setq lsp-ltex-version "15.2.0"))  ; make sure you have set this, see below
 #+END_SRC
 
 * Autocomplete (autocomplete company company-posframe company-box)
@@ -1519,6 +1529,8 @@
 * ORG mode  Latex
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-latex
+    :init
+    (warn-if-executable-not-found "texlab" "Install texlab cargo install texlab")
     :mode ("\\.tex\\'" . tex-mode)
     :custom
     (lsp-latex-build-is-continuous t)
