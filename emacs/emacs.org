@@ -1,3 +1,6 @@
+* !! WARNING !! EMACS Configuration is infinitely MALLEABLE.
+;; YOU WILL SPEND INORDINATE AMOUNTS OF TIME TUNING IT - GO BACK USE VSCODE
+
 * Emacs configuration file
 #+BEGIN_SRC emacs-lisp
   ;;; package -- Summary EOS_DESKTOP
@@ -126,22 +129,22 @@
 
     ;; window/frame selection preference
     (setq display-buffer-base-action
-	  '((display-buffer-reuse-window
-	     display-buffer-same-window
-	     display-buffer-in-previous-window
-	     display-buffer-use-some-window)))
+          '((display-buffer-reuse-window
+             display-buffer-same-window
+             display-buffer-in-previous-window
+             display-buffer-use-some-window)))
 
     (setq ring-bell-function
-	  (lambda nil
-	    (let
-		((orig-fg
-		  (face-foreground 'mode-line)))
-	      (set-face-foreground 'mode-line "#6495ED")
-	      (run-with-idle-timer 0.1 nil
-				   (lambda
-				     (fg)
-				     (set-face-foreground 'mode-line fg))
-				   orig-fg))))
+          (lambda nil
+            (let
+                ((orig-fg
+                  (face-foreground 'mode-line)))
+              (set-face-foreground 'mode-line "#6495ED")
+              (run-with-idle-timer 0.1 nil
+                                   (lambda
+                                     (fg)
+                                     (set-face-foreground 'mode-line fg))
+                                   orig-fg))))
     (set-face-background 'vertical-border "grey2")
 
     (progn
@@ -149,6 +152,7 @@
      (tool-bar-mode -1)
      ;;(scroll-bar-mode -1)
      (global-eldoc-mode 1)
+     (global-visual-line-mode t)
      ;; default 8 pixel fringes on both sides
      ;; fringe-mode nil
      (savehist-mode 1)
@@ -220,8 +224,13 @@
   ;; The theme work in GUI mode.
   ;; For terminal mode make sure that the term support True Color
   (use-package doom-themes
+    :disabled
     :config
     (load-theme 'doom-dark+ t))
+
+  (use-package nano-theme
+    :config
+    (load-theme 'nano-dark t))
 #+END_SRC
 
 * UX
@@ -1047,7 +1056,7 @@
     (custom-set-faces
      '(ivy-current-match ((t (:box (:line-width 2 :style released-button)))))
      '(ivy-posframe-border ((t (:inherit internal-border :background "white" :foreground "white")))))
-    (setq ivy-posframe-width 50)
+    ;;(setq ivy-posframe-width 50)
     (ivy-posframe-mode 1))
 
   (use-package swiper
@@ -1061,6 +1070,10 @@
     :config
     (ivy-mode 1)
     (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
+
+  (use-package marginalia
+    :config
+    (marginalia-mode 1))
 #+END_SRC
 * Tools Whitespace flyspell
 #+BEGIN_SRC emacs-lisp
