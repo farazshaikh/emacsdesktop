@@ -102,9 +102,9 @@ linkupFiles() {
     linkup ${ts} ~/.XtermModifiedITERM.json `pwd`/.XtermModifiedITERM.json
     linkup ${ts} ~/.screenrc `pwd`/.screenrc
     linkup ${ts} ~/.tmux.conf `pwd`/.tmux.conf
-    linkup ${ts} ~/.i3/config `pwd`/.i3/config
-    linkup ${ts} ~/.i3/i3-wm-scripts ${gitRepoInstallLoc}/i3-wm-scripts
-    linkup ${ts} ~/.i3/.inputrc `pwd`/.inputrc
+    linkup ${ts} ~/i3/config `pwd`/i3/config
+    linkup ${ts} ~/i3/i3-wm-scripts ${gitRepoInstallLoc}/i3-wm-scripts
+    linkup ${ts} ~/i3/.inputrc `pwd`/.inputrc
     linkup ${ts} ~/.config/rofi/config  `pwd`/.config/rofi/config
 
     mkdir -p  ~/.config/powerline-shell
