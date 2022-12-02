@@ -226,11 +226,16 @@
   (use-package doom-themes
     :disabled
     :config
-    (load-theme 'doom-dark+ t))
+    (load-theme 'doom-molokai t))
 
   (use-package nano-theme
+    :disabled
     :config
     (load-theme 'nano-dark t))
+
+  (use-package monokai-theme
+    :config
+    (load-theme 'monokai t))
 #+END_SRC
 
 * UX
@@ -259,8 +264,8 @@
 
 ** Common font
 #+BEGIN_SRC emacs-lisp
-  (custom-set-faces
-   '(default ((t (:family "Source Code Pro")))))
+    (custom-set-faces
+     '(default ((t (:family "Source Code Pro")))))
 #+END_SRC
 
 ** ADOC
@@ -1555,10 +1560,9 @@
     (setq lsp-ltex-version "15.2.0"))  ; make sure you have set this, see below
 #+END_SRC
 
-* Autocomplete (Use one of the following)
+* Autocomplete (Use one of the following) a. Company b. auto complete c. Corfu
 ** Company
 #+BEGIN_SRC emacs-lisp
-  ;; USE only one a. Company b. auto complete c. Corfu
   ;; Company
   (use-package company
     :hook (prog-mode . company-mode)
@@ -1597,15 +1601,21 @@
 
 ** Corfu
 #+BEGIN_SRC emacs-lisp
+  ;; How does this work ?
+  ;; Its fast auto-complete: i.e. If you idle around it will popup suggestion.
+  ;; If you cancel a suggestion by backspace and then type in some initials THEN ... it completes in ORDERLESS fashion
   (use-package corfu
     ;; Optional customizations
     :custom
     (corfu-cycle t)                ;; Enable cycling for `corfu-next/previous'
     ;; Agressive Auto
     (corfu-auto t)                 ;; Enable auto completion
+    (corfu-quit-no-match t)
+    (corfu-preview-current nil)
     (corfu-auto-delay 0)
     (corfu-auto-prefix 2)
     (completion-styles '(basic))
+
     ;; (corfu-separator ?\s)          ;; Orderless field separator
     ;; (corfu-quit-at-boundary nil)   ;; Never quit at completion boundary
     ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
@@ -1632,24 +1642,19 @@
                 ("M-d" . corfu-doc-toggle))
 
     :init
+    (corfu-popupinfo-mode)
     (global-corfu-mode))
 
-  (use-package corfu-doc
-    :requires corfu
-    :hook corfu-mode
-    :config
-    :bind (:map corfu-map
-                ("M-p" . corfu-doc-scroll-down) ;; corfu-next
-                ("M-n" . corfu-doc-scroll-up)   ;; corfu-previous
-                ("M-d" . corfu-doc-toggle)))
-
+  ;; orderless let you fuzzy search completions
+  ;; Optionally use the `orderless' completion style.
   (use-package orderless
-    :ensure t
-    :after corfu
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-defaults nil)
-    (completion-category-overrides '((file (styles basic partial-completion)))))
+    :init
+    ;; Configure a custom style dispatcher (see the Consult wiki)
+    ;; (setq orderless-style-dispatchers '(+orderless-dispatch)
+    ;;       orderless-component-separator #'orderless-escapable-split-on-space)
+    (setq completion-styles '(orderless basic)
+          completion-category-defaults nil
+          completion-category-overrides '((file (styles . (partial-completion))))))
 
   (use-package kind-icon
     :ensure t
