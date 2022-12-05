@@ -1,0 +1,702 @@
+* !! WARNING !! EMACS Configuration is infinitely MALLEABLE.
+;; YOU WILL SPEND INORDINATE AMOUNTS OF TIME TUNING IT - GO BACK USE VSCODE
+* Emacs configuration file
+#+BEGIN_SRC emacs-lisp
+   ;;; package -- Summary EOS_DESKTOP
+   ;;
+   ;;         EXWM/Gnome-based Desktop Environment using Emacs.
+   ;;         This FILE is not to be used standalone and must be
+   ;;;        included after top-level .emacs file
+   ;;
+   ;;; Commentary:
+   ;;   Use EXWM as a window manager and gnome and the desktop to provide a development
+   ;;   friendly desktop.
+   ;;
+   ;;  -> Environment variable EOS_DESKTOP must be set to run Emacs in a
+   ;;  window manager/Desktop replacement mode.
+   ;;
+   ;; -> ~/.eosinstall file indicates the installation of EOS_DESKTOP
+   ;;  has been completed Removing this file will trigger an
+   ;;  re-installation.  During installation, packages will be downloaded
+   ;;  and installed only if they are not found on the system.
+   ;;
+   ;;  -> To do a full reinstallation remove the file ~/.eosinstall AND
+   ;;  remove all the packages from ~/.emacs.d
+   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+   ;;; -*- lexical-binding: t; -*-
+
+   ;;; Code:
+#+END_SRC
+* Emacs Desktop Custom variables
+#+BEGIN_SRC emacs-lisp
+  ;; Custom variables
+  (defgroup emacs-desktop-environment nil
+    "Emacs Desktop Environment"
+    :prefix "ede"
+    :group 'convenience)
+
+  (defcustom ede-term-type 'uxterm
+    "Choose Terminal Type."
+    :group 'emacs-desktop-environment
+    :type '(choice (const :tag "gnome-terminal" gnome-terminal)
+                   (const :tag "xterm" xterm)
+                   (const :tag "uxterm" uxterm)))
+
+  (defcustom ede-browser 'firefox
+    "Choose Terminal Type."
+    :group 'emacs-desktop-environment
+    :type '(choice (const :tag "firefox" firefox)
+                   (const :tag "chrome" chrome)))
+#+END_SRC
+* Emacs Desktop Support GDM+EDE+EmacsWindowManager
+#+BEGIN_SRC emacs-lisp
+  (defun es/windowsetup()
+    "After init hook for setting up windows."
+    (interactive)
+    ;; (customize-set-variable
+    ;;  'display-buffer-base-action
+    ;;  '((display-buffer-reuse-window display-buffer-pop-up-frame)
+    ;;    (reusable-frames . 0)))
+    (customize-set-variable
+     'display-buffer-base-action
+     '((display-buffer-reuse-window display-buffer-same-window
+                                    display-buffer-in-previous-window
+                                    display-buffer-use-some-window))))
+
+
+  ;; Start with the /run folder as  TMPDIR
+  (if (eq  system-type 'gnu/linux) (setenv "TMPDIR" (concat "/run/user/" (number-to-string (user-uid)))))
+
+  ;; Load EXWM.
+  (defun es/setup-systray()
+    "Setup system tray."
+    (start-process "" nil "/usr/bin/python3 /usr/bin/blueman-applet")
+    (start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-messages/indicator-messages-service")
+
+    ;; some issues with systray
+    ;;(start-process "" nil "/usr/lib/x86_64-linux-gnu/indicator-application/indicator-application-service")
+    ;;  (start-process "" nil "zeitgeist-datahub")
+    (start-process "" nil "update-notifier")
+    (start-process "" nil "/usr/lib/deja-dup/deja-dup-monitor")
+
+    (start-process "" nil "/usr/bin/nm-applet")
+    (start-process "" nil "/usr/bin/blueman-applet")
+    (start-process "" nil "/usr/bin/pasystray")
+    (start-process "" nil "/usr/bin/xset" "dpms" "120 300 600")
+    (message "[INFO] es/setupsystray"))
+  (if (and window-system (getenv "EOS_DESKTOP") (eq system-type 'gnu/linux)) (es/setup-systray))
+
+  (defun es/set-up-gnome-desktop()
+    "GNOME is used for most of the system settings."
+    (setenv "XDG_CURRENT_DESKTOP" "GNOME")
+    (start-process "" nil "/usr/bin/gnome-flashback")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gnome-settings-daemon")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-power")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-print-notifications")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-rfkill")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-screensaver-proxy")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sharing")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-smartcard")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-xsettings")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-wacom")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-sound")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-a11y-settings")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-clipboard")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-color")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-datetime")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-housekeeping")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-keyboard")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-media-keys")
+    (start-process "" nil "/usr/lib/gnome-settings-daemon/gsd-mouse")
+    (start-process "" nil "/usr/lib/gnome-disk-utility/gsd-disk-utility-notify")
+
+    ;; setup gnome-keyring
+    (defvar ssh-auth-sock  (shell-command-to-string  "/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh"))
+    (setq-default ssh-auth-sock (split-string (replace-regexp-in-string "\n$" ""  ssh-auth-sock) "="))
+    (setenv (car ssh-auth-sock) (car (cdr ssh-auth-sock)))
+    (message "[INFO] es/setup-up-gnome-desktop"))
+  (if (and window-system (getenv "EOS_DESKTOP") (getenv "EOS_EMACS_GNOME_SHELL_SETUP") (eq system-type 'gnu/linux)) (es/set-up-gnome-desktop))
+
+  (use-package undo-tree
+    :pin gnu
+    :diminish (undo-tree-mode . "")
+    :after hydra
+    :bind ("C-x u" . hydra-undo-tree/undo-tree-undo)
+    :config
+    (global-undo-tree-mode 1)
+    :custom
+    (undo-tree-auto-save-history t)
+    :hydra (hydra-undo-tree (:hint nil)
+                            "
+    _p_: undo  _n_: redo _s_: save _l_: load   "
+                            ("p"   undo-tree-undo)
+                            ("n"   undo-tree-redo)
+                            ("s"   undo-tree-save-history)
+                            ("l"   undo-tree-load-history)
+                            ("u"   undo-tree-visualize "visualize" :color blue)
+                            ("q"   nil "quit" :color blue)))
+
+  ;;;;;;;;;;;;;;;;;;;;;;
+  ;;Setup alt-tab     ;;
+  ;;;;;;;;;;;;;;;;;;;;;;
+  (use-package iflipb
+    :after exwm
+    :config
+    (defvar iflipbTimerObj)
+    (setq iflipbTimerObj nil)
+    (defvar alt-tab-selection-hover-time)
+    (setq alt-tab-selection-hover-time "1 sec")
+
+    (defun timed-iflipb-auto-off ()
+      (message ">")
+      (setq last-command 'message))
+
+
+    (defun timed-iflipb-next-buffer (arg)
+      (interactive "P")
+      (iflipb-next-buffer arg)
+
+      (when iflipbTimerObj
+        (cancel-timer iflipbTimerObj)
+        (setq iflipbTimerObj nil))
+
+      (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+
+
+    (defun timed-iflipb-previous-buffer ()
+      (interactive)
+      (iflipb-previous-buffer)
+      (when iflipbTimerObj
+        (cancel-timer iflipbTimerObj)
+        (setq iflipbTimerObj nil))
+      (setq iflipbTimerObj (run-at-time alt-tab-selection-hover-time nil 'timed-iflipb-auto-off)))
+
+    (defun iflipb-first-iflipb-buffer-switch-command ()
+      "Determines whether this is the first invocation of iflipb-next-buffer or iflipb-previous-buffer this round."
+      (not (and (or (eq last-command 'timed-iflipb-next-buffer)
+                    (eq last-command 'timed-iflipb-previous-buffer)))))
+
+
+    ;; in iflip just flip with candidate windows that are not currently being displayed in a window
+    ;; and include the current buffer
+    ;; not doing so can jumble up the entire layout at other windows will swap buffers with current window
+    (defun iflipb-ignore-windowed-buffers(buffer)
+      (if
+          (or (eq (get-buffer-window buffer "visible") nil)
+              (string= (buffer-name) buffer)
+              )
+          nil t))
+
+    (defun setupIFlipb()
+      "Alt-tab Super-tab for window switch."
+      (interactive)
+      (setq iflipb-wrap-around t)
+      (setq iflipb-ignore-buffers 'iflipb-ignore-windowed-buffers)
+      (setq iflipb-always-ignore-buffers "^[ *]")
+      (global-set-key (kbd "<M-<tab>>") 'timed-iflipb-next-buffer)
+      (global-set-key (kbd "C-M-i") 'timed-iflipb-next-buffer)
+      (global-set-key (kbd "<M-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+
+      (global-set-key (kbd "<s-<tab>>") 'timed-iflipb-next-buffer)
+      (global-set-key (kbd "<s-<iso-lefttab>") 'timed-iflipb-previous-buffer))
+
+    (setupIFlipb))
+  (message "[INFO] es/alt-tab")
+#+END_SRC
+* EXWM
+#+BEGIN_SRC emacs-lisp
+  (use-package exwm
+    :if (and
+         window-system
+         (getenv "EOS_DESKTOP"))
+    :ensure windmove
+    :pin gnu
+    :functions exwm-workspace-rename-buffer exwm-systemtray-enable exwm-randr-enable
+    :hook (window-setup . es/windowsetup)
+    :hook
+    (('exwm-update-class .
+                         (lambda ()
+                           (unless (or (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                                       (string= "gimp" exwm-instance-name))
+                             (exwm-workspace-rename-buffer exwm-class-name))))
+     ('exwm-update-title-hook .
+                              (lambda ()
+                                (when (or (not exwm-instance-name)
+                                          (string-prefix-p "sun-awt-X11-" exwm-instance-name)
+                                          (string= "gimp" exwm-instance-name))
+                                  (exwm-workspace-rename-buffer exwm-title)))))
+    :config
+    ;; Disable dialog boxes since they are unusable in EXWM
+    (setq use-dialog-box nil)
+
+    ;; Set floating window border
+    (setq exwm-floating-border-width 3)
+    (setq exwm-floating-border-color "orange")
+
+    (setq exwm-workspace-number 4)
+    ;; Per host dual monitor setup.
+    ;; Map workspace 0 to the primary monitor. i.e. the attached monitor.
+    ;; This is because the system tray is attached to the main workspace.
+    ;; DP-1 HDMI-1 are usually the attached monitors.
+    ;;
+    ;; XXX: A simpler display/workspace mapping policy is to have the
+    ;; highest/lowest resolution display host workspace 0
+    (defvar exwm-randr-workspace-monitor-plist)
+    (setq exwm-randr-workspace-monitor-plist '(0 "DP-1" 0 "HDMI-1"))
+    (when (string= (system-name) "faraz-dfn-x1")
+      (progn
+        (setq exwm-randr-workspace-monitor-plist '(1 "eDP-1" 2 "DP-1" 0 "HDMI-1"))
+        (add-hook 'exwm-randr-screen-change-hook
+                  (lambda ()
+                    (start-process-shell-command
+                     "xrandr" nil "xrandr --output eDP-1 --output DP-1 --output HDMI-1 --auto")))))
+
+    ;; Access buffers from all workspaces
+    (setq exwm-workspace-show-all-buffers t)
+    (setq exwm-layout-show-all-buffers t)
+
+    ;; The following example demonstrates how to use simulation keys to mimic
+    ;; the behavior of Emacs.  The value of `exwm-input-simulation-keys` is a
+    ;; list of cons cells (SRC . DEST), where SRC is the key sequence you press
+    ;; and DEST is what EXWM actually sends to application.  Note that both SRC
+    ;; and DEST should be key sequences (vector or string).
+    (setq exwm-input-simulation-keys
+          '(
+            ;; movement
+            ([?\C-b] . [left])
+            ([?\M-b] . [C-left])
+            ([?\C-f] . [right])
+            ([?\M-f] . [C-right])
+            ([?\C-p] . [up])
+            ([?\C-n] . [down])
+            ([?\C-a] . [home])
+            ([?\C-e] . [end])
+            ([?\M-v] . [prior])
+            ([?\C-v] . [next])
+            ([?\C-d] . [delete])
+            ([?\C-k] . [S-end delete])
+            ;; cut/paste.
+            ([?\C-w] . [?\C-x])  ;; Cut
+            ([?\M-w] . [?\C-c])  ;; copy
+            ([?\C-y] . [?\C-v])  ;; paste
+            ;; search
+            ([?\C-s] . (?\C-f))))
+    (message "[INFO] es/keyboard-setup")
+
+    ;; setup alt-tab
+    (exwm-input-set-key (kbd "<M-tab>") 'timed-iflipb-next-buffer)
+    (exwm-input-set-key (kbd "<M-S-iso-lefttab>") 'timed-iflipb-previous-buffer)
+    ;;(exwm-input-set-key (kbd "s-<tab>") 'timed-iflipb-next-buffer)
+    ;;(exwm-input-set-key (kbd "s-<iso-lefttab>") 'timed-iflipb-previous-buffer)
+
+    ;; applications
+    (exwm-input-set-key (kbd "s-l") 'es/lock-screen)
+    (exwm-input-set-key (kbd "s-g") 'es/app-browser)
+    (exwm-input-set-key (kbd "s-t") 'es/app-terminal)
+    (exwm-input-set-key (kbd "s-w") 'exwm-workspace-switch)
+    (exwm-input-set-key (kbd "s-e") 'hydra-eos/body)
+    (exwm-input-set-key (kbd "s-r") 'exwm-reset)
+    (exwm-input-set-key (kbd "s-<space>") 'es/save-edit-position)
+    (exwm-input-set-key (kbd "s-j") 'counsel-mark-ring)
+
+    ;; window move
+    (exwm-input-set-key (kbd "s-<left>") 'windmove-left)
+    (exwm-input-set-key (kbd "s-<down>") 'windmove-down)
+    (exwm-input-set-key (kbd "s-<up>") 'windmove-up)
+    (exwm-input-set-key (kbd "s-<right>") 'windmove-right)
+    ;; window resize
+    (exwm-input-set-key (kbd "s-M-<right>")
+                        (lambda () (interactive) (exwm-layout-enlarge-window-horizontally 50)))
+    (exwm-input-set-key (kbd "s-M-<left>")
+                        (lambda () (interactive) (exwm-layout-shrink-window-horizontally 50)))
+    (exwm-input-set-key (kbd "s-M-<up>")
+                        (lambda () (interactive) (exwm-layout-enlarge-window             50)))
+    (exwm-input-set-key (kbd "s-M-<down>")
+                        (lambda () (interactive) (exwm-layout-shrink-window              50)))
+    ;; window splits
+    (exwm-input-set-key (kbd "s-\\") 'split-window-horizontally-and-follow)
+    (exwm-input-set-key (kbd "s-]") 'split-window-vertically-and-follow)
+    (exwm-input-set-key (kbd "s-<backspace>") 'delete-window)
+    (exwm-input-set-key (kbd "s-[") 'delete-other-windows)
+    (exwm-input-set-key (kbd "s-b") 'counsel-switch-buffer)
+    (exwm-input-set-key (kbd "s-d") 'counsel-linux-app)
+
+    ;; window undo
+    (exwm-input-set-key (kbd "s-u") 'winner-undo)
+    (exwm-input-set-key (kbd "s-k") 'exwm-input-release-keyboard)
+    (exwm-input-set-key (kbd "s-j") 'exwm-input-grab-keyboard)
+    (global-unset-key (kbd "C-z"))
+    (setq exwm-input-global-keys
+          `(
+            ,@(mapcar (lambda (i)
+                        `(,(kbd (format "s-%d" i)) .
+                          (lambda ()
+                            (interactive)
+                            (exwm-workspace-switch ,i))))
+                      (number-sequence 0 9))
+            ([?\s-&] . (lambda (command)
+                         (interactive (list (read-shell-command "$ ")))
+                         (start-process-shell-command command nil command)))))
+
+    (require 'exwm-systemtray)
+    (exwm-systemtray-enable)
+
+    (require 'exwm-randr)
+    (exwm-randr-enable)
+
+    ;; start the emacs x'window manager.
+    (exwm-enable)
+
+    ;; set work psace names
+    (setq exwm-workspace-index-map
+          (lambda (index)
+            (let ((named-workspaces ["code" "term" "brow" "slac" "extr"]))
+              (if (< index (length named-workspaces))
+                  (elt named-workspaces index)
+                (number-to-string index)))))
+
+    (defun exwm-workspace--update-ewmh-desktop-names ()
+      "Set names for work spaces."
+      (xcb:+request exwm--connection
+                    (make-instance 'xcb:ewmh:set-_NET_DESKTOP_NAMES
+                                   :window exwm--root :data
+                                   (mapconcat (lambda (i) (funcall exwm-workspace-index-map i))
+                                              (number-sequence 0 (1- (exwm-workspace--count)))
+                                              "\0"))))
+
+    (add-hook 'exwm-workspace-list-change-hook
+              #'exwm-workspace--update-ewmh-desktop-names)
+
+    ;; you may need to call the function once manually
+    (exwm-workspace--update-ewmh-desktop-names)
+
+    :init
+    (message "[INFO] es/use-package/exwm"))
+#+END_SRC
+* EXWM Hydra
+#+BEGIN_SRC emacs-lisp
+  (defhydra hydra-eos (:exit nil :hint nil)
+    "
+  Emacs Deskop EOS: Binding ALSO accessible under Super key i.e. s-b switch buffer
+  Apps^^                        EXWM^^                     Windows mvmt                Windows split
+  -------------------------------------------------------------------------------------------------------------
+  [_d_] Linux application       [_w_] Workspace switch     [_<up>_] up                 [_\\_] Vertical split
+  [_g_] Browser                 [_r_] Reset                [_<down>_] down             [_]_] Horizontal split
+  [_t_] Terminal                [_L_] Monitor Move left    [_<left>_] left             [<backspace>] delete win
+  [_T_] New Terminal            [_R_] Monitor Move right   [_<right>_] right           [_[_] delete other win
+  [_E_] Treemacs Explorer       [_-_] Text size decrease   [_S-<up>_] move window up   [_u_] winner-undo
+  [_l_] lock screen             [_=_] Text size increase   [_S-<down>_] move wind down [_b_] switch buffer
+  [_a_] Splash                  [_s_] Save edit Position   [_S-<left>_] move left      [_G_] GDM Tweaks
+  [_n_] Netflix                 [_j_] Jump edit position   [_S-<right>_] move right    [_S_] GDM Set Scale
+  [_s_] ssh
+  [_v_] Volume 200pct
+  [_f_] rip grep
+  [_F_] ag silver searcher
+  "
+    ("d"  counsel-linux-app)
+    ("g" es/app-browser)
+    ("t" es/terminal)
+    ("T" es/app-terminal)
+    ("E" treemacs)
+    ("l" es/lock-screen)
+    ("a" es/app-splash)
+    ("n" es/app-netflix)
+    ("s" es/ssh)
+    ("v" es/volumeset)
+    ("f" counsel-rg)
+    ("F" counsel-ag)
+    ("G" es/gdm-tweaks)
+    ("S" es/gdm-set-scale)
+
+    ("w" exwm-workspace-switch)
+    ("r" exwm-workspace-reset)
+    ("L" es/monitor-monitor-move-left)
+    ("R" es/monitor-monitor-move-right)
+    ("-" text-scale-decrease)
+    ("=" text-scale-increase)
+    ("<space>" es/save-edit-position)
+    ("j" counsel-mark-ring)
+
+    ("<up>" windmove-up)
+    ("<down>" windmove-down)
+    ("<left>" windmove-left)
+    ("<right>" windmove-right)
+    ("S-<up>" windower-swap-up)
+    ("S-<down>" windower-swap-down)
+    ("S-<left>" windower-swap-left)
+    ("S-<right>" windower-swap-right)
+    ("\\" split-window-horizontally-and-follow)
+    ("]" split-window-vertically-and-follow)
+    ("<backpsace>" delete-window)
+    ("[" delete-other-windows)
+    ("u" winner-undo)
+    ("b" counsel-switch-buffer)
+    ("q" nil :color blue))
+#+END_SRC
+
+* Emacs Desktop Helpers
+#+BEGIN_SRC emacs-lisp
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Helper/Utility functions ;;
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  (defun es/save-edit-position()
+    "Save this buffer position in marker ring."
+    (interactive)
+    (point-to-register ?p))
+
+  (defun es/jump-edit-position()
+    "Jump to last saved position."
+    (interactive)
+    (jump-to-register ?p))
+
+  (defun es/toggle-show-trailing-whitespace ()
+    "Toggle 'show-trailing-whitespace' between t and nil."
+    (interactive)
+    (setq show-trailing-whitespace (not show-trailing-whitespace)))
+
+  (defun es/tags-create (dir-name)
+    "Create tags file Arguments DIR-NAME."
+    (interactive "DDirectory: ")
+    (eshell-command
+     (format "find %s -type f -name \"*.hpp\" -o -name \"*.cpp\" -o -name \"*.[ch]\" | xargs etags -f %s/TAGS" dir-name dir-name))
+    (eshell-command
+     (format "cd %s; gtags -i -q" dir-name))
+    )
+
+  (defun es/copy-rectangle-as-kill ()
+    "Copy a rectangle as kill."
+    (interactive)
+    (save-excursion
+      (kill-rectangle (mark) (point))
+      (exchange-point-and-mark)
+      (yank-rectangle)))
+
+  (defun es/mark-directory-readonly(name)
+    "Mark a directory NAME to be opened readonly under Emacs."
+    (interactive "sDirectory Name:")
+    (setq name (concat name "/./.dir-locals.el"))
+    (message (concat "Created : " name))
+    (unless (file-exists-p name)
+      (progn
+        (write-region "" nil name)
+        (f-append-text "((nil . ((buffer-reado-only . t))))" 'utf-8 name))))
+
+  (defun es/adb-reverse()
+    "Start a reverse ADB session to debug android applications running a emulator."
+    (interactive)
+    (start-process-shell-command
+     "/usr/bin/adb"
+     nil
+     "adb devices | head -n2  | tail -n1 | cut -f 1 | xargs -I{} adb -s {} reverse tcp:8081 tcp:8081"))
+
+  (defun es/adb-reload()
+    "Emulates the key R on the android mobile emulator.  Used for reloading a react native app."
+    (interactive)
+    (start-process-shell-command
+     "/usr/bin/adb" nil "adb shell input keyevent R"))
+
+
+  (defun es/adb-shake()
+    "Emulates a shake on the mobile emulator."
+    (interactive)
+    (start-process-shell-command
+     "/usr/bin/adb" nil  "adb shell input keyevent 82"))
+  (message "[INFO] es/helper-utilities")
+
+  ;; Application invocations
+  (defun find-named-buffer(buffPrefix)
+    "Find a named buffer BUFFPREFIX."
+    (defvar named-buffer)
+    (setq named-buffer nil)
+    (cl-loop for buf in (buffer-list)  do
+             (when (string-prefix-p buffPrefix (buffer-name buf))
+               (progn
+                 (setq named-buffer buf)
+                 (cl-return)
+                 )
+               )
+             )
+    named-buffer)
+
+  (defun es/app-netflix()
+    "Start Netflix."
+    (interactive)
+    (defvar es/browser-bufname)
+    (defvar es/browser-binary)
+    (defvar es/browser-invocation)
+
+    (setq es/browser-binary "/usr/bin/google-chrome")
+    (setq es/browser-invocation (concat es/browser-binary))
+    (setq es/browser-invocation (concat es/browser-invocation "  --app=http://netflix.com"))
+    (message "[INFO] Opening Web browser")
+    (start-process-shell-command
+     es/browser-binary nil  es/browser-invocation))
+
+  (defun es/volumeset()
+    "Workaround for low sound an X1, allow you set the volume to more that 100%."
+    (interactive)
+    (defvar es/pulse-cmd-binary)
+    (setq es/pulse-cmd-binary "/usr/bin/pactl")
+    (start-process-shell-command
+     es/pulse-cmd-binary nil "/usr/bin/pactl list | grep -oP \'Sink #\K([0-9]+)\' | while read -r i ; /usr/bin/pactl -- set-sink-volume $i 200"))
+
+  (defun es/app-browser()
+    "Find existing or open a new browser window."
+    (interactive)
+    (defvar es/browser-bufname)
+    (defvar es/browser-binary)
+    (defvar es/browser-invocation)
+
+
+    (cond ((eq ede-browser 'chrome)
+           (setq es/browser-bufname "Google-chrome")
+           (setq es/browser-binary "/usr/bin/google-chrome")
+           (setq es/browser-invocation (concat es/browser-binary)))
+          ((eq ede-browser 'firefox)
+           (setq es/browser-bufname "Firefox")
+           (setq es/browser-binary "/usr/bin/firefox --private-window")
+           (setq es/browser-invocation (concat es/browser-binary))))
+
+    (defvar es/browser)
+    (setq es/browser (find-named-buffer es/browser-bufname))
+    (if (eq es/browser nil)
+        (progn
+          (message "Opening Web browser")
+          (start-process-shell-command
+           es/browser-binary nil  es/browser-invocation))
+      (progn
+        (message "Web browser")
+        (switch-to-buffer es/browser))
+      ))
+
+
+  (defun es/app-splash()
+    "EOS Splash screen."
+    (interactive)
+    (defvar es/splashbufname)
+    (setq es/splashbufname "feh")
+    (defvar es/splash)
+    (setq es/splash (find-named-buffer es/splashbufname))
+    (if (eq es/splash nil)
+        (progn
+          (defvar es/splashbinary)
+          (defvar es/splashinvocation)
+          (setq es/splashbinary "feh")
+          (setq es/splashinvocation (concat es/splashbinary
+                                            " ~/acme.png"
+                                            ))
+          (message "[INFO] Opening splash")
+          (start-process-shell-command
+           es/splashbinary nil es/splashinvocation))
+      (progn
+        (message "[INFO] splash")
+        (switch-to-buffer es/splash))
+      ))
+
+  (defun es/app-terminal()
+    "Find existing or open a new terminal window."
+    (interactive)
+    (defvar es/terminal)
+    (defvar es/termbufname)
+    (setq es/termbufname
+          (cond ((eq ede-term-type 'xterm)  "UXTerm")
+                ((eq ede-term-type 'xterm)  "XTerm")
+                ((eq ede-term-type 'gnome-terminal)  "Gnome-terminal")
+                (t "UXTerm")))
+
+    (setq es/terminal (find-named-buffer es/termbufname))
+    (if (eq es/terminal nil)
+        (progn
+          (message "[INFO] Opening terminal")
+          (es/app-terminal-new))
+      (progn
+        (switch-to-buffer es/terminal))
+      ))
+
+  (defun es/app-terminal-new()
+    "Start a new terminal."
+    (interactive)
+    (defvar es/term-bufname)
+    (defvar es/term-binary)
+    (defvar es/term-invocation)
+
+    (setq es/term-binary
+          (cond ((eq ede-term-type 'uxterm)
+                 "/usr/bin/dbus-launch /usr/bin/uxterm -fa \"Ubuntu Mono for Powerline\" -fs 12")
+                ((eq ede-term-type 'xterm)
+                 "/usr/bin/dbus-launch /usr/bin/xterm  -fa \"Ubuntu Mono for Powerline\" -fs 12")
+                ((eq ede-term-type 'gnome-terminal)
+                 "/usr/bin/dbus-launch /usr/bin/gnome-terminal")
+                (t "/usr/bin/dbus-launch /usr/bin/uxterm")))
+
+    (setq es/term-invocation es/term-binary)
+    (progn
+      (message "Opening terminal")
+      (start-process-shell-command
+       es/term-binary nil es/term-invocation))
+    )
+
+  (defun es/lock-screen()
+    "Lock screen command for es."
+    (interactive)
+    (start-process-shell-command
+     "/usr/bin/gnome-screensaver-command" nil  "/usr/bin/gnome-screensaver-command -l")
+    (start-process-shell-command "/usr/bin/xset" nil "/usr/bin/xset dpms force standby")
+    )
+
+  ;;(setq lock-screen-timer (run-with-idle-timer 1800 nil 'es/lock-screen))
+
+  ;; Swap monitors
+  (defun es/monitor-monitor-move-left()
+    "Move primary monitor to left."
+    (interactive)
+    (defvar es/commandMoveLeft)
+    (setq es/commandMoveLeft
+          "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --left-of /;s/^/xrandr --output /'`")
+    (shell-command es/commandMoveLeft))
+
+  (defun es/monitor-move-right()
+    "Move primary monitor to right."
+    (interactive)
+    (defvar es/commandMoveRight)
+    (setq es/commandMoveRight
+          "`xrandr  | grep -w connected | cut -f 1  -d  \" \"  | paste -s -d _ |  sed  's/_/ --right-of /;s/^/xrandr --output /'`")
+    (shell-command es/commandMoveRight))
+
+  ;; Scale/Descale gdm
+  (defun es/gdm-set-scale(scale-factor)
+    "Set gnome desktop scaling factor to SCALE-FACTOR."
+    (interactive "scale-factor: ")
+    (defvar es/gsettings-binary)
+    (defvar es/gsettings-invocation)
+    (setq es/gsettings-binary "/usr/bin/gsettings")
+    (setq es/gsettings-invocation
+          (concat es/gsettings-binary  " set org.gnome.desktop.interface text-scaling-factor "  scale-factor))
+    (message es/gsettings-invocation)
+    (start-process-shell-command
+     es/gsettings-binary nil es/gsettings-invocation))
+
+  (defun es/gdm-tweaks()
+    "Open gnome tweaks."
+    (interactive)
+    (start-process-shell-command
+     "/usr/bin/gnome-tweaks" nil  "/usr/bin/gnome-tweaks"))
+
+
+  (defun es/ssh(hostName)
+    "SSH to a host HOSTNAME."
+    (interactive "suserName@Host:")
+    (defvar ssh-bufname)
+    (defvar ssh-binary)
+    (defvar ssh-invocation)
+    (setq ssh-bufname "XTerm")
+    (setq ssh-binary "/usr/bin/xterm")
+    (setq ssh-invocation (concat ssh-binary
+                                 " -bg black -fg white "
+                                 " -fa 'Ubuntu Mono'"
+                                 " -e 'ssh -Y " hostName "'"
+                                 ))
+    (start-process-shell-command  ssh-binary nil ssh-invocation))
+  (message "[INFO] es/app-setup")
+#+END_SRC

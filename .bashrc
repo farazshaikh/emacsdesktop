@@ -5,7 +5,7 @@
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
-      *) return;;
+    *) return;;
 esac
 
 
@@ -30,24 +30,26 @@ alias prodssh="source $EOS/emacsdesktop/.prodssh.rc"
 alias rcd='cd $(git rev-parse --show-cdup)'
 alias fixsound="pactl list short sinks | pactl set-default-sink alsa_output.pci-0000_06_00.1.hdmi-stereo;\
        pactl list short sources | pactl set-default-source alsa_output.usb-Blue_Microphones_Yeti_X_2046SG003K88_888-000313110306-00.iec958-stereo.monitor"
+alias cargowatchlib='cargo watch -c -x  "test --release --message-format=human -- --nocapture"'
+alias cargowatch='cargo watch -c -x  "run --release --message-format=human -- --nocapture"'
 
 untarall ()
 {
     for filegz in `ls *.tar.gz`
     do
-    echo Untaring $filegz
-    mkdir `echo $filegz | cut -d "." -f1` > /dev/null
-    tar -zxvf $filegz -C `echo $filegz | cut -d "." -f1` > /dev/null
+	echo Untaring $filegz
+	mkdir `echo $filegz | cut -d "." -f1` > /dev/null
+	tar -zxvf $filegz -C `echo $filegz | cut -d "." -f1` > /dev/null
     done
 }
- 
+
 prune() {
-        if [ $# -eq 0 ]
-          then
-           echo "No arguments supplied, Example prune start end file"
-          else
-           sed -n '/$1/,/$2/p' $3
-        fi
+    if [ $# -eq 0 ]
+    then
+        echo "No arguments supplied, Example prune start end file"
+    else
+        sed -n '/$1/,/$2/p' $3
+    fi
 }
 
 g() {
@@ -56,22 +58,22 @@ g() {
 
 
 rustproj() {
-	mkdir ~/rustplay
-	cd ~/rustplay
-	cargo init $1
-	cd $1
-	$EDITOR ./src/main.rs
+    mkdir ~/rustplay
+    cd ~/rustplay
+    cargo init $1
+    cd $1
+    $EDITOR ./src/main.rs
 }
 
 runtillfail () {
-     command=$1
-     while $command; do :; done
+    command=$1
+    while $command; do :; done
 }
 
 
 function git-grepblame {
-  local script
-  script="$(cat <<'EOF'
+    local script
+    script="$(cat <<'EOF'
   my $input = do { local $/=undef; <> };
   while ($input =~ m!\A(([^\0]+)\0([1-9][0-9]*)\0([^\n]+)\n)!xmsg) {
     my ($orig, $filename, $lineno, $line) = ($1, $2, $3, $4);
@@ -85,7 +87,7 @@ function git-grepblame {
   }
 EOF
   )"
-  git grep  --null --line-number "$@" | perl -e "$script"
+    git grep  --null --line-number "$@" | perl -e "$script"
 }
 
 export PYTHONSTARTUP=~/.pythonrc
@@ -100,9 +102,9 @@ export PYTHONSTARTUP=~/.pythonrc
 # nvim
 if command -v nvim &> /dev/null
 then
-alias vimdiff='nvim -d'
-alias vim='nvim'
-alias vi='nvim'
+    alias vimdiff='nvim -d'
+    alias vim='nvim'
+    alias vi='nvim'
 fi
 
 
@@ -127,10 +129,8 @@ export NVM_DIR="$HOME/.nvm"
 #~/24bit.sh
 if [ -f ~/24bit.sh ]; then
     echo -n  "Color test: "
-   ~/24bit.sh
+    ~/24bit.sh
 fi
-
-
 
 #sh -c "$(curl -fsSL https://starship.rs/install.sh)"
 eval "$(starship init bash)"
