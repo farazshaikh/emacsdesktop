@@ -43,6 +43,9 @@
 * Package Mgmt
 ** Package Source Setup
 #+BEGIN_SRC emacs-lisp
+  (defvar hostname
+  (or (getenv "HOSTNAME") (getenv "COMPUTERNAME") "unknown")
+  "hostname of this machine")
   (defun es/setup-package-mgmt()
     "Setup the package management for EOS."
     (message "installing use package")
@@ -68,7 +71,6 @@
       (package-reinstall package-name)))
   (es/setup-package-mgmt)
 #+END_SRC
-
 ** Bootstrap use package
 #+BEGIN_SRC emacs-lisp
     ;;;;;;;;;;;;;;;;;;;;;;;
@@ -307,22 +309,31 @@
 ** Common font
 #+BEGIN_SRC emacs-lisp
   ;; set default font in initial window and for any new window
-(cond
- ((string-equal system-type "windows-nt") ; Microsoft Windows
-  (when (member "DejaVu Sans Mono" (font-family-list))
-    (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
-    (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
- ((string-equal system-type "darwin") ; Mac OS X
-  (when (member "DejaVu Sans Mono" (font-family-list))
-    (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
-    (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
- ((string-equal system-type "gnu/linux") ; linux
-  (when (member "Source Code Pro" (font-family-list))
-    (add-to-list 'initial-frame-alist '(font . "Source Code Pro-15"))
-    (add-to-list 'default-frame-alist '(font . "Source Code Pro-15")))))
+  (cond
+   ((string-equal system-type "windows-nt") ; Microsoft Windows
+    (when (member "DejaVu Sans Mono" (font-family-list))
+      (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
+      (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
+   ((string-equal system-type "darwin") ; Mac OS X
+    (when (member "DejaVu Sans Mono" (font-family-list))
+      (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
+      (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
+   ((string-equal system-type "gnu/linux") ; linux
+    (when (member "Source Code Pro" (font-family-list))
+      (message "[INFO]: Font Linux Source Code Pro")
+      (add-to-list 'initial-frame-alist '(font . "Source Code Pro"))
+      (add-to-list 'default-frame-alist '(font . "Source Code Pro")))))
 
-  (custom-set-faces
-   '(default ((t (:family "Source Code Pro")))))
+  ;; Over ride for bobcat
+  (when (and (string-equal "bobcat" hostname) t)
+    (add-to-list 'initial-frame-alist '(font . "Source Code Pro-15"))
+    (add-to-list 'default-frame-alist '(font . "Source Code Pro-15")))
+
+  ;;
+  ;;(when (and (string-equal "unknown" hostname) t)
+  ;;  (message "[INFO]: Font Linux Source Code Pro")
+  ;;  (add-to-list 'initial-frame-alist '(font . "Source Code Pro-8"))
+  ;;  (add-to-list 'default-frame-alist '(font . "Source Code Pro-8")))
 #+END_SRC
 
 ** ADOC
@@ -1112,7 +1123,7 @@
 #+END_SRC
 
 * Language server protocol (LSP)
-** LSP-Mode (RUST)
+** LSP-Mode
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
     :commands lsp
@@ -1136,8 +1147,8 @@
     (lsp-modeline-code-actions-segments '(count icon name))
 
     ;; Function signature in modeline
-    ;;(lsp-signature-auto-activate nil)
-    ;;(lsp-signature-doc-lines 5)
+    (lsp-signature-auto-activate nil)
+    (lsp-signature-doc-lines 5)
 
     ;; Lsp eldoc and docbuffer integration.
     ;; How does this work ?
@@ -1159,7 +1170,7 @@
 
     (eldoc-echo-area-use-multiline-p 5);; Truncate modeline eldoc to just 5 lines. Else mode lines pops out
     (eldoc-echo-area-display-truncation-message t) ;; Display Help message if help is truncated
-    (eldoc-echo-area-prefer-doc-buffer t);; Display in an existing eldoc buffer is availbe and skip mode like
+    (eldoc-echo-area-prefer-doc-buffer t);; Display in an existing eldoc buffer if available and skip mode like
 
 
 
