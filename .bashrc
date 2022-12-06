@@ -134,3 +134,4 @@ fi
 
 #sh -c "$(curl -fsSL https://starship.rs/install.sh)"
 eval "$(starship init bash)"
+source ~/.bash_completion/alacritty
