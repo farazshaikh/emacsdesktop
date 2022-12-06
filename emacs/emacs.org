@@ -71,13 +71,13 @@
 
 ** Bootstrap use package
 #+BEGIN_SRC emacs-lisp
-  ;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;
   ;; Package Setup     ;;
-  ;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;
   (require 'use-package-ensure)
   (setq use-package-always-ensure t)
   (setq use-package-compute-statistics t)
-  (setq use-package-always-pin "melpa")
+  ;;(setq use-package-always-pin "melpa")
   (use-package auto-package-update
     :disabled
     :config
@@ -306,8 +306,23 @@
 
 ** Common font
 #+BEGIN_SRC emacs-lisp
-    (custom-set-faces
-     '(default ((t (:family "Source Code Pro")))))
+  ;; set default font in initial window and for any new window
+(cond
+ ((string-equal system-type "windows-nt") ; Microsoft Windows
+  (when (member "DejaVu Sans Mono" (font-family-list))
+    (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
+    (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
+ ((string-equal system-type "darwin") ; Mac OS X
+  (when (member "DejaVu Sans Mono" (font-family-list))
+    (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
+    (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
+ ((string-equal system-type "gnu/linux") ; linux
+  (when (member "Source Code Pro" (font-family-list))
+    (add-to-list 'initial-frame-alist '(font . "Source Code Pro-15"))
+    (add-to-list 'default-frame-alist '(font . "Source Code Pro-15")))))
+
+  (custom-set-faces
+   '(default ((t (:family "Source Code Pro")))))
 #+END_SRC
 
 ** ADOC
@@ -1118,13 +1133,35 @@
 
     ;; completions are better handled by company-box
     (lsp-completion-no-cache nil)
-    (lsp-completion-show-detail nil)
-    (lsp-completion-show-kind nil)
     (lsp-modeline-code-actions-segments '(count icon name))
 
-    // Function signature in modeline
+    ;; Function signature in modeline
     ;;(lsp-signature-auto-activate nil)
     ;;(lsp-signature-doc-lines 5)
+
+    ;; Lsp eldoc and docbuffer integration.
+    ;; How does this work ?
+    ;;
+    ;; Next to Completion: Completion can show function prototype in drop down.
+    ;;                     This is disabled as it results in very wide boxes
+    ;;
+    ;; Completion Doc Frame: frameworks display doc-help, next to the completion drop down.
+    ;; The documentation can browsed quickly by scroll-other-window C-M-v/V
+    ;;
+    ;; HOVER: Once the completion is selected, documentation can be looked up using mouse hover.
+    ;;
+    ;; ELDOC: copy pasting from hover is impractica. So the hover info is passed to eldoc buffer
+    (lsp-completion-show-detail nil)  ;; Disable completion drop , function signatures
+    (lsp-completion-show-kind nil)
+
+    (lsp-eldoc-render-all t)    ;; push all availabe info to eldoc, let eldoc truncate and format
+    (lsp-eldoc-enable-hover t)  ;; push info to eldoc we move mouse around
+
+    (eldoc-echo-area-use-multiline-p 5);; Truncate modeline eldoc to just 5 lines. Else mode lines pops out
+    (eldoc-echo-area-display-truncation-message t) ;; Display Help message if help is truncated
+    (eldoc-echo-area-prefer-doc-buffer t);; Display in an existing eldoc buffer is availbe and skip mode like
+
+
 
     ;; rust
     (lsp-rust-wait-to-build 10000)
@@ -1338,12 +1375,11 @@
           :custom
           (corfu-cycle t)                   ;; Enable cycling for `corfu-next/previous'
           (corfu-auto t)                    ;; Enable auto completion
-          (corfu-auto-delay 0)
-          (corfu-auto-prefix 3)
+          (corfu-auto-delay 0.0)
           (corfu-separator ?\s)             ;; Orderless field separator
-          (corfu-quit-at-boundary 'separator)   ;; Never quit at completion boundary
-          (corfu-preview-current nil)
-          (corfu-preselect-first nil)       ;; Disable candidate preselection
+          ;;(corfu-quit-at-boundary 'separator)   ;; Never quit at completion boundary
+          ;;(corfu-preview-current nil)
+          ;;(corfu-preselect-first nil)       ;; Disable candidate preselection
           ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
           ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
           ;; (corfu-scroll-margin 5)        ;; Use scroll margin
