@@ -225,8 +225,7 @@
   ;;  terminal mode settings
   (add-hook 'ansi-term-mode-hook '(lambda ()
                                     (setq term-buffer-maximum-size 0)
-                                    (setq-default show-trailing-whitespace nil)
-                                    ))
+                                    (setq-default show-trailing-whitespace nil)))
 #+END_SRC
 
 
@@ -754,16 +753,24 @@
 * Fly Checker
 ** Whitespace
 #+BEGIN_SRC emacs-lisp
-    (use-package whitespace
-      :hook
-      (prog-mode . whitespace-mode)
-      (prog-mode . display-fill-column-indicator-mode)
-      :init
-      (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode VTerm))
-      :custom
-      (show-trailing-whitespace t)
-      (fill-column 80)
-      (whitespace-style (quote (face empty tabs whitespace))))
+  (use-package whitespace
+    :hook
+    (prog-mode . whitespace-mode)
+    (prog-mode . display-fill-column-indicator-mode)
+    :init
+    (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode VTerm))
+    (dolist (hook '(ansi-term-mode-hook
+                    special-mode-hook
+                    term-mode-hook
+                    comint-mode-hook
+                    compilation-mode-hook
+                    minibuffer-setup-hook))
+      (add-hook hook
+                (lambda () (setq show-trailing-whitespace nil))))
+    :custom
+    (show-trailing-whitespace t)
+    (fill-column 80)
+    (whitespace-style (quote (face empty tabs whitespace))))
   #+END_SRC
 ** Flyspell
 #+BEGIN_SRC emacs-lisp

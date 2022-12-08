@@ -132,6 +132,7 @@ if [ -f ~/24bit.sh ]; then
     ~/24bit.sh
 fi
 
+[ -f source ~/.bash_completion/alacritty] && source ~/.bash_completion/alacritty
+
 #sh -c "$(curl -fsSL https://starship.rs/install.sh)"
 eval "$(starship init bash)"
-source ~/.bash_completion/alacritty
