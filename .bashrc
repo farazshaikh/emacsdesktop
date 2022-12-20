@@ -28,8 +28,15 @@ export EOS=~/.eos
 alias scr="screen -DAR -h 10000"
 alias prodssh="source $EOS/emacsdesktop/.prodssh.rc"
 alias rcd='cd $(git rev-parse --show-cdup)'
+
+
 alias fixsound="pactl list short sinks | pactl set-default-sink alsa_output.pci-0000_06_00.1.hdmi-stereo;\
        pactl list short sources | pactl set-default-source alsa_output.usb-Blue_Microphones_Yeti_X_2046SG003K88_888-000313110306-00.iec958-stereo.monitor"
+alias fixsound_z13="pactl list short sinks | pactl set-default-sink alsa_output.pci-0000_64_00.1.HiFi__hw_Generic_9__sink; \
+       pactl list short sources | pactl set-default-source alsa_output.usb-Blue_Microphones_Yeti_X_2046SG003K88_888-000313110306-00.iec958-stereo.monitor"
+
+
+
 alias cargowatchlib='cargo watch -c -x  "test --release --message-format=human -- --nocapture"'
 alias cargowatch='cargo watch -c -x  "run --release --message-format=human -- --nocapture"'
 
@@ -112,8 +119,7 @@ fi
 # sync bash commands to file always
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
-export WRK="/wrk/dfn/release"
-export WRK2="/wrk/sfn"
+export WRK="$HOME/wrk"
 eval "$(direnv hook bash)"
 . "$HOME/.cargo/env"
 
@@ -132,7 +138,7 @@ if [ -f ~/24bit.sh ]; then
     ~/24bit.sh
 fi
 
-[ -f source ~/.bash_completion/alacritty] && source ~/.bash_completion/alacritty
+[ -f ~/.bash_completion/alacritty ] && source ~/.bash_completion/alacritty
 
 #sh -c "$(curl -fsSL https://starship.rs/install.sh)"
 eval "$(starship init bash)"
