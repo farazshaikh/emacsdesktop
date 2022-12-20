@@ -761,9 +761,6 @@
 
   (use-package vertico-posframe
     ;;:disabled
-    :quelpa (vertico-posframe
-             :fetcher github
-             :repo "tumashu/vertico-posframe/blob/main/vertico-posframe.el")
     :init
     (vertico-posframe-mode)
     :config
