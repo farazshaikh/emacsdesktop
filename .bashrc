@@ -119,7 +119,7 @@ fi
 # sync bash commands to file always
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
-export WRK="$HOME/wrk"
+export WRK="$HOME/wrk/apk"
 eval "$(direnv hook bash)"
 . "$HOME/.cargo/env"
 
