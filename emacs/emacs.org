@@ -637,7 +637,6 @@
       (ivy-quit-and-run (counsel-git))))
 
   (use-package counsel
-    :disabled
     :bind
     (("M-x" . counsel-M-x)
      ("s-x" . counsel-M-x)
@@ -1227,7 +1226,13 @@
     (interactive)
     (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
     )
-  (es/setup-project-dfn)
+
+  (defun es/setup-project-apk()
+    "Setup Excubito Project."
+    (interactive)
+    (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/wrk/apk/.")))
+    )
+  (es/setup-project-apk)
 
   ;; Setup projectile
   (use-package counsel-projectile)
@@ -1329,6 +1334,7 @@
 * Language server protocol (LSP)
 ** LSP-Mode
 #+BEGIN_SRC emacs-lisp
+  (custom-set-faces '(markdown-code-face ((t (:inherit default)))))
   (use-package lsp-mode
     :commands lsp
     :functions lsp-session lsp--persist-session
