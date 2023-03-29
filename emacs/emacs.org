@@ -141,7 +141,7 @@
     (set-face-background 'vertical-border "grey2")
 
     (progn
-     ;;(menu-bar-mode -1)
+     (menu-bar-mode -1)
      (tool-bar-mode -1)
      ;;(scroll-bar-mode -1)
      (global-eldoc-mode 1)
@@ -324,10 +324,10 @@
       (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
       (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
    ((string-equal system-type "gnu/linux") ; linux
-    (when (member "Source Code Pro" (font-family-list))
+    (when (member "Fira Code" (font-family-list))
       (message "[INFO]: Font Linux Source Code Pro")
-      (add-to-list 'initial-frame-alist '(font . "Source Code Pro"))
-      (add-to-list 'default-frame-alist '(font . "Source Code Pro")))))
+      (add-to-list 'initial-frame-alist '(font . "Fira Code"))
+      (add-to-list 'default-frame-alist '(font . "Fira Code")))))
 
   ;; Over ride for bobcat
   (when (and (string-equal "bobcat" hostname) t)
@@ -556,8 +556,13 @@
     (load-theme 'nano-dark t))
 
   (use-package monokai-pro-theme
+    :disabled
     :config
     (load-theme 'monokai-pro t))
+
+  (use-package modus-themes
+    :config
+    (load-theme 'modus-vivendi t))
 #+END_SRC
 * Emacs Mode line  (DOOM LINE)
 #+BEGIN_SRC emacs-lisp
@@ -1732,6 +1737,12 @@
     (warn-if-executable-not-found "cargo-watch" "cargo install cargo-watch")
     (warn-if-executable-not-found "cargo-upgrade" "cargo install cargo-upgrade")
     :hook (rust-mode . cargo-minor-mode))
+
+  (defun rustzen()
+    "Declutter rust lsp ui"
+    (interactive)
+    (setq lsp-rust-analyzer-server-display-inlay-hints nil))
+
 #+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp
