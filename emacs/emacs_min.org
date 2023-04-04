@@ -1,0 +1,97 @@
+* !! WARNING !! EMACS Configuration is infinitely MALLEABLE.
+;; YOU WILL SPEND INORDINATE AMOUNTS OF TIME TUNING IT - GO BACK USE VSCODE
+* Emacs configuration file
+#+BEGIN_SRC emacs-lisp
+  ;;; package -- Emacs Programming IDE
+  ;;         Emacs setting for day to day programming
+  ;;
+  ;;; Commentary:
+  ;;;         LSP based emacs programming setup ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;;; -*- lexical-binding: t; -*-
+  ;;; Code:
+#+END_SRC
+* Emacs Version check
+#+BEGIN_SRC emacs-lisp
+  (defun es/check-version()
+    "Check that Emacs version is at the least supported version."
+    (if (version< emacs-version  "24.4")
+        (error "Script depends on Emacs version being greater than 24.4")
+      (message "Version greater or equal to 24.4")))
+  (es/check-version)
+#+END_SRC
+* Faster GC
+#+BEGIN_SRC emacs-lisp
+  ;; Make startup faster by reducing the frequency of garbage
+  ;; collection.  The default is 800 kilobytes.  Measured in bytes.
+  ;; Following setting saves 0.2 seconds an brings startup times down to 1.1sec
+  ;; (setq gc-cons-threshold (* 250 1000 1000))
+  (setq package-enable-at-startup nil
+        message-log-max 16384
+        gc-cons-threshold 402653184
+        gc-cons-percentage 0.6
+        auto-window-vscroll nil)
+
+  (add-hook 'after-init-hook
+            `(lambda ()
+               (setq gc-cons-threshold 800000
+                     gc-cons-percentage 0.1)
+               (garbage-collect)) t)
+#+END_SRC
+
+
+
+* Package Mgmt
+** Package Source Setup
+#+BEGIN_SRC emacs-lisp
+  (defvar hostname
+  (or (getenv "HOSTNAME") (getenv "COMPUTERNAME") "unknown")
+  "hostname of this machine")
+  (defun es/setup-package-mgmt()
+    "Setup the package management for EOS."
+    (message "installing use package")
+    (require 'package)
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+    ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
+    ;; and `package-pinned-packages`. Most users will not need or want to do this.
+    (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+    (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
+    (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+    (package-initialize)
+
+    (unless package-archive-contents
+      (package-refresh-contents))
+
+    (unless (package-installed-p 'use-package)
+      (package-install 'use-package))
+    (message "es/setup-package-mgmt"))
+
+  (defun package-reinstall-all()
+    (interactive)
+    (dolist (package-name package-activated-list)
+      (package-reinstall package-name)))
+  (es/setup-package-mgmt)
+#+END_SRC
+** Bootstrap use package
+#+BEGIN_SRC emacs-lisp
+    ;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Package Setup     ;;
+    ;;;;;;;;;;;;;;;;;;;;;;;
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
+  (setq use-package-compute-statistics t)
+  ;;(setq use-package-always-pin "melpa")
+  (use-package auto-package-update
+    :disabled
+    :config
+    (auto-package-update-maybe))
+
+  (use-package use-package-hydra)
+  (use-package diminish
+    :demand)
+
+  ;; quelpa
+  (use-package quelpa)
+  (use-package quelpa-use-package
+    :init (setq quelpa-update-melpa-p nil)
+    :config (quelpa-use-package-activate-advice))
+#+END_SRC

@@ -153,7 +153,7 @@
      (column-number-mode 1)
      (show-paren-mode 1)
      (global-hl-line-mode 1)
-     (which-function-mode 1)
+     (which-function-mode -1)
      (xterm-mouse-mode 1)
      (abbrev-mode 1)
      ;; kill tabs
@@ -313,32 +313,38 @@
 
 ** Common font
 #+BEGIN_SRC emacs-lisp
-  ;; set default font in initial window and for any new window
-  (cond
-   ((string-equal system-type "windows-nt") ; Microsoft Windows
-    (when (member "DejaVu Sans Mono" (font-family-list))
-      (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
-      (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
-   ((string-equal system-type "darwin") ; Mac OS X
-    (when (member "DejaVu Sans Mono" (font-family-list))
-      (add-to-list 'initial-frame-alist '(font . "DejaVu Sans Mono-10"))
-      (add-to-list 'default-frame-alist '(font . "DejaVu Sans Mono-10"))))
-   ((string-equal system-type "gnu/linux") ; linux
-    (when (member "Fira Code" (font-family-list))
-      (message "[INFO]: Font Linux Source Code Pro")
-      (add-to-list 'initial-frame-alist '(font . "Fira Code"))
-      (add-to-list 'default-frame-alist '(font . "Fira Code")))))
+  (defun set-exec-path-from-shell-PATH ()
+    "Set up Emacs' `exec-path' and PATH environment variable to match
+  that used by the user's shell."
+    (interactive)
+    (let ((path-from-shell (replace-regexp-in-string
+                            "[ \t\n]*$" "" (shell-command-to-string
+                                            "$SHELL --login -c 'echo $PATH'"
+                                            ))))
+      (setenv "PATH" path-from-shell)
+      (setq exec-path (split-string path-from-shell path-separator))))
 
-  ;; Over ride for bobcat
-  (when (and (string-equal "bobcat" hostname) t)
-    (add-to-list 'initial-frame-alist '(font . "Source Code Pro-15"))
-    (add-to-list 'default-frame-alist '(font . "Source Code Pro-15")))
+  (defun custom/setup-font-faces ()
+    (set-exec-path-from-shell-PATH)
+    ;; set default font in initial window and for any new window
+    (message "server after frame hook")
+    (when
+        (string-equal system-type "gnu/linux") ; linux
+      (when (member "Fira Code" (font-family-list))
+        (message "[INFO]: Font Fira Code Light")
+        (add-to-list 'initial-frame-alist '(font . "Fira Code Light"))
+        (add-to-list 'default-frame-alist '(font . "Fira Code Light"))))
 
-  ;;
-  ;;(when (and (string-equal "unknown" hostname) t)
-  ;;  (message "[INFO]: Font Linux Source Code Pro")
-  ;;  (add-to-list 'initial-frame-alist '(font . "Source Code Pro-8"))
-  ;;  (add-to-list 'default-frame-alist '(font . "Source Code Pro-8")))
+    (when
+        (string-equal hostname "bobat") ; linux
+      (when (member "Source Code Pro" (font-family-list))
+        (message "[INFO]: Source Code Pro-15")
+        (add-to-list 'initial-frame-alist '(font . "Source Code Pro-15"))
+        (add-to-list 'default-frame-alist '(font . "Source Code Pro-15")))))
+  ;; run this hook after we have initialized the first time
+  (add-hook 'after-init-hook 'custom/setup-font-faces)
+  ;; re-run this hook if we create a new frame from daemonized Emacs
+  (add-hook 'server-after-make-frame-hook 'custom/setup-font-faces)
 #+END_SRC
 
 ** ADOC
@@ -361,173 +367,6 @@
                                  (whitespace-mode -1))))
 #+END_SRC
 
-** Treemacs hydra
-#+BEGIN_SRC emacs-lisp
-  (use-package hydra)
-  (use-package treemacs
-    :commands (project-layout)
-    :init
-    (defun project-layout()
-      (interactive)
-      (treemacs)
-      (lsp-treemacs-symbols)
-      (lsp-treemacs-errors-list))
-    (with-eval-after-load 'winum
-      (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-    :config
-    (progn
-      (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
-            treemacs-deferred-git-apply-delay      0.5
-            treemacs-directory-name-transformer    #'identity
-            treemacs-display-in-side-window        t
-            treemacs-eldoc-display                 nil
-            treemacs-file-event-delay              5000
-            treemacs-file-extension-regex          treemacs-last-period-regex-value
-            treemacs-file-follow-delay             0.2
-            treemacs-file-name-transformer         #'identity
-            treemacs-follow-after-init             t
-            treemacs-git-command-pipe              ""
-            treemacs-goto-tag-strategy             'refetch-index
-            treemacs-indentation                   1
-            treemacs-indentation-string            " "
-            treemacs-is-never-other-window         nil
-            treemacs-max-git-entries               5000
-            treemacs-missing-project-action        'ask
-            treemacs-no-png-images                 nil
-            treemacs-no-delete-other-windows       t
-            treemacs-project-follow-cleanup        nil
-            treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-            treemacs-position                      'right
-            treemacs-recenter-distance             0.1
-            treemacs-recenter-after-file-follow    nil
-            treemacs-recenter-after-tag-follow     nil
-            treemacs-recenter-after-project-jump   'always
-            treemacs-recenter-after-project-expand 'on-distance
-            treemacs-show-cursor                   nil
-            treemacs-show-hidden-files             t
-            treemacs-silent-filewatch              nil
-            treemacs-silent-refresh                nil
-            treemacs-sorting                       'alphabetic-asc
-            treemacs-space-between-root-nodes      t
-            treemacs-tag-follow-cleanup            t
-            treemacs-tag-follow-delay              1.5
-            treemacs-width                         20)
-
-      ;; The default width and height of the icons is 22 pixels. If you are
-      ;; using a Hi-DPI display, uncomment this to double the icon size.
-      ;; (treemacs-resize-icons 10)
-      (treemacs-follow-mode t)
-      (treemacs-filewatch-mode t)
-      (treemacs-fringe-indicator-mode t)
-      (pcase (cons (not (null (executable-find "git")))
-                   (not (null treemacs-python-executable)))
-        (`(t . t)
-         (treemacs-git-mode 'deferred))
-        (`(t . _)
-         (treemacs-git-mode 'simple)))
-      (message "[INFO] es/use-package-treemacs"))
-    :bind
-    (:map global-map
-          ("M-0"       . treemacs-select-window)
-          ("C-x t 1"   . treemacs-delete-other-windows)
-          ("C-x t t"   . treemacs)
-          ("C-x t B"   . treemacs-bookmark)
-          ("C-x t C-t" . treemacs-find-file)
-          ("C-x t M-t" . treemacs-find-tag)))
-#+END_SRC
-
-** Centaur Tabs
-#+BEGIN_SRC emacs-lisp
-  (defun centaur-tabs-custom-buffer-groups ()
-    "`centaur-tabs-buffer-groups' control buffers' group rules.
-    Group centaur-tabs with mode if buffer is derived from
-    `eshell-mode' `emacs-lisp-mode' `dired-mode' `org-mode' `magit-mode'.
-    All buffer name start with * will group to \"Emacs\".
-    Other buffer group by `centaur-tabs-get-group-name' with project name."
-    (list
-     (cond
-      ((or (string-equal "*" (substring (buffer-name) 0 1))
-           (memq major-mode '(magit-process-mode
-                              magit-status-mode
-                              magit-diff-mode
-                              magit-log-mode
-                              magit-file-mode
-                              magit-blob-mode
-                              magit-blame-mode
-                              )))
-       "Emacs")
-      ((derived-mode-p 'prog-mode)
-       "Editing")
-      ((derived-mode-p 'dired-mode)
-       "Dired")
-      ((memq major-mode '(helpful-mode
-                          help-mode))
-       "Help")
-      ((memq major-mode '(org-mode
-                          org-agenda-clockreport-mode
-                          org-src-mode
-                          org-agenda-mode
-                          org-beamer-mode
-                          org-indent-mode
-                          org-bullets-mode
-                          org-cdlatex-mode
-                          org-agenda-log-mode
-                          diary-mode))
-       "OrgMode")
-      (t "Editing"))))
-
-
-  (use-package centaur-tabs
-    :disabled
-    :init (setq centaur-tabs-set-bar 'over)
-    :function centaur-tabs-force-update
-    :config
-    (centaur-tabs-mode +1)
-    (centaur-tabs-headline-match)
-    (setq centaur-tabs-set-modified-marker t
-          centaur-tabs-modified-marker " ● "
-          centaur-tabs-cycle-scope 'tabs
-          centaur-tabs-height 10
-          centaur-tabs-set-icons t
-          centaur-tabs-close-button " × "
-          centaur-tabs-show-navigation-buttons t)
-    (centaur-tabs-change-fonts "ubuntu-mono" 100)
-
-    (defun centaur-tabs-group-by-custom ()
-      "Custom grouping for Centaur tabs."
-      (interactive)
-      (defvar centaur-tabs-buffer-groups-function)
-      (setq centaur-tabs-buffer-groups-function 'centaur-tabs-custom-buffer-groups)
-      (centaur-tabs-force-update))
-    (centaur-tabs-group-by-custom)
-    (message "[INFO] es/setup-package-centaur-tabs")
-    :bind
-    ("C-S-<tab>" . centaur-tabs-backward)
-    ("C-<tab>" . centaur-tabs-forward)
-    :hook
-    (dired-mode . centaur-tabs-local-mode))
-#+END_SRC
-
-** Dashboard
-#+BEGIN_SRC emacs-lisp
-  (use-package dashboard
-    :if window-system
-    :demand
-    :config
-    ;;(setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
-    (setq dashboard-startup-banner "~/.eos/emacsdesktop/emacs/acme.png")
-    (setq dashboard-banner-logo-title "Cogito, ergo sum")
-    (setq dashboard-center-content t)
-    (setq dashboard-items '((recents  . 30)
-                            (bookmarks . 5)
-                            (projects . 5)
-                            (agenda . 5)
-                            (registers . 5)))
-    (setq dashboard-set-heading-icons t)
-    (setq dashboard-set-file-icons t)
-    (dashboard-setup-startup-hook))
-#+END_SRC
-
 ** Winner
 #+BEGIN_SRC emacs-lisp
   (use-package winner
@@ -537,12 +376,6 @@
 #+END_SRC
 * Emacs Themes
 #+BEGIN_SRC emacs-lisp
-  (use-package kaolin-themes
-    :disabled
-    :defer
-    :config
-    (setq custom-safe-themes t))
-
   ;; The theme work in GUI mode.
   ;; For terminal mode make sure that the term support True Color
   (use-package doom-themes
@@ -550,17 +383,12 @@
     :config
     (load-theme 'doom-molokai t))
 
-  (use-package nano-theme
-    :disabled
-    :config
-    (load-theme 'nano-dark t))
-
   (use-package monokai-pro-theme
-    :disabled
     :config
     (load-theme 'monokai-pro t))
 
   (use-package modus-themes
+    :disabled
     :config
     (load-theme 'modus-vivendi t))
 #+END_SRC
@@ -627,10 +455,6 @@
 #+END_SRC
 
 * IVY Counsel
-** flx
-** ivy-posframe
-** counsel
-** ivy
 ** swiper
 #+BEGIN_SRC emacs-lisp :eval no
   (use-package flx)
@@ -1019,79 +843,81 @@
 * Version Control  (Git, Git-Gutter, Git-timemachine, magit, smerge, direnv)
 ** Git
 #+BEGIN_SRC emacs-lisp
-  (use-package git-gutter
-    :diminish
-    :hook (after-init . global-git-gutter-mode)
-    :init (setq git-gutter:visual-line t
-                git-gutter:disabled-modes '(asm-mode image-mode)
-                git-gutter:modified-sign "*"
-                git-gutter:added-sign "+"
-                git-gutter:deleted-sign "x")
-    (warn-if-executable-not-found "git" "apt install git")
-    :bind
-    ("C-c g" . hydra-git-gutter/body))
-  (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
-                                        :hint nil)
-    "
-    Git gutter:
-      _j_: next hunk        _s_tage hunk     _q_uit
-      _k_: previous hunk    _r_evert hunk    _Q_uit and deactivate git-gutter
-      ^ ^                   _p_opup hunk
-      _h_: first hunk
-      _l_: last hunk        set start _R_evision
-    "
-    ("j" git-gutter:next-hunk)
-    ("k" git-gutter:previous-hunk)
-    ("h" (progn (goto-char (point-min))
-                (git-gutter:next-hunk 1)))
-    ("l" (progn (goto-char (point-min))
-                (git-gutter:previous-hunk 1)))
-    ("s" git-gutter:stage-hunk)
-    ("r" git-gutter:revert-hunk)
-    ("p" git-gutter:popup-hunk)
-    ("R" git-gutter:set-start-revision)
-    ("q" nil :color blue)
-    ("Q" (git-gutter-mode -1) :color blue))
+    (use-package git-gutter
+      :diminish
+      :hook (after-init . global-git-gutter-mode)
+      :init (setq git-gutter:visual-line t
+                  git-gutter:disabled-modes '(asm-mode image-mode)
+                  git-gutter:modified-sign "*"
+                  git-gutter:added-sign "+"
+                  git-gutter:deleted-sign "x")
+      (warn-if-executable-not-found "git" "apt install git")
+      :bind
+      ("C-c g" . hydra-git-gutter/body))
+    (defhydra hydra-git-gutter (:body-pre (git-gutter-mode 1)
+                                          :hint nil)
+      "
+      Git gutter:
+        _j_: next hunk        _s_tage hunk     _q_uit
+        _k_: previous hunk    _r_evert hunk    _Q_uit and deactivate git-gutter
+        ^ ^                   _p_opup hunk
+        _h_: first hunk
+        _l_: last hunk        set start _R_evision
+      "
+      ("j" git-gutter:next-hunk)
+      ("k" git-gutter:previous-hunk)
+      ("h" (progn (goto-char (point-min))
+                  (git-gutter:next-hunk 1)))
+      ("l" (progn (goto-char (point-min))
+                  (git-gutter:previous-hunk 1)))
+      ("s" git-gutter:stage-hunk)
+      ("r" git-gutter:revert-hunk)
+      ("p" git-gutter:popup-hunk)
+      ("R" git-gutter:set-start-revision)
+      ("q" nil :color blue)
+      ("Q" (git-gutter-mode -1) :color blue))
 
 
-  (use-package git-timemachine)
+    (use-package git-timemachine)
 
-  (use-package magit
-    :init
-    (warn-if-executable-not-found "git" "sudo apt install git")
-    (progn
-      (bind-key "C-x g" 'magit-status))
-    :config
-    (with-eval-after-load 'magit-log
-      (define-key magit-log-mode-map (kbd "<M-tab>") nil))
-    (with-eval-after-load 'magit-status
-      (define-key magit-status-mode-map (kbd "<M-tab>") nil))
-    (with-eval-after-load 'magit-diff
-      (define-key magit-diff-mode-map (kbd "<M-tab>") nil))
-    :bind (:map magit-file-section-map
-                ("RET" . magit-diff-visit-file-other-window)
-                :map magit-hunk-section-map
-                ("RET" . magit-diff-visit-file-other-window))
-    :custom
-    ((magit-auto-revert-mode nil)
-     (magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")))
-     (magit-diff-refine-hunk t)
-     (magit-expand-staged-on-commit (quote full))
-     (magit-fetch-arguments (quote ("--prune")))
-     (magit-log-auto-more t)
-     (magit-log-cutoff-length 20)
-     (magit-no-confirm (quote (stage-all-changes unstage-all-changes)))
-     (magit-process-connection-type nil)
-     (magit-push-always-verify nil)
-     (magit-push-arguments (quote ("--set-upstream")))
-     (magit-refresh-file-buffer-hook nil)
-     (magit-save-some-buffers nil)
-     (magit-set-upstream-on-push (quote askifnotset))
-     (magit-stage-all-confirm nil)
-     (magit-status-verbose-untracked nil)
-     (magit-unstage-all-confirm nil)
-     (magithub-message-confirm-cancellation nil)
-     (magithub-use-ssl t)))
+    (use-package magit
+      :init
+      (warn-if-executable-not-found "git" "sudo apt install git")
+      (progn
+        (bind-key "C-x g" 'magit-status))
+      :config
+      (with-eval-after-load 'magit-log
+        (define-key magit-log-mode-map (kbd "<M-tab>") nil))
+      (with-eval-after-load 'magit-status
+        (define-key magit-status-mode-map (kbd "<M-tab>") nil))
+      (with-eval-after-load 'magit-diff
+        (define-key magit-diff-mode-map (kbd "<M-tab>") nil))
+      :bind (:map magit-file-section-map
+                  ("RET" . magit-diff-visit-file-other-window)
+                  :map magit-hunk-section-map
+                  ("RET" . magit-diff-visit-file-other-window))
+      :custom
+      ((magit-auto-revert-mode nil)
+       (magit-ediff-dwim-show-on-hunks t)
+       (magit-diff-arguments (quote ("--no-ext-diff" "-M" "-C")))
+       (magit-diff-refine-hunk t)
+       (magit-ediff-dwim-show-on-hunks t)
+       (magit-expand-staged-on-commit (quote full))
+       (magit-fetch-arguments (quote ("--prune")))
+       (magit-log-auto-more t)
+       (magit-log-cutoff-length 20)
+       (magit-no-confirm (quote (stage-all-changes unstage-all-changes)))
+       (magit-process-connection-type nil)
+       (magit-push-always-verify nil)
+       (magit-push-arguments (quote ("--set-upstream")))
+       (magit-refresh-file-buffer-hook nil)
+       (magit-save-some-buffers nil)
+       (magit-set-upstream-on-push (quote askifnotset))
+       (magit-stage-all-confirm nil)
+       (magit-status-verbose-untracked nil)
+       (magit-unstage-all-confirm nil)
+       (magithub-message-confirm-cancellation nil)
+       (magithub-use-ssl t)))
 #+END_SRC
 ** Ediff
 #+BEGIN_SRC emacs-lisp
@@ -1214,15 +1040,6 @@
     (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/rs")))
     (setq compile-command
           "cd $WRK/;source ~/.nix-profile/etc/profile.d/nix.sh;nix-shell --run \"cargo build\"")
-    )
-
-
-  (defun es/setup-project-sp()
-    "Setup SP project."
-    (interactive)
-    (setenv "WRK" "/storvisor/work/cypress")
-    (setq compile-command
-          "cd $WRK; source ./setvars.sh debug; DBUILDCMD=\"make -j32 BUILDTYPE=debug\" ./docker/build_template/build.sh  buildcmd")
     )
 
 

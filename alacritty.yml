@@ -8,42 +8,43 @@ window:
   startup_mode: Fullscreen
 
 font:
+  size: 19.9
   normal:
     family: Fira Code
-    style: Regular
+    style: Light
 
   bold:
     family: Fira Code
-    style: Bold
+    style: Ligth Bold
 
   italic:
     family: Fira Code
-    style: Italic
+    style: Light Italic
 colors:
-  name: Default (dark)
-  author: Chris Kempson
+  # Default colors
   primary:
-    background: "#151515"
-    foreground: "#d0d0d0"
-  cursor:
-    text: "#151515"
-    cursor: "#d0d0d0"
+    background: '#2D2A2E'
+    foreground: '#FCFCFA'
+
+  # Normal colors
   normal:
-    black: "#151515"
-    red: "#ac4142"
-    green: "#90a959"
-    yellow: "#f4bf75"
-    blue: "#6a9fb5"
-    magenta: "#aa759f"
-    cyan: "#75b5aa"
-    white: "#d0d0d0"
+    black: '#403E41'
+    red: '#FF6188'
+    green: '#A9DC76'
+    yellow: '#FFD866'
+    blue: '#FC9867'
+    magenta: '#AB9DF2'
+    cyan: '#78DCE8'
+    white: '#FCFCFA'
+
+  # Bright colors
   bright:
-    black: "#505050"
-    red: "#ac4142"
-    green: "#90a959"
-    yellow: "#f4bf75"
-    blue: "#6a9fb5"
-    magenta: "#aa759f"
-    cyan: "#75b5aa"
-    white: "#f5f5f5"
-theme: Default.dark
+    black: '#727072'
+    red: '#FF6188'
+    green: '#A9DC76'
+    yellow: '#FFD866'
+    blue: '#FC9867'
+    magenta: '#AB9DF2'
+    cyan: '#78DCE8'
+    white: '#FCFCFA'
+theme: Monokai-Pro

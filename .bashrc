@@ -8,7 +8,7 @@ case $- in
     *) return;;
 esac
 
-
+export WRK="$HOME/wrk/apk"
 alias ssh='ssh -o "StrictHostKeyChecking no" -A'
 alias ff="find . -name"
 alias gg="git grep -n"
@@ -21,8 +21,8 @@ alias eo='emacsclient -n -s ~/.emacs.d/server'
 alias magit='ec --eval "(magit)"'
 alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
-alias tmuxa="tmux new -s MAIN || tmux attach"
-alias tmuxs="tmux new-session -d -s "
+alias tmuxa="tmux new -s MAIN -c $WRK || tmux attach"
+alias tmuxs="tmux new-session -c $WRK -d -s "
 alias tmuxfixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
 export EDITOR=ec
 export HISTCONTROL=ignoredups
@@ -121,7 +121,6 @@ fi
 # sync bash commands to file always
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
-export WRK="$HOME/wrk/apk"
 eval "$(direnv hook bash)"
 . "$HOME/.cargo/env"
 
@@ -136,7 +135,7 @@ export NVM_DIR="$HOME/.nvm"
 
 #~/24bit.sh
 if [ -f ~/24bit.sh ]; then
-    echo -n  "Color test: "
+    echo "Color test: "
     ~/24bit.sh
 fi
 
