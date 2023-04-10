@@ -384,6 +384,7 @@
     (load-theme 'doom-molokai t))
 
   (use-package monokai-pro-theme
+    :disabled
     :config
     (load-theme 'monokai-pro t))
 
@@ -1137,20 +1138,6 @@
 
 
   (use-package popup)
-  (use-package function-args
-    ;;:hook (prog-mode . function-args-mode)
-    :disabled
-    :config
-    (fa-config-default))
-
-  (use-package dap-mode
-    :hook prog-mode
-    :init
-    (require 'dap-gdb-lldb)
-    (warn-if-executable-not-found "gdb" "apt install gdb")
-    (warn-if-executable-not-found "gdb" "apt install lldb")
-    :hook
-    ('dap-stopped . (lambda (arg) (call-interactively #'dap-hydra))))
 #+END_SRC
 
 * Language server protocol (LSP)
