@@ -389,7 +389,6 @@
     (load-theme 'monokai-pro t))
 
   (use-package modus-themes
-    :disabled
     :config
     (load-theme 'modus-vivendi t))
 #+END_SRC
