@@ -8,6 +8,7 @@ case $- in
     *) return;;
 esac
 
+set -o emacs
 export WRK="$HOME/wrk/apk"
 alias ssh='ssh -o "StrictHostKeyChecking no" -A'
 alias ff="find . -name"
