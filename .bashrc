@@ -100,6 +100,26 @@ EOF
     git grep  --null --line-number "$@" | perl -e "$script"
 }
 
+laptop_power_debug() {
+    # For new latops debugs power consuption
+    sudo apt install powertop
+    # install lmt tools
+    sudo apt install laptop-mode-tools
+    sudo laptop-detect
+    status=$?
+    if [ $status -ne 0 ];
+    then
+        echo "Laptop not detected"
+        return 1
+    else
+        sudo laptop-detect -V
+        echo "Most likely running a laptop"
+    fi
+    sudo laptop_mode
+    sudo powertop --auto-tune
+    sudo powertop
+}
+
 export PYTHONSTARTUP=~/.pythonrc
 # Source rust and rust/cargo/nix
 #[ -f $HOME/.nix-profile/etc/profile.d/nix.sh ] && source $HOME/.nix-profile/etc/profile.d/nix.sh
@@ -144,3 +164,7 @@ fi
 
 #sh -c "$(curl -fsSL https://starship.rs/install.sh)"
 eval "$(starship init bash)"
+
+[ -f "/home/faraz/.foundry/" ] && export PATH="$PATH:/home/faraz/.foundry/bin"
+
+[ -f "/home/faraz/.ghcup/env" ] && source "/home/faraz/.ghcup/env" # ghcup-env
