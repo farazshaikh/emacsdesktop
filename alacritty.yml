@@ -10,15 +10,15 @@ window:
 font:
   size: 19.9
   normal:
-    family: Fira Code
+    family: FiraCode Nerd Font
     style: Light
 
   bold:
-    family: Fira Code
+    family: FiraCode Nerd Font
     style: Ligth Bold
 
   italic:
-    family: Fira Code
+    family: FiraCode Nerd Font
     style: Light Italic
 colors:
   name: bw (dark)
