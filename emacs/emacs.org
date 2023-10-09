@@ -289,6 +289,7 @@
 
 * Emacs UX
 ** Writeroom
+
 #+BEGIN_SRC emacs-lisp
   (use-package writeroom-mode
     :commands (writeroom-mode)
@@ -330,10 +331,10 @@
     (message "server after frame hook")
     (when
         (string-equal system-type "gnu/linux") ; linux
-      (when (member "Fira Code" (font-family-list))
-        (message "[INFO]: Font Fira Code Light")
-        (add-to-list 'initial-frame-alist '(font . "Fira Code Light"))
-        (add-to-list 'default-frame-alist '(font . "Fira Code Light"))))
+      (when (member "FiraCode Nerd Font, Light" (font-family-list))
+        (message "[INFO]: FiraCode Nerd Font, Light")
+        (add-to-list 'initial-frame-alist '(font . "FiraCode Nerd Font, Light"))
+        (add-to-list 'default-frame-alist '(font . "FiraCode Nerd Font, Light"))))
 
     (when
         (string-equal hostname "bobat") ; linux
