@@ -4,12 +4,12 @@
 [[ $- != *i* ]] && return
 # If not running interactively, don't do anything
 case $- in
-    *i*) ;;
-    *) return;;
+*i*) ;;
+*) return ;;
 esac
 
 set -o emacs
-export WRK="$HOME/wrk/apk"
+export WRK="$HOME/wrk/lyn"
 alias ssh='ssh -o "StrictHostKeyChecking no" -A'
 alias ff="find . -name"
 alias gg="git grep -n"
@@ -22,6 +22,8 @@ alias eo='emacsclient -n -s ~/.emacs.d/server'
 alias magit='ec --eval "(magit)"'
 alias toff="tmux set-window-option synchronize-panes off"
 alias ton="tmux set-window-option synchronize-panes on"
+alias ts="tmux split -h"
+alias tsv="tmux split"
 alias tmuxa="tmux new -s MAIN -c $WRK || tmux attach"
 alias tmuxs="tmux new-session -c $WRK -d -s "
 alias tmuxfixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
@@ -38,52 +40,48 @@ alias fixsound="pactl list short sinks | pactl set-default-sink alsa_output.pci-
 alias fixsound_z13="pactl list short sinks | pactl set-default-sink alsa_output.pci-0000_64_00.1.HiFi__hw_Generic_9__sink; \
        pactl list short sources | pactl set-default-source alsa_output.usb-Blue_Microphones_Yeti_X_2046SG003K88_888-000313110306-00.iec958-stereo.monitor"
 
-
-
 alias cargowatchlib='cargo watch -c -x  "test --release --message-format=human -- --nocapture"'
 alias cargowatch='cargo watch -c -x  "run --release --message-format=human -- --nocapture"'
 
-untarall ()
-{
-    for filegz in `ls *.tar.gz`
-    do
-	echo Untaring $filegz
-	mkdir `echo $filegz | cut -d "." -f1` > /dev/null
-	tar -zxvf $filegz -C `echo $filegz | cut -d "." -f1` > /dev/null
-    done
+untarall() {
+	for filegz in $(ls *.tar.gz); do
+		echo Untaring $filegz
+		mkdir $(echo $filegz | cut -d "." -f1) >/dev/null
+		tar -zxvf $filegz -C $(echo $filegz | cut -d "." -f1) >/dev/null
+	done
 }
 
 prune() {
-    if [ $# -eq 0 ]
-    then
-        echo "No arguments supplied, Example prune start end file"
-    else
-        sed -n '/$1/,/$2/p' $3
-    fi
+	if [ $# -eq 0 ]; then
+		echo "No arguments supplied, Example prune start end file"
+	else
+		sed -n '/$1/,/$2/p' $3
+	fi
 }
 
 g() {
-    git log --max-count=5 --format=oneline --abbrev-commit; git status ; git rev-parse --abbrev-ref HEAD
+	git log --max-count=5 --format=oneline --abbrev-commit
+	git status
+	git rev-parse --abbrev-ref HEAD
 }
-
 
 rustproj() {
-    mkdir ~/rustplay
-    cd ~/rustplay
-    cargo init $1
-    cd $1
-    $EDITOR ./src/main.rs
+	mkdir ~/rustplay
+	cd ~/rustplay
+	cargo init $1
+	cd $1
+	$EDITOR ./src/main.rs
 }
 
-runtillfail () {
-    command=$1
-    while $command; do :; done
+runtillfail() {
+	command=$1
+	while $command; do :; done
 }
-
 
 function git-grepblame {
-    local script
-    script="$(cat <<'EOF'
+	local script
+	script="$(
+		cat <<'EOF'
   my $input = do { local $/=undef; <> };
   while ($input =~ m!\A(([^\0]+)\0([1-9][0-9]*)\0([^\n]+)\n)!xmsg) {
     my ($orig, $filename, $lineno, $line) = ($1, $2, $3, $4);
@@ -96,28 +94,27 @@ function git-grepblame {
     >;
   }
 EOF
-  )"
-    git grep  --null --line-number "$@" | perl -e "$script"
+	)"
+	git grep --null --line-number "$@" | perl -e "$script"
 }
 
 laptop_power_debug() {
-    # For new latops debugs power consuption
-    sudo apt install powertop
-    # install lmt tools
-    sudo apt install laptop-mode-tools
-    sudo laptop-detect
-    status=$?
-    if [ $status -ne 0 ];
-    then
-        echo "Laptop not detected"
-        return 1
-    else
-        sudo laptop-detect -V
-        echo "Most likely running a laptop"
-    fi
-    sudo laptop_mode
-    sudo powertop --auto-tune
-    sudo powertop
+	# For new latops debugs power consuption
+	sudo apt install powertop
+	# install lmt tools
+	sudo apt install laptop-mode-tools
+	sudo laptop-detect
+	status=$?
+	if [ $status -ne 0 ]; then
+		echo "Laptop not detected"
+		return 1
+	else
+		sudo laptop-detect -V
+		echo "Most likely running a laptop"
+	fi
+	sudo laptop_mode
+	sudo powertop --auto-tune
+	sudo powertop
 }
 
 export PYTHONSTARTUP=~/.pythonrc
@@ -130,14 +127,11 @@ export PYTHONSTARTUP=~/.pythonrc
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
 # nvim
-if command -v nvim &> /dev/null
-then
-    alias vimdiff='nvim -d'
-    alias vim='nvim'
-    alias vi='nvim'
+if command -v nvim &>/dev/null; then
+	alias vimdiff='nvim -d'
+	alias vim='nvim'
+	alias vi='nvim'
 fi
-
-
 
 # sync bash commands to file always
 shopt -s histappend
@@ -151,13 +145,13 @@ GEM_COMPLETION=/opt/vagrant/embedded/gems/2.2.16/gems/vagrant-2.2.16/contrib/bas
 # <<<<  Vagrant command completion (end)
 
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
 
 #~/24bit.sh
 if [ -f ~/24bit.sh ]; then
-    echo "Color test: "
-    ~/24bit.sh
+	echo "Color test: "
+	~/24bit.sh
 fi
 
 [ -f ~/.bash_completion/alacritty ] && source ~/.bash_completion/alacritty

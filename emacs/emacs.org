@@ -375,20 +375,19 @@
     :config
     (winner-mode 1))
 #+END_SRC
+** Clipetty X Copy paste
+#+BEGIN_SRC emacs-lisp
+(use-package clipetty
+  :ensure t
+  :hook (after-init . global-clipetty-mode))
+#+END_SRC
+** Treemacs
+#+BEGIN_SRC emacs-lisp
+  (use-package treemacs)
+#+END_SRC
+
 * Emacs Themes
 #+BEGIN_SRC emacs-lisp
-  ;; The theme work in GUI mode.
-  ;; For terminal mode make sure that the term support True Color
-  (use-package doom-themes
-    :disabled
-    :config
-    (load-theme 'doom-molokai t))
-
-  (use-package monokai-pro-theme
-    :disabled
-    :config
-    (load-theme 'monokai-pro t))
-
   (use-package modus-themes
     :config
     (load-theme 'modus-vivendi t))
@@ -456,10 +455,9 @@
 #+END_SRC
 
 * IVY Counsel
-** swiper
+** Counsel
 #+BEGIN_SRC emacs-lisp :eval no
   (use-package flx)
-
   (defun ivy-switch-file-search ()
     "Switch to counsel-file-jump, preserving current input."
     (interactive)
@@ -468,6 +466,7 @@
 
   (use-package counsel
     :bind
+    :disabled
     (("M-x" . counsel-M-x)
      ("s-x" . counsel-M-x)
      ("C-x C-f" . counsel-find-file)
@@ -485,7 +484,9 @@
      ("RET" . ivy-alt-done))
     :config
     (counsel-mode 1))
-
+#+END_SRC
+** ivy
+#+BEGIN_SRC emacs-lisp :eval no
   (use-package ivy
     :disabled
     :diminish (ivy-mode)
@@ -504,7 +505,8 @@
     :config
     (ivy-mode 1))
 
-  (use-package ivy-hydra)
+  (use-package ivy-hydra
+    :disabled)
 
   (defun ivy-fix()
     "Fix ivy prefix its a work around there is unwanted interacttion in variable settings due to use package."
@@ -543,7 +545,9 @@
      '(ivy-posframe-border ((t (:inherit internal-border :background "white" :foreground "white")))))
     ;;(setq ivy-posframe-width 50)
     (ivy-posframe-mode 1))
-
+    #+END_SRC
+** swiper
+#+BEGIN_SRC emacs-lisp :eval no
   (use-package swiper
     :disabled
     :bind (("C-s" . swiper-isearch)
@@ -556,8 +560,11 @@
     :config
     (ivy-mode 1)
     (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
+#+END_SRC
 
-  (use-package marginalia
+* Merginalia
+#+BEGIN_SRC emacs-lisp
+    (use-package marginalia
     :config
     (marginalia-mode 1))
 #+END_SRC
@@ -588,15 +595,9 @@
     ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
     (setq vertico-cycle t))
 
-  (use-package vertico-posframe
-    ;;:disabled
-    :init
-    (vertico-posframe-mode)
+  (use-package vertico-prescient
     :config
-    (setq vertico-multiform-commands
-          '((consult-line posframe (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center))
-            (consult-buffer posframe (vertico-posframe-poshandler . posframe-poshandler-frame-bottom-center))
-            (t posframe (vertico-posframe-poshandler . posframe-poshandler-point-bottom-left-corner)))))
+    (vertico-prescient-mode))
 
   ;; A few more useful configurations...
   (use-package emacs
@@ -1067,7 +1068,8 @@
     :init
     (projectile-add-known-project (getenv "WRK"))
     :bind
-    ("C-c p" . hydra-projectile/body))
+    ("C-x f" . project-find-file)
+    ("C-c p" . hydra-projectile/bfody))
 
   (defhydra hydra-projectile-other-window (:color teal)
     "projectile-other-window"
@@ -1378,6 +1380,11 @@
           company-minimum-prefix-length 1)
     (global-company-mode))
 
+  (use-package company-prescient
+    :if (company-engine)
+    :config
+    (company-prescient-mode))
+
   (use-package company-quickhelp
     :if (company-engine)
     :hook (company-mode)
@@ -1444,9 +1451,16 @@
     (global-corfu-mode))
 
   (use-package corfu-terminal
+    :if (corfu-engine)
     :after corfu
     :init
     (corfu-terminal-mode))
+
+  (use-package corfu-prescient
+    :if (corfu-engine)
+    :after corfu
+    :config
+    (corfu-prescient-mode))
 
   (use-package kind-icon
     :if (corfu-engine)
@@ -1765,6 +1779,7 @@
 #+END_SRC
 * File Experimental
 #+BEGIN_SRC emacs-lisp
+  
 #+END_SRC
 
 * Restore GC
