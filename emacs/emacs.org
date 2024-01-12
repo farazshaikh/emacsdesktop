@@ -783,7 +783,6 @@
   (use-package whitespace
     :hook
     (prog-mode . whitespace-mode)
-    (prog-mode . display-fill-column-indicator-mode)
     :init
     (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode VTerm))
     (dolist (hook '(ansi-term-mode-hook
@@ -796,8 +795,8 @@
                 (lambda () (setq show-trailing-whitespace nil))))
     :custom
     (show-trailing-whitespace t)
-    (fill-column 80)
-    (whitespace-style (quote (face empty tabs whitespace))))
+    (whitespace-line-column 80)
+    (whitespace-style (quote (face empty tabs whitespace lines-tail trailing))))
   #+END_SRC
 ** Flyspell
 #+BEGIN_SRC emacs-lisp
@@ -1779,7 +1778,6 @@
 #+END_SRC
 * File Experimental
 #+BEGIN_SRC emacs-lisp
-  
 #+END_SRC
 
 * Restore GC
@@ -1801,7 +1799,7 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Setup common variables across packages ;;
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (setq custom-file "~/.emacs_custom.el")
+  (setq custom-file "~/.eos/emacsdesktop/emacs/.emacs_custom.el")
   (load custom-file t)
 #+END_SRC
 
