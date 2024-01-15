@@ -162,3 +162,5 @@ eval "$(starship init bash)"
 [ -f "/home/faraz/.foundry/" ] && export PATH="$PATH:/home/faraz/.foundry/bin"
 
 [ -f "/home/faraz/.ghcup/env" ] && source "/home/faraz/.ghcup/env" # ghcup-env
+
+export PATH="$PATH:/home/faraz/.foundry/bin"
