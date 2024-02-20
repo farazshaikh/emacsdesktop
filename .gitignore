@@ -4,3 +4,4 @@ a.out
 *#
 *.code-workspace
 frz_local_notes/
+.gdb_history

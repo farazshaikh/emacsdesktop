@@ -96,6 +96,13 @@
     :config (quelpa-use-package-activate-advice))
 #+END_SRC
 
+* Emacs Editor settings
+#+BEGIN_SRC emacs-lisp
+  (use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode 1))
+#+END_SRC
 
 * Emacs Editor settings
 #+BEGIN_SRC emacs-lisp
@@ -316,7 +323,7 @@
 #+BEGIN_SRC emacs-lisp
   (defun set-exec-path-from-shell-PATH ()
     "Set up Emacs' `exec-path' and PATH environment variable to match
-  that used by the user's shell."
+    that used by the user's shell."
     (interactive)
     (let ((path-from-shell (replace-regexp-in-string
                             "[ \t\n]*$" "" (shell-command-to-string
@@ -328,6 +335,10 @@
   (defun custom/setup-font-faces ()
     (set-exec-path-from-shell-PATH)
     ;; set default font in initial window and for any new window
+
+    (custom-set-faces
+     '(markdown-code-face ((t (:inherit default)))))
+
     (message "server after frame hook")
     (when
         (string-equal system-type "gnu/linux") ; linux
@@ -783,6 +794,7 @@
   (use-package whitespace
     :hook
     (prog-mode . whitespace-mode)
+    (rust-mode . (lambda () (setq whitespace-line-column 99)))
     :init
     (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode VTerm))
     (dolist (hook '(ansi-term-mode-hook
