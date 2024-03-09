@@ -1287,10 +1287,13 @@
   (use-package lsp-ui
     :diminish
     :bind (:map lsp-ui-mode-map
-                ([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
-                ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M-Shift-/
-                ([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
-                ("C-c u" . lsp-ui-imenu))
+		([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
+		([remap xref-find-references] . lsp-ui-peek-find-references) ;; M-Shift-/
+		([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
+		("C-c u" . lsp-ui-imenu))
+    :bind (:map lsp-ui-flycheck-list-mode-map
+		("M-RET" . lsp-ui-flycheck-list--visit)
+		("RET" . lsp-ui-flycheck-list--view))
 
     :custom
     (lsp-ui-doc-glance t)
@@ -1325,12 +1328,12 @@
 
   (defhydra hydra-lsp (:exit t :hint nil)
     "
-   Buffer^^               Server^^                   Symbol
-  -------------------------------------------------------------------------------------
-   [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
-   [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
-   [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature       [_c_] clear blacklist
-   [_e_] describe session"
+    Buffer^^               Server^^                   Symbol
+   -------------------------------------------------------------------------------------
+    [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
+    [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
+    [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature       [_c_] clear blacklist
+    [_e_] describe session"
     ("d" lsp-find-declaration)
     ("D" lsp-ui-peek-find-definitions)
     ("R" lsp-ui-peek-find-references)
@@ -1548,7 +1551,7 @@
     (warn-if-executable-not-found "rustfmt" "rustup component add rustfmt")
     :config
     (setq rust-format-on-save t))
-  (use-package flycheck-rust
+   (use-package flycheck-rust
     :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+END_SRC
 ** Rust Cargo
@@ -1790,6 +1793,47 @@
 #+END_SRC
 * File Experimental
 #+BEGIN_SRC emacs-lisp
+  (use-package corfu-candidate-overlay
+    :after corfu
+    :config
+    ;; enable corfu-candidate-overlay mode globally
+    ;; this relies on having corfu-auto set to nil
+    (setq corfu-auto nil)
+    (corfu-candidate-overlay-mode +1)
+    ;; bind Ctrl + TAB to trigger the completion popup of corfu
+    (global-set-key (kbd "C-<tab>") 'completion-at-point)
+    ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
+    ;; (keybing <iso-lefttab> may not work for your keyboard model)
+    (global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point))
+
+  (use-package treesit-auto
+    :custom
+    (treesit-auto-install 'prompt)
+    :config
+    (treesit-auto-add-to-auto-mode-alist 'all)
+    (global-treesit-auto-mode))
+
+  (setq treesit-language-source-alist
+        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+          (rust "https://github.com/tree-sitter/tree-sitter-rust")
+          (cmake "https://github.com/uyha/tree-sitter-cmake")
+          (css "https://github.com/tree-sitter/tree-sitter-css")
+          (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+          (go "https://github.com/tree-sitter/tree-sitter-go")
+          (html "https://github.com/tree-sitter/tree-sitter-html")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
+          (make "https://github.com/alemuller/tree-sitter-make")
+          (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+          (python "https://github.com/tree-sitter/tree-sitter-python")
+          (toml "https://github.com/tree-sitter/tree-sitter-toml")
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+
+  (if (functionp 'json-serialize)
+      (message "Native JSON is available")
+    (message "WARN Native JSON is *not* available"))
 #+END_SRC
 
 * Restore GC

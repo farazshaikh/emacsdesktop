@@ -117,7 +117,8 @@ laptop_power_debug() {
 	sudo powertop
 }
 
-export PYTHONSTARTUP=~/.pythonrc
+[ -f ~/.python.rc ] && export PYTHONSTARTUP=~/.python.rc
+
 # Source rust and rust/cargo/nix
 #[ -f $HOME/.nix-profile/etc/profile.d/nix.sh ] && source $HOME/.nix-profile/etc/profile.d/nix.sh
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
