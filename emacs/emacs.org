@@ -14,31 +14,11 @@
 #+BEGIN_SRC emacs-lisp
   (defun es/check-version()
     "Check that Emacs version is at the least supported version."
-    (if (version< emacs-version  "24.4")
-        (error "Script depends on Emacs version being greater than 24.4")
-      (message "Version greater or equal to 24.4")))
+    (if (version< emacs-version  "29")
+        (error "Script depends on Emacs version being greater than 29")
+      (message "Version greater or equal to 29")))
   (es/check-version)
 #+END_SRC
-* Faster GC
-#+BEGIN_SRC emacs-lisp
-  ;; Make startup faster by reducing the frequency of garbage
-  ;; collection.  The default is 800 kilobytes.  Measured in bytes.
-  ;; Following setting saves 0.2 seconds an brings startup times down to 1.1sec
-  ;; (setq gc-cons-threshold (* 250 1000 1000))
-  (setq package-enable-at-startup nil
-        message-log-max 16384
-        gc-cons-threshold 402653184
-        gc-cons-percentage 0.6
-        auto-window-vscroll nil)
-
-  (add-hook 'after-init-hook
-            `(lambda ()
-               (setq gc-cons-threshold 800000
-                     gc-cons-percentage 0.1)
-               (garbage-collect)) t)
-#+END_SRC
-
-
 
 * Package Mgmt
 ** Package Source Setup
@@ -53,9 +33,9 @@
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
     ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
     ;; and `package-pinned-packages`. Most users will not need or want to do this.
-    (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
-    (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
-    (add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+    ;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+    ;;(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
+    ;;(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
     (package-initialize)
 
     (unless package-archive-contents
@@ -79,6 +59,7 @@
   (require 'use-package-ensure)
   (setq use-package-always-ensure t)
   (setq use-package-compute-statistics t)
+  (setq use-package-always-demand t)
   ;;(setq use-package-always-pin "melpa")
   (use-package auto-package-update
     :disabled
@@ -86,22 +67,13 @@
     (auto-package-update-maybe))
 
   (use-package use-package-hydra)
-  (use-package diminish
-    :demand)
+  (use-package diminish)
 
   ;; quelpa
   (use-package quelpa)
   (use-package quelpa-use-package
     :init (setq quelpa-update-melpa-p nil)
     :config (quelpa-use-package-activate-advice))
-#+END_SRC
-
-* Emacs Editor settings
-#+BEGIN_SRC emacs-lisp
-  (use-package editorconfig
-  :ensure t
-  :config
-  (editorconfig-mode 1))
 #+END_SRC
 
 * Emacs Editor settings
@@ -148,24 +120,28 @@
     (set-face-background 'vertical-border "grey2")
 
     (progn
-     (menu-bar-mode -1)
-     (tool-bar-mode -1)
-     ;;(scroll-bar-mode -1)
-     (global-eldoc-mode 1)
-     (global-visual-line-mode t)
-     ;; default 8 pixel fringes on both sides
-     ;; fringe-mode nil
-     (savehist-mode 1)
-     (line-number-mode 1)
-     (column-number-mode 1)
-     (show-paren-mode 1)
-     (global-hl-line-mode 1)
-     (which-function-mode -1)
-     (xterm-mouse-mode 1)
-     (abbrev-mode 1)
-     ;; kill tabs
-     (indent-tabs-mode nil))
+      (menu-bar-mode -1)
+      (tool-bar-mode -1)
+      ;;(scroll-bar-mode -1)
+      (global-eldoc-mode 1)
+      (global-visual-line-mode t)
+      ;; default 8 pixel fringes on both sides
+      ;; fringe-mode nil
+      (savehist-mode 1)
+      (line-number-mode 1)
+      (column-number-mode 1)
+      (show-paren-mode 1)
+      (global-hl-line-mode 1)
+      (which-function-mode -1)
+      (xterm-mouse-mode 1)
+      (abbrev-mode 1)
+      ;; kill tabs
+      (indent-tabs-mode nil))
 
+    (use-package editorconfig
+      :ensure t
+      :config
+      (editorconfig-mode 1))
     (message "[INFO] es/emacs-base-settings"))
 #+END_SRC
 
@@ -177,123 +153,8 @@
       (if full-path
           (message "[INFO] %s: %s" filename full-path)
         (message " [WARN] %s file not found: Help %s" filename help))))
-
-  (defun es/unsafe-signature-override()
-    "DEPRECATED: Override package signature check requirements."
-    (package-initialize)
-    (unless (package-installed-p 'gnu-elpa-keyring-update)
-      (progn
-        (setq package-check-signature nil)
-        (es/setup-package-mgmt)
-        (package-install 'gnu-elpa-keyring-update)
-        (setq package-check-signature t)))
-    (message "[INFO] es/setup-package-mgmt"))
-  ;;(es/unsafe-signature-override)
+    (message "[INFO] es/setup-package-mgmt")
 #+END_SRC
-* Emacs workarounds
-#+BEGIN_SRC emacs-lisp
-  ;;;;;;;;;;;;;;;
-  ;;Workarounds;;
-  ;;;;;;;;;;;;;;;
-  ;;https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
-  (defun my:force-modes (rule-mode &rest modes)
-    "RULE-MODE MODES switch on/off several modes depending of state of the controlling minor mode."
-    (let ((rule-state (if rule-mode 1 -1)
-                      ))
-      (mapcar (lambda (k) (funcall k rule-state)) modes)
-      )
-    )
-  (defvar my:prev-whitespace-mode nil)
-  (make-variable-buffer-local 'my:prev-whitespace-mode)
-  (defvar my:prev-whitespace-pushed nil)
-  (make-variable-buffer-local 'my:prev-whitespace-pushed)
-  (defun my:push-whitespace (&rest skip)
-    "SKIP docstring :(."
-    (if my:prev-whitespace-pushed () (progn
-                                       (setq my:prev-whitespace-mode whitespace-mode)
-                                       (setq my:prev-whitespace-pushed t)
-                                       (my:force-modes nil 'whitespace-mode)
-                                       ))
-    )
-
-  (defun my:pop-whitespace (&rest skip)
-    "SKIP docstring :(."
-    (if my:prev-whitespace-pushed (progn
-                                    (setq my:prev-whitespace-pushed nil)
-                                    (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
-                                    ))
-    )
-  (advice-add 'popup-draw :before #'my:push-whitespace)
-  (advice-add 'popup-delete :after #'my:pop-whitespace)
-  ;; End workaround auto complete and whitespace
-
-
-  ;; Compilation buffer colorize
-  (when (require 'ansi-color nil t)
-    (defun colorize-compilation-buffer ()
-      (when (eq major-mode 'compilation-mode)
-        (ansi-color-apply-on-region compilation-filter-start (point-max))))
-    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
-
-  ;;  terminal mode settings
-  (add-hook 'ansi-term-mode-hook '(lambda ()
-                                    (setq term-buffer-maximum-size 0)
-                                    (setq-default show-trailing-whitespace nil)))
-#+END_SRC
-
-
-
-#+BEGIN_SRC emacs-lisp
-   ;;;;;;;;;;;;;;;
-  ;;Workarounds;;
-  ;;;;;;;;;;;;;;;
-  ;;https://stackoverflow.com/questions/12965814/emacs-how-can-i-eliminate-whitespace-mode-in-auto-complete-pop-ups/27960576#27960576
-  (defun my:force-modes (rule-mode &rest modes)
-    "RULE-MODE MODES switch on/off several modes depending of state of the controlling minor mode."
-    (let ((rule-state (if rule-mode 1 -1)
-                      ))
-      (mapcar (lambda (k) (funcall k rule-state)) modes)
-      )
-    )
-  (defvar my:prev-whitespace-mode nil)
-  (make-variable-buffer-local 'my:prev-whitespace-mode)
-  (defvar my:prev-whitespace-pushed nil)
-  (make-variable-buffer-local 'my:prev-whitespace-pushed)
-  (defun my:push-whitespace (&rest skip)
-    "SKIP docstring :(."
-    (if my:prev-whitespace-pushed () (progn
-                                       (setq my:prev-whitespace-mode whitespace-mode)
-                                       (setq my:prev-whitespace-pushed t)
-                                       (my:force-modes nil 'whitespace-mode)
-                                       ))
-    )
-
-  (defun my:pop-whitespace (&rest skip)
-    "SKIP docstring :(."
-    (if my:prev-whitespace-pushed (progn
-                                    (setq my:prev-whitespace-pushed nil)
-                                    (my:force-modes my:prev-whitespace-mode 'whitespace-mode)
-                                    ))
-    )
-  (advice-add 'popup-draw :before #'my:push-whitespace)
-  (advice-add 'popup-delete :after #'my:pop-whitespace)
-  ;; End workaround auto complete and whitespace
-
-
-  ;; Compilation buffer colorize
-  (when (require 'ansi-color nil t)
-    (defun colorize-compilation-buffer ()
-      (when (eq major-mode 'compilation-mode)
-        (ansi-color-apply-on-region compilation-filter-start (point-max))))
-    (add-hook 'compilation-filter-hook 'colorize-compilation-buffer))
-
-  ;;  terminal mode settings
-  (add-hook 'ansi-term-mode-hook '(lambda ()
-                                    (setq term-buffer-maximum-size 0)
-                                    (setq-default show-trailing-whitespace nil)
-                                    ))
-#+END_SRC
-
 * Emacs UX
 ** Writeroom
 
@@ -335,10 +196,6 @@
   (defun custom/setup-font-faces ()
     (set-exec-path-from-shell-PATH)
     ;; set default font in initial window and for any new window
-
-    (custom-set-faces
-     '(markdown-code-face ((t (:inherit default)))))
-
     (message "server after frame hook")
     (when
         (string-equal system-type "gnu/linux") ; linux
@@ -403,24 +260,16 @@
     :config
     (load-theme 'modus-vivendi t))
 #+END_SRC
+* Merginalia
+#+BEGIN_SRC emacs-lisp
+    (use-package marginalia
+    :config
+    (marginalia-mode 1))
+#+END_SRC
+
 * Emacs Mode line  (DOOM LINE)
 #+BEGIN_SRC emacs-lisp
-  (use-package unicode-fonts
-    :if window-system)
-
-  (use-package all-the-icons-dired
-    :if window-system)
-  (use-package all-the-icons
-    :if window-system
-    :hook
-    (dired-mode . all-the-icons-dired-mode)
-    :config
-    (message "[INFO] es/use-package-all-the-icons")
-    (when (not (member "all-the-icons" (font-family-list)))
-      (all-the-icons-install-fonts t)))
-
   (use-package doom-modeline
-    :pin melpa
     :ensure t
     :hook (after-init . doom-modeline-mode))
 #+END_SRC
@@ -463,121 +312,6 @@
     (global-set-key (kbd "<s-S-right>") 'windower-swap-right)
     (global-set-key (kbd "<s-tab>") 'windower-switch-to-last-buffer)
     (global-set-key (kbd "<s-o>") 'windower-toggle-single))
-#+END_SRC
-
-* IVY Counsel
-** Counsel
-#+BEGIN_SRC emacs-lisp :eval no
-  (use-package flx)
-  (defun ivy-switch-file-search ()
-    "Switch to counsel-file-jump, preserving current input."
-    (interactive)
-    (let ((input (ivy--input)))
-      (ivy-quit-and-run (counsel-git))))
-
-  (use-package counsel
-    :bind
-    :disabled
-    (("M-x" . counsel-M-x)
-     ("s-x" . counsel-M-x)
-     ("C-x C-f" . counsel-find-file)
-     ("C-j" . counsel-mark-ring)
-     ("C-x C-j" . counsel-fzf)
-     ("s-d" . counsel-linux-app)
-     ("M-y" . counsel-yank-pop)
-     ("C-x b" . counsel-switch-buffer)
-     :map ivy-minibuffer-map
-     ("M-y" . ivy-next-line)
-
-     :map counsel-find-file-map
-     ("M-." . ivy-switch-file-search)
-     ("C-h" . counsel-up-directory)
-     ("RET" . ivy-alt-done))
-    :config
-    (counsel-mode 1))
-#+END_SRC
-** ivy
-#+BEGIN_SRC emacs-lisp :eval no
-  (use-package ivy
-    :disabled
-    :diminish (ivy-mode)
-    :bind (("<f5>" . compile)
-           ("s-b" . ivy-switch-buffer))
-    :custom
-    (global-set-key (kbd "C-d") 'ivy-backward-delete-char)
-    (ivy-use-virtual-buffers t)
-    (ivy-count-format "%d/%d ")
-    (ivy-display-style 'fancy)
-    (ivy-wrap t)
-    (ivy-use-virtual-buffers t)
-    (ivy-re-builders-alist
-     '((swiper . ivy--regex)
-       (t      . ivy--regex-plus)))
-    :config
-    (ivy-mode 1))
-
-  (use-package ivy-hydra
-    :disabled)
-
-  (defun ivy-fix()
-    "Fix ivy prefix its a work around there is unwanted interacttion in variable settings due to use package."
-    (interactive)
-    (message "[INFO] fixing ivy prefixes")
-    (setq ivy-initial-inputs-alist
-          '((counsel-minor . "^+")
-            (counsel-package . "^+")
-            (counsel-org-capture . "^")
-            (counsel-M-x . "")
-            (counsel-describe-function . "^")
-            (counsel-describe-variable . "^"))))
-
-  (use-package ivy-posframe
-    :disabled
-    :config
-    ;; Required for EXWM
-    (if (and window-system (getenv "EOS_DESKTOP"))
-        (setq ivy-posframe-parameters '((parent-frame nil))))
-    ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display)))
-    ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-center)))
-    ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-center)))
-    ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-bottom-left)))
-    ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-window-bottom-left)))
-    ;; (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point)))
-    (setq ivy-posframe-display-functions-alist
-          '((swiper-isearch  . ivy-posframe-display-at-window-bottom-left)
-            (complete-symbol . ivy-posframe-display-at-point)
-            (counsel-M-x     . ivy-posframe-display-at-point)
-            (counsel-mark-ring . ivy-posframe-display-at-window-bottom-left)
-            (ivy-switch-buffer . ivy-posframe-display-at-window-bottom-left)
-            (t               . ivy-posframe-display-at-point)))
-
-    (custom-set-faces
-     '(ivy-current-match ((t (:box (:line-width 2 :style released-button)))))
-     '(ivy-posframe-border ((t (:inherit internal-border :background "white" :foreground "white")))))
-    ;;(setq ivy-posframe-width 50)
-    (ivy-posframe-mode 1))
-    #+END_SRC
-** swiper
-#+BEGIN_SRC emacs-lisp :eval no
-  (use-package swiper
-    :disabled
-    :bind (("C-s" . swiper-isearch)
-           ("C-r" . swiper-isearch)
-           ("C-c C-r" . ivy-resume))
-    :hook (window-setup . ivy-fix)
-    :custom
-    ((ivy-use-virtual-buffers t)
-     (ivy-display-style 'fancy))
-    :config
-    (ivy-mode 1)
-    (define-key read-expression-map (kbd "C-r") 'counsel-expression-history))
-#+END_SRC
-
-* Merginalia
-#+BEGIN_SRC emacs-lisp
-    (use-package marginalia
-    :config
-    (marginalia-mode 1))
 #+END_SRC
 
 * Vertico Consult
@@ -755,10 +489,6 @@
 #+END_SRC
 
 * Search Tooling
-** ag
-** rg
-** ssh-agency
-** persistent-scratch
 #+BEGIN_SRC emacs-lisp
   (use-package ag
     :disabled
@@ -795,6 +525,7 @@
     :hook
     (prog-mode . whitespace-mode)
     (rust-mode . (lambda () (setq whitespace-line-column 99)))
+    (rust-ts-mode . (lambda () (setq whitespace-line-column 99)))
     :init
     (setq whitespace-global-modes '(not exwm-mode treemacs-mode Term-mode VTerm))
     (dolist (hook '(ansi-term-mode-hook
@@ -822,12 +553,6 @@
     (prog-mode . flyspell-prog-mode)
     (text-mode . flyspell-mode)
     (flyspell-mode . flyspell-local-vars))
-
-  (use-package flyspell-correct-ivy
-    :bind ("C-;" . flyspell-correct-wrapper)
-    :init
-    (global-eldoc-mode -1)
-    (setq flyspell-correct-interface #'flyspell-correct-ivy))
 #+END_SRC
 ** Fly check
 #+BEGIN_SRC emacs-lisp
@@ -1047,31 +772,7 @@
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ;; Project Specific Setup                   ;;
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  (defun es/setup-project-dfn()
-    "Setup DFN project."
-    (interactive)
-    (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/dfn/dfinity/rs")))
-    (setq compile-command
-          "cd $WRK/;source ~/.nix-profile/etc/profile.d/nix.sh;nix-shell --run \"cargo build\"")
-    )
-
-
-  (defun es/setup-project-excb()
-    "Setup Excubito Project."
-    (interactive)
-    (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/excubito_workspace/hazen/.")))
-    )
-
-  (defun es/setup-project-apk()
-    "Setup Excubito Project."
-    (interactive)
-    (setenv "WRK" (concat (concat "/home/" (getenv "USER") "/wrk/apk/.")))
-    )
-  (es/setup-project-apk)
-
   ;; Setup projectile
-  (use-package counsel-projectile)
-
   (use-package projectile
     :config
     (projectile-mode 1)
@@ -1079,62 +780,11 @@
     :init
     (projectile-add-known-project (getenv "WRK"))
     :bind
-    ("C-x f" . project-find-file)
-    ("C-c p" . hydra-projectile/bfody))
-
-  (defhydra hydra-projectile-other-window (:color teal)
-    "projectile-other-window"
-    ("f"  projectile-find-file-other-window        "file")
-    ("g"  projectile-find-file-dwim-other-window   "file dwim")
-    ("d"  projectile-find-dir-other-window         "dir")
-    ("b"  projectile-switch-to-buffer-other-window "buffer")
-    ("q"  nil                                      "cancel" :color blue))
-
-  (defhydra hydra-projectile (:exit nil
-                                    :color teal
-                                    :hint nil)
-    "
-       PROJECTILE: %(projectile-project-root)
-
-       Find File            Search/Tags          Buffers                Cache
-  ------------------------------------------------------------------------------------------
-  _s-f_: file            _a_: ag                _i_: Ibuffer           _c_: cache clear
-   _ff_: file dwim       _g_: update gtags      _b_: switch to buffer  _x_: remove known project
-   _fd_: file curr dir   _o_: multi-occur     _s-k_: Kill all buffers  _X_: cleanup non-existing
-    _r_: recent file                                               ^^^^_z_: cache current
-    _d_: dir
-
-  "
-    ("a"   counsel-projectile-ag)
-    ("b"   counsel-projectile-switch-to-buffer)
-    ("c"   projectile-invalidate-cache)
-    ("d"   counsel-projectile-find-dir)
-    ("s-f" counsel-projectile-find-file)
-    ("ff"  counsel-projectile-find-file-dwim)
-    ("fd"  projectile-find-file-in-directory)
-    ("g"   ggtags-update-tags)
-    ("s-g" ggtags-update-tags)
-    ("i"   projectile-ibuffer)
-    ("K"   projectile-kill-buffers)
-    ("s-k" projectile-kill-buffers)
-    ("m"   projectile-multi-occur)
-    ("o"   projectile-multi-occur)
-    ("s-p" counsel-projectile-switch-project "switch project")
-    ("p"   counsel-projectile-switch-project)
-    ("s"   counsel-projectile-switch-project)
-    ("r"   projectile-recentf)
-    ("x"   projectile-remove-known-project)
-    ("X"   projectile-cleanup-known-projects)
-    ("z"   projectile-cache-current-file)
-    ("`"   hydra-projectile-other-window/body "other window")
-    ("q"   nil "cancel" :color blue))
+    ("C-x f" . project-find-file))
 #+END_SRC
 
 
 * Programming common
-** Yas
-** Popup
-** dap-mode
 #+BEGIN_SRC emacs-lisp
   ;; YAS
   (use-package yasnippet-snippets)
@@ -1148,15 +798,11 @@
   (use-package yasnippet-snippets
     :pin gnu
     :defer)
-
-
-  (use-package popup)
 #+END_SRC
 
 * Language server protocol (LSP)
 ** LSP-Mode
 #+BEGIN_SRC emacs-lisp
-  (custom-set-faces '(markdown-code-face ((t (:inherit default)))))
   (use-package lsp-mode
     :commands lsp
     :functions lsp-session lsp--persist-session
@@ -1171,8 +817,6 @@
     (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
     (lsp-restart 'auto-restart)
     (lsp-enable-file-watchers nil)
-    (lsp-file-watch-threshold 64)
-    (lsp-auto-guess-root nil)
 
     ;; completions are better handled by company-box
     (lsp-completion-no-cache nil)
@@ -1227,8 +871,6 @@
     ;;cpp
     (lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
 
-    ;; `company-lsp' is automatically enabled
-    ;; (lsp-enable-completion-at-point nil)
     (lsp-file-watch-ignored '(
                               "[/\\\\]\\.direnv$"
                                           ; SCM tools
@@ -1409,11 +1051,6 @@
     :if (company-engine)
     :hook (company-mode . company-box-mode)
     :custom (company-box-icons-alist 'company-box-icons-all-the-icons))
-
-  (use-package company-posframe
-    :if (company-engine)
-    :config
-    (company-posframe-mode))
 #+END_SRC
 ** Corfu
 #+BEGIN_SRC emacs-lisp
@@ -1428,14 +1065,7 @@
     (corfu-auto t)                    ;; Enable auto completion
     (corfu-auto-delay 0.0)
     (corfu-separator ?\s)             ;; Orderless field separator
-    ;;(corfu-quit-at-boundary 'separator)   ;; Never quit at completion boundary
     (corfu-preview-current nil)
-    ;;(corfu-preselect-first nil)       ;; Disable candidate preselection
-    ;; (corfu-quit-no-match nil)      ;; Never quit, even if there is no match
-    ;; (corfu-on-exact-match nil)     ;; Configure handling of exact matches
-    ;; (corfu-scroll-margin 5)        ;; Use scroll margin
-    ;;(corfu-quit-no-match t)
-    ;;    (corfu-echo-documentation nil)
 
     ;; Enable Corfu only for certain modes.
     :hook ((prog-mode . corfu-mode)
@@ -1475,15 +1105,6 @@
     :after corfu
     :config
     (corfu-prescient-mode))
-
-  (use-package kind-icon
-    :if (corfu-engine)
-    :after corfu
-    :custom
-    (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
-    (kind-icon-use-icons 'nil)
-    :config
-    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 #+END_SRC
 ** Auto-complete
 #+BEGIN_SRC emacs-lisp
@@ -1546,12 +1167,14 @@
 ** Rust
 #+BEGIN_SRC emacs-lisp
   (use-package rust-mode
-    :mode ("\\.rs\\'" . rust-mode)
+    :hook (rust-mode . lsp)
     :init
     (warn-if-executable-not-found "rustfmt" "rustup component add rustfmt")
+    (setq rust-mode-treesitter-derive t)
     :config
     (setq rust-format-on-save t))
-   (use-package flycheck-rust
+
+  (use-package flycheck-rust
     :config (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 #+END_SRC
 ** Rust Cargo
@@ -1559,6 +1182,7 @@
   ;; Add keybindings for interacting with Cargo
   (use-package cargo
     :init
+    :disabled
     (warn-if-executable-not-found "cargo" "Install cargo from website")
     (warn-if-executable-not-found "cargo-add" "cargo install cargo-add")
     (warn-if-executable-not-found "cargo-expand" "cargo install cargo-expand")
@@ -1567,12 +1191,6 @@
     (warn-if-executable-not-found "cargo-watch" "cargo install cargo-watch")
     (warn-if-executable-not-found "cargo-upgrade" "cargo install cargo-upgrade")
     :hook (rust-mode . cargo-minor-mode))
-
-  (defun rustzen()
-    "Declutter rust lsp ui"
-    (interactive)
-    (setq lsp-rust-analyzer-server-display-inlay-hints nil))
-
 #+END_SRC
 ** Haskell
 #+BEGIN_SRC emacs-lisp
@@ -1580,7 +1198,6 @@
     :mode ("\\.hs\\'" . haskell-mode))
   (use-package lsp-haskell
     :hook haskell-mode)
-
 #+END_SRC
 
 ** Golang
@@ -1631,17 +1248,13 @@
   (use-package py-autopep8
     :hook (python-mode . py-autopep8-mode))
 #+END_SRC
-** YAML+ANSIBLE
+** YAML
 #+BEGIN_SRC emacs-lisp
   ;; ansible
   (use-package yaml-mode
     :mode
     "\\.yml\\'"
     "\\.yaml\\'")
-  (use-package ansible
-    :init
-    (add-hook 'yaml-mode-hook '(lambda () (ansible 1))))
-  (use-package company-ansible)
 #+END_SRC
 ** TOML
 #+BEGIN_SRC emacs-lisp
@@ -1699,6 +1312,7 @@
            (tex-mode . lsp)
            (latex-mode . lsp)))
   (use-package latex-preview-pane
+    :disabled
     :mode ("\\.tex\\'" . tex-mode)
     :config
     (latex-preview-pane-mode 1))
@@ -1806,43 +1420,46 @@
     ;; (keybing <iso-lefttab> may not work for your keyboard model)
     (global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point))
 
-  (use-package treesit-auto
-    :custom
-    (treesit-auto-install 'prompt)
-    :config
-    (treesit-auto-add-to-auto-mode-alist 'all)
-    (global-treesit-auto-mode))
+  ;; (use-package rust-ts-mode
+  ;;   :disabled
+  ;;   :config
+  ;;   (setq compilation-error-regexp-alist-alist
+  ;;         (cons '(cargo "^\\([^ \n]+\\):\\([0-9]+\\):\\([0-9]+\\): \\([0-9]+\\):\\([0-9]+\\) \\(?:[Ee]rror\\|\\([Ww]arning\\)\\):" 1 (2 . 4) (3 . 5) (6))
+  ;;               compilation-error-regexp-alist-alist)))
 
-  (setq treesit-language-source-alist
-        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-          (rust "https://github.com/tree-sitter/tree-sitter-rust")
-          (cmake "https://github.com/uyha/tree-sitter-cmake")
-          (css "https://github.com/tree-sitter/tree-sitter-css")
-          (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-          (go "https://github.com/tree-sitter/tree-sitter-go")
-          (html "https://github.com/tree-sitter/tree-sitter-html")
-          (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-          (json "https://github.com/tree-sitter/tree-sitter-json")
-          (make "https://github.com/alemuller/tree-sitter-make")
-          (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-          (python "https://github.com/tree-sitter/tree-sitter-python")
-          (toml "https://github.com/tree-sitter/tree-sitter-toml")
-          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+  ;; (use-package treesit-auto
+  ;;   :disabled
+  ;;   :custom
+  ;;   (treesit-auto-install 'prompt)
+  ;;   :config
+  ;;   (treesit-auto-add-to-auto-mode-alist 'all)
+  ;;   (global-treesit-auto-mode))
+
+  ;; (setq treesit-language-source-alist
+  ;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+  ;;         (rust "https://github.com/tree-sitter/tree-sitter-rust")
+  ;;         (cmake "https://github.com/uyha/tree-sitter-cmake")
+  ;;         (css "https://github.com/tree-sitter/tree-sitter-css")
+  ;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+  ;;         (go "https://github.com/tree-sitter/tree-sitter-go")
+  ;;         (html "https://github.com/tree-sitter/tree-sitter-html")
+  ;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+  ;;         (json "https://github.com/tree-sitter/tree-sitter-json")
+  ;;         (make "https://github.com/alemuller/tree-sitter-make")
+  ;;         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+  ;;         (python "https://github.com/tree-sitter/tree-sitter-python")
+  ;;         (toml "https://github.com/tree-sitter/tree-sitter-toml")
+  ;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+  ;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+  ;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
   (if (functionp 'json-serialize)
       (message "Native JSON is available")
     (message "WARN Native JSON is *not* available"))
+  (if (functionp 'native-comp-available-p)
+      (message "Native compilation is available")
+    (message "WARN Native compliation is *not* available"))
 #+END_SRC
-
-* Restore GC
-#+BEGIN_SRC emacs-lisp
-  ;; Make gc pauses faster by decreasing the threshold.  This works in
-  ;; conjunction with gc setting set up in the starting of the file
-  (setq gc-cons-threshold (* 128 1000 1000))
-#+END_SRC
-
 * Emacs server
 #+BEGIN_SRC emacs-lisp
   (setq server-socket-dir "~/.emacs.d")
@@ -1865,7 +1482,3 @@
   (provide '.emacs)
   ;;; .emacs ends here
 #+END_SRC
-
-# Local Variables:
-# flycheck-disabled-checkers: emacs-lisp-checkdoc lsp
-# End:
