@@ -10,25 +10,23 @@
   ;;; -*- lexical-binding: t; -*-
   ;;; Code:
 #+END_SRC
+
+
 * Emacs Version check
 #+BEGIN_SRC emacs-lisp
   (defun es/check-version()
     "Check that Emacs version is at the least supported version."
     (if (version< emacs-version  "29")
-        (error "Script depends on Emacs version being greater than 29")
-      (message "Version greater or equal to 29")))
+        (error "Script depends on Emacs version being greater than 29")))
   (es/check-version)
 #+END_SRC
+
 
 * Package Mgmt
 ** Package Source Setup
 #+BEGIN_SRC emacs-lisp
-  (defvar hostname
-  (or (getenv "HOSTNAME") (getenv "COMPUTERNAME") "unknown")
-  "hostname of this machine")
   (defun es/setup-package-mgmt()
     "Setup the package management for EOS."
-    (message "installing use package")
     (require 'package)
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
     ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
@@ -36,14 +34,17 @@
     ;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
     ;;(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
     ;;(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+    (setq package-archive-priorities
+          '(("melpa" . 20)
+            ("melpa-stable" . 10)
+            ("gnu" . 0)))
     (package-initialize)
 
     (unless package-archive-contents
       (package-refresh-contents))
 
     (unless (package-installed-p 'use-package)
-      (package-install 'use-package))
-    (message "es/setup-package-mgmt"))
+      (package-install 'use-package)))
 
   (defun package-reinstall-all()
     (interactive)
@@ -53,14 +54,10 @@
 #+END_SRC
 ** Bootstrap use package
 #+BEGIN_SRC emacs-lisp
-    ;;;;;;;;;;;;;;;;;;;;;;;
-  ;; Package Setup     ;;
-    ;;;;;;;;;;;;;;;;;;;;;;;
   (require 'use-package-ensure)
   (setq use-package-always-ensure t)
   (setq use-package-compute-statistics t)
   (setq use-package-always-demand t)
-  ;;(setq use-package-always-pin "melpa")
   (use-package auto-package-update
     :disabled
     :config
@@ -69,12 +66,15 @@
   (use-package use-package-hydra)
   (use-package diminish)
 
-  ;; quelpa
   (use-package quelpa)
   (use-package quelpa-use-package
     :init (setq quelpa-update-melpa-p nil)
     :config (quelpa-use-package-activate-advice))
 #+END_SRC
+
+
+
+
 
 * Emacs Editor settings
 #+BEGIN_SRC emacs-lisp
@@ -106,19 +106,6 @@
              display-buffer-in-previous-window
              display-buffer-use-some-window)))
 
-    (setq ring-bell-function
-          (lambda nil
-            (let
-                ((orig-fg
-                  (face-foreground 'mode-line)))
-              (set-face-foreground 'mode-line "#6495ED")
-              (run-with-idle-timer 0.1 nil
-                                   (lambda
-                                     (fg)
-                                     (set-face-foreground 'mode-line fg))
-                                   orig-fg))))
-    (set-face-background 'vertical-border "grey2")
-
     (progn
       (menu-bar-mode -1)
       (tool-bar-mode -1)
@@ -136,25 +123,25 @@
       (xterm-mouse-mode 1)
       (abbrev-mode 1)
       ;; kill tabs
-      (indent-tabs-mode nil))
+      (indent-tabs-mode nil)))
 
-    (use-package editorconfig
-      :ensure t
-      :config
-      (editorconfig-mode 1))
-    (message "[INFO] es/emacs-base-settings"))
+  (use-package editorconfig
+    :ensure t
+    :config
+    (editorconfig-mode 1))
 #+END_SRC
+
+
 
 * Helper functions
 #+BEGIN_SRC emacs-lisp
   (defun warn-if-executable-not-found(filename help)
     "Check for executable specified by FILENAME.  HELP is printed if file is not found."
     (let ((full-path (executable-find filename)))
-      (if full-path
-          (message "[INFO] %s: %s" filename full-path)
-        (message " [WARN] %s file not found: Help %s" filename help))))
-    (message "[INFO] es/setup-package-mgmt")
+      (if (not full-path)
+          (message " [WARN] %s file not found: Help %s" filename help))))
 #+END_SRC
+
 * Emacs UX
 ** Writeroom
 
@@ -182,6 +169,10 @@
 
 ** Common font
 #+BEGIN_SRC emacs-lisp
+  (defvar hostname
+    (or (getenv "HOSTNAME") (getenv "COMPUTERNAME") "unknown")
+    "hostname of this machine")
+
   (defun set-exec-path-from-shell-PATH ()
     "Set up Emacs' `exec-path' and PATH environment variable to match
     that used by the user's shell."
@@ -196,7 +187,6 @@
   (defun custom/setup-font-faces ()
     (set-exec-path-from-shell-PATH)
     ;; set default font in initial window and for any new window
-    (message "server after frame hook")
     (when
         (string-equal system-type "gnu/linux") ; linux
       (when (member "FiraCode Nerd Font, Light" (font-family-list))
@@ -216,12 +206,6 @@
   (add-hook 'server-after-make-frame-hook 'custom/setup-font-faces)
 #+END_SRC
 
-** ADOC
-#+BEGIN_SRC emacs-lisp
-  (use-package adoc-mode
-    :mode ("\\.adoc\\'" . adoc-mode))
-#+END_SRC
-
 ** VTERM
 #+BEGIN_SRC emacs-lisp
   (use-package vterm
@@ -239,7 +223,6 @@
 ** Winner
 #+BEGIN_SRC emacs-lisp
   (use-package winner
-    :pin gnu
     :config
     (winner-mode 1))
 #+END_SRC
@@ -253,66 +236,39 @@
 #+BEGIN_SRC emacs-lisp
   (use-package treemacs)
 #+END_SRC
-
-* Emacs Themes
-#+BEGIN_SRC emacs-lisp
-  (use-package modus-themes
-    :config
-    (load-theme 'modus-vivendi t))
-#+END_SRC
-* Merginalia
-#+BEGIN_SRC emacs-lisp
-    (use-package marginalia
-    :config
-    (marginalia-mode 1))
-#+END_SRC
-
-* Emacs Mode line  (DOOM LINE)
+** Mode line
 #+BEGIN_SRC emacs-lisp
   (use-package doom-modeline
     :ensure t
     :hook (after-init . doom-modeline-mode))
 #+END_SRC
 
+** Theme
+#+BEGIN_SRC emacs-lisp
+  (use-package modus-themes
+    :config
+    (load-theme 'modus-vivendi t))
+#+END_SRC
+** Marginalia
+#+BEGIN_SRC emacs-lisp
+    (use-package marginalia
+    :config
+    (marginalia-mode 1))
+#+END_SRC
+
+
 * Window Mgmt (Windmove Windower)
 #+BEGIN_SRC emacs-lisp
   (use-package windmove
-    :pin gnu
-    :functions split-window-horizontally-and-follow split-window-vertically-and-follow winner-undo
     :init
     (windmove-default-keybindings 'meta)
-    (defun split-window-horizontally-and-follow()
-      "Focus follows the newly created window."
-      (interactive)
-      (split-window-horizontally)
-      (other-window 1))
-    (defun split-window-vertically-and-follow()
-      "Focus follows the newly created window."
-      (interactive)
-      (split-window-vertically)
-      (other-window 1))
     :bind
-    ;; splits
-    ("s-\\" . 'split-window-horizontally-and-follow)
-    ("s-]" . 'split-window-vertically-and-follow)
-    ("s-<backspace>" . 'delete-window)
-    ("s-[" . 'delete-other-windows)
     ("M-u" . 'winner-undo))
 
   ;; dedicated buffers
-  (use-package dedicated
-    :commands dedicated-mode)
-
-  (use-package windower
-    :pin gnu
-    :config
-    (global-set-key (kbd "<s-S-left>") 'windower-swap-left)
-    (global-set-key (kbd "<s-S-down>") 'windower-swap-below)
-    (global-set-key (kbd "<s-S-up>") 'windower-swap-above)
-    (global-set-key (kbd "<s-S-right>") 'windower-swap-right)
-    (global-set-key (kbd "<s-tab>") 'windower-switch-to-last-buffer)
-    (global-set-key (kbd "<s-o>") 'windower-toggle-single))
+  (use-package dedicated)
 #+END_SRC
+
 
 * Vertico Consult
 #+BEGIN_SRC emacs-lisp
@@ -328,16 +284,6 @@
                 ("M-R" . #'vertico-multiform-reverse)
                 ("M-u" . #'vertico-multiform-unobtrusive))
     :config
-    ;; Different scroll margin
-    ;; (setq vertico-scroll-margin 0)
-
-    ;; Show more candidates
-    ;; (setq vertico-count 20)
-
-    ;; Grow and shrink the Vertico minibuffer
-    ;; (setq vertico-resize t)
-
-    ;; Optionally enable cycling for `vertico-next' and `vertico-previous'.
     (setq vertico-cycle t))
 
   (use-package vertico-prescient
@@ -361,7 +307,7 @@
     ;; Do not allow the cursor in the minibuffer prompt
     (setq minibuffer-prompt-properties
           '(read-only t cursor-intangible t face minibuffer-prompt))
-    (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode)
+    (add-hook 'minibuffer-setup-hook #'cursor-intangible-mode))
 
     ;; Emacs 28: Hide commands in M-x which do not work in the current mode.
     ;; Vertico commands are hidden in normal buffers.
@@ -369,7 +315,7 @@
     ;;       #'command-completion-default-include-p)
 
     ;; Enable recursive minibuffers
-    (setq enable-recursive-minibuffers t))
+    ;;(setq enable-recursive-minibuffers t))
 
   ;; Example configuration for Consult
   (use-package consult
@@ -488,6 +434,7 @@
     )
 #+END_SRC
 
+
 * Search Tooling
 #+BEGIN_SRC emacs-lisp
   (use-package ag
@@ -504,19 +451,17 @@
     :bind (("C-f" . consult-ripgrep)
            ("C-S-f" . consult-git-grep)))    ;; for expanded results use rg command
 
-  ;; magit on ssh-protected git repos
   (use-package ssh-agency)
 
-  ;; persistent-scratch
   (use-package persistent-scratch
     :config
     (persistent-scratch-setup-default))
 
-  ;; Persist history over Emacs restarts. Vertico sorts by history position.
   (use-package savehist
     :init
     (savehist-mode))
 #+END_SRC
+
 
 * Fly Checker
 ** Whitespace
@@ -707,8 +652,7 @@
     ;; FRZ: TODO hooks cannot be placed in :hook section
     (add-hook 'ediff-before-setup-hook 'my-ediff-bsh)
     (add-hook 'ediff-after-setup-windows-hook 'my-ediff-ash 'append)
-    (add-hook 'ediff-quit-hook 'my-ediff-qh)
-    (message "[INFO] es/workarounds"))
+    (add-hook 'ediff-quit-hook 'my-ediff-qh))
 
     ;;https://ladicle.com/post/config/#smerge
   (use-package smerge-mode
@@ -767,6 +711,7 @@
     (direnv-mode))
 #+END_SRC
 
+
 * Projects/Projectile
 #+BEGIN_SRC emacs-lisp
   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -777,8 +722,6 @@
     :config
     (projectile-mode 1)
     (define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-    :init
-    (projectile-add-known-project (getenv "WRK"))
     :bind
     ("C-x f" . project-find-file))
 #+END_SRC
@@ -795,133 +738,129 @@
     (:map yas-minor-mode-map
           ("C-c & t" . yas-describe-tables)
           ("C-c & &" . org-mark-ring-goto)))
-  (use-package yasnippet-snippets
-    :pin gnu
-    :defer)
 #+END_SRC
+
 
 * Language server protocol (LSP)
 ** LSP-Mode
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-mode
-    :commands lsp
-    :functions lsp-session lsp--persist-session
-    :config
-    (defun lsp-clear-session-blacklist()
-      "Clear the list of blacklisted folders."
-      (interactive)
-      (setf (lsp-session-folders-blacklist (lsp-session)) nil)
-      (lsp--persist-session (lsp-session)))
-    :custom
-    (lsp-auto-guess-root nil)
-    (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
-    (lsp-restart 'auto-restart)
-    (lsp-enable-file-watchers nil)
+    (use-package lsp-mode
+      :commands lsp
+      :config
+      (defun lsp-clear-session-blacklist()
+        "Clear the list of blacklisted folders."
+        (interactive)
+        (setf (lsp-session-folders-blacklist (lsp-session)) nil)
+        (lsp--persist-session (lsp-session)))
+      :custom
+      (lsp-auto-guess-root nil)
+      (lsp-prefer-flymake nil) ; Use flycheck instead of flymake
+      (lsp-restart 'auto-restart)
+      (lsp-enable-file-watchers nil)
 
-    ;; completions are better handled by company-box
-    (lsp-completion-no-cache nil)
-    (lsp-modeline-code-actions-segments '(count icon name))
+      ;; completions are better handled by company-box
+      (lsp-completion-no-cache nil)
+      (lsp-modeline-code-actions-segments '(count icon name))
 
-    ;; Function signature in modeline
-    (lsp-signature-auto-activate nil)
-    (lsp-signature-doc-lines 5)
+      ;; Function signature in modeline
+      (lsp-signature-auto-activate nil)
+      (lsp-signature-doc-lines 5)
 
-    ;; Lsp eldoc and docbuffer integration.
-    ;; How does this work ?
-    ;;
-    ;; Next to Completion: Completion can show function prototype in drop down.
-    ;;                     This is disabled as it results in very wide boxes
-    ;;
-    ;; Completion Doc Frame: frameworks display doc-help, next to the completion drop down.
-    ;; The documentation can browsed quickly by scroll-other-window C-M-v/V
-    ;;
-    ;; HOVER: Once the completion is selected, documentation can be looked up using mouse hover.
-    ;;
-    ;; ELDOC: copy pasting from hover is impractica. So the hover info is passed to eldoc buffer
-    (lsp-completion-show-detail nil)  ;; Disable completion drop , function signatures
-    (lsp-completion-show-kind nil)
+      ;; Lsp eldoc and docbuffer integration.
+      ;; How does this work ?
+      ;;
+      ;; Next to Completion: Completion can show function prototype in drop down.
+      ;;                     This is disabled as it results in very wide boxes
+      ;;
+      ;; Completion Doc Frame: frameworks display doc-help, next to the completion drop down.
+      ;; The documentation can browsed quickly by scroll-other-window C-M-v/V
+      ;;
+      ;; HOVER: Once the completion is selected, documentation can be looked up using mouse hover.
+      ;;
+      ;; ELDOC: copy pasting from hover is impractica. So the hover info is passed to eldoc buffer
+      (lsp-completion-show-detail nil)  ;; Disable completion drop , function signatures
+      (lsp-completion-show-kind nil)
 
-    (lsp-eldoc-render-all t)    ;; push all availabe info to eldoc, let eldoc truncate and format
-    (lsp-eldoc-enable-hover t)  ;; push info to eldoc we move mouse around
+      (lsp-eldoc-render-all t)    ;; push all availabe info to eldoc, let eldoc truncate and format
+      (lsp-eldoc-enable-hover t)  ;; push info to eldoc we move mouse around
 
-    (eldoc-echo-area-use-multiline-p 5);; Truncate modeline eldoc to just 5 lines. Else mode lines pops out
-    (eldoc-echo-area-display-truncation-message t) ;; Display Help message if help is truncated
-    (eldoc-echo-area-prefer-doc-buffer t);; Display in an existing eldoc buffer if available and skip mode like
+      (eldoc-echo-area-use-multiline-p 5);; Truncate modeline eldoc to just 5 lines. Else mode lines pops out
+      (eldoc-echo-area-display-truncation-message t) ;; Display Help message if help is truncated
+      (eldoc-echo-area-prefer-doc-buffer t);; Display in an existing eldoc buffer if available and skip mode like
 
+      ;; rust
+      (lsp-rust-wait-to-build 10000)
+      (lsp-rust-build-on-save t)
+      (lsp-rust-jobs 2)
 
+      (lsp-rust-server 'rust-analyzer)
+      (lsp-rust-analyzer-display-chaining-hints t)
+      (lsp-rust-analyzer-display-parameter-hints t)
 
-    ;; rust
-    (lsp-rust-wait-to-build 10000)
-    (lsp-rust-build-on-save t)
-    (lsp-rust-jobs 2)
+      ;; Very useful for writing code but, generally distracting got reading code
+      ;; probably good to only enable if the buffer is dirty
+      (lsp-rust-analyzer-server-display-inlay-hints t)
+      (lsp-rust-full-docs t)
 
-    (lsp-rust-server 'rust-analyzer)
-    (lsp-rust-analyzer-display-chaining-hints t)
-    (lsp-rust-analyzer-display-parameter-hints t)
+      ;; Rust lifetimes. Good for starters. Works only in X server mode
+      (lsp-rust-analyzer-display-lifetime-elision-hints-enable t)
+      (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t)
 
-    ;; Very useful for writing code but, generally distracting got reading code
-    ;; probably good to only enable if the buffer is dirty
-    (lsp-rust-analyzer-server-display-inlay-hints t)
-    (lsp-rust-full-docs t)
+      ;;cpp
+      (lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
 
-    ;; Rust lifetimes. Good for starters. Works only in X server mode
-    (lsp-rust-analyzer-display-lifetime-elision-hints-enable t)
-    (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names t)
+      (lsp-file-watch-ignored '(
+                                "[/\\\\]\\.direnv$"
+                                            ; SCM tools
+                                "[/\\\\]\\.git$"
+                                "[/\\\\]\\.cargo$"
+                                "[/\\\\]\\.hg$"
+                                "[/\\\\]\\.bzr$"
+                                "[/\\\\]_darcs$"
+                                "[/\\\\]\\.svn$"
+                                "[/\\\\]_FOSSIL_$"
+                                            ; IDE tools
+                                "[/\\\\]\\.idea$"
+                                "[/\\\\]\\.ensime_cache$"
+                                "[/\\\\]\\.eunit$"
+                                "[/\\\\]node_modules$"
+                                "[/\\\\]\\.fslckout$"
+                                "[/\\\\]\\.tox$"
+                                "[/\\\\]\\.stack-work$"
+                                "[/\\\\]\\.bloop$"
+                                "[/\\\\]\\.metals$"
+                                "[/\\\\]target$"
+                                            ; Autotools output
+                                "[/\\\\]\\.deps$"
+                                "[/\\\\]build-aux$"
+                                "[/\\\\]autom4te.cache$"
+                                "[/\\\\]\\.reference$"
+                                            ; rls cargo etc
+                                "[/\\\\]\\result???$"
+                                "[/\\\\]\\target???$"
+                                "[/\\\\]\\.cargo-home???$"
+                                            ; ccls cache
+                                "[/\\\\]\\.ccls-cache$"
+                                            ; all hidden folders
+                                "[/\\\\]\\.$"
+                                ))
+      :bind (:map lsp-mode-map
+                  ("C-c C-l" . hydra-lsp/body)
+                  ("M-f" . lsp-format-buffer)
+                  ("M-m" . lsp-execute-code-action)
+                  ("M-n" . lsp-ivy-workspace-symbol))
 
-    ;;cpp
-    (lsp-clients-clangd-args '("-j=4" "-background-index" "-log=error"))
+      :hook ((LaTeX-mode . lsp)
+             (TeX-mode . lsp)
+             (tex-mode . lsp)
+             (latex-mode . lsp)
+             (prog-mode . 'display-line-numbers-mode)
+             (prog-mode . lsp)
+             ;; (lsp-mode . lsp-enable-which-key-integration)
+             (lsp-managed-mode . lsp-modeline-diagnostics-mode)
 
-    (lsp-file-watch-ignored '(
-                              "[/\\\\]\\.direnv$"
-                                          ; SCM tools
-                              "[/\\\\]\\.git$"
-                              "[/\\\\]\\.cargo$"
-                              "[/\\\\]\\.hg$"
-                              "[/\\\\]\\.bzr$"
-                              "[/\\\\]_darcs$"
-                              "[/\\\\]\\.svn$"
-                              "[/\\\\]_FOSSIL_$"
-                                          ; IDE tools
-                              "[/\\\\]\\.idea$"
-                              "[/\\\\]\\.ensime_cache$"
-                              "[/\\\\]\\.eunit$"
-                              "[/\\\\]node_modules$"
-                              "[/\\\\]\\.fslckout$"
-                              "[/\\\\]\\.tox$"
-                              "[/\\\\]\\.stack-work$"
-                              "[/\\\\]\\.bloop$"
-                              "[/\\\\]\\.metals$"
-                              "[/\\\\]target$"
-                                          ; Autotools output
-                              "[/\\\\]\\.deps$"
-                              "[/\\\\]build-aux$"
-                              "[/\\\\]autom4te.cache$"
-                              "[/\\\\]\\.reference$"
-                                          ; rls cargo etc
-                              "[/\\\\]\\result???$"
-                              "[/\\\\]\\target???$"
-                              "[/\\\\]\\.cargo-home???$"
-                                          ; ccls cache
-                              "[/\\\\]\\.ccls-cache$"
-                                          ; all hidden folders
-                              "[/\\\\]\\.$"
-                              ))
-    :bind (:map lsp-mode-map
-                ("C-c C-l" . hydra-lsp/body)
-                ("C-c C-f" . lsp-format-buffer)
-                ("s-." . lsp-execute-code-action)
-                ("M-m" . lsp-ui-mode))
-
-    :hook (((prog-mode) . 'display-line-numbers-mode)
-           (LaTeX-mode . lsp)
-           (TeX-mode . lsp)
-           (tex-mode . lsp)
-           (latex-mode . lsp)
-           ((prog-mode) . lsp)
-           ;; (lsp-mode . lsp-enable-which-key-integration)
-           (lsp-managed-mode . lsp-modeline-diagnostics-mode)
-           (lsp-mode . lsp-headerline-breadcrumb-mode)
-           (lsp-mode . lsp-modeline-code-actions-mode)))
+             (lsp-mode . lsp-headerline-breadcrumb-mode)
+             (lsp-mode . lsp-modeline-code-actions-mode)))
 #+END_SRC
 
 ** LSP-UI
@@ -929,28 +868,31 @@
   (use-package lsp-ui
     :diminish
     :bind (:map lsp-ui-mode-map
-		([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
-		([remap xref-find-references] . lsp-ui-peek-find-references) ;; M-Shift-/
-		([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
-		("C-c u" . lsp-ui-imenu))
+                ([remap xref-find-definitions] . lsp-ui-peek-find-definitions) ;; M-.
+                ([remap xref-find-references] . lsp-ui-peek-find-references) ;; M-Shift-/
+                ([remap xref-find-apropos] . lsp-ivy-workspace-symbol) ;; C-M-.
+                ("C-c u" . lsp-ui-imenu))
     :bind (:map lsp-ui-flycheck-list-mode-map
-		("M-RET" . lsp-ui-flycheck-list--visit)
-		("RET" . lsp-ui-flycheck-list--view))
+                ("M-RET" . lsp-ui-flycheck-list--visit)
+                ("RET" . lsp-ui-flycheck-list--view))
 
     :custom
+    (lsp-ui-mode t)
     (lsp-ui-doc-glance t)
     (lsp-ui-doc-header t)
     (lsp-ui-doc-include-signature t)
     (lsp-ui-doc-position 'bottom)
     (lsp-ui-doc-alignment 'window)
 
-    (lsp-ui-sideline-enable t)
-    (lsp-ui-sideline-ignore-duplicate t)
-    (lsp-ui-sideline-mode t)
-    (lsp-ui-sideline-show-code-actions t)
-    (lsp-ui-sideline-show-hover t)
-    (lsp-ui-sideline-update-mode 'line)
-    (lsp-ui-sideline-diagnostic-max-line-length 40)
+    ;; sideline
+    ;; (lsp-ui-sideline-enable t)
+    ;; (lsp-ui-sideline-ignore-duplicate t)
+    ;; (lsp-ui-sideline-mode t)
+    ;; (lsp-ui-sideline-show-code-actions t)
+    ;; (lsp-ui-sideline-show-hover t)
+    ;; (lsp-ui-sideline-update-mode 'line)
+    ;; (lsp-ui-sideline-diagnostic-max-line-length 40)
+    ;; (lsp-ui-sideline-show-symbol nil)
 
     ;;  Use lsp-ui-doc-webkit only in GUI
     (lsp-ui-doc-use-webkit nil)
@@ -960,11 +902,7 @@
     (lsp-ui-flycheck-enable t)
 
     :config
-    (setf truncate-lines t)
-    ;;WORKAROUND Hide mode-line of the lsp-ui-imenu buffer
-    ;;https://github.com/emacs-lsp/lsp-ui/issues/243
-    (defadvice lsp-ui-imenu (after hide-lsp-ui-imenu-mode-line activate)
-      (setq mode-line-format nil)))
+    (setf truncate-lines t))
 
   (use-package lsp-ivy)
 
@@ -996,11 +934,12 @@
     ("S" lsp-workspace-shutdown))
 #+END_SRC
 
+
 * Completion Engines (Company Corfu Autocomplete)
 ** Selector
 #+BEGIN_SRC emacs-lisp
+  ;;(setq completion-engine "company")
   (setq completion-engine "corfu")
-  ;; (setq completion-engine "company")
   ;;(setq completion-engine "autocomplete")
   (defun company-engine()
     (string= completion-engine "company"))
@@ -1029,7 +968,6 @@
     :if (company-engine)
     :hook (prog-mode . company-mode)
     :config
-    (message "[INFO] es/completion engine COMPANY")
     (setq company-quickhelp-delay 1
           company-quickhelp-use-propertized-text nil
           lsp-completion-provider :capf
@@ -1046,11 +984,6 @@
     :hook (company-mode)
     :config
     (company-quickhelp-mode))
-
-  (use-package company-box
-    :if (company-engine)
-    :hook (company-mode . company-box-mode)
-    :custom (company-box-icons-alist 'company-box-icons-all-the-icons))
 #+END_SRC
 ** Corfu
 #+BEGIN_SRC emacs-lisp
@@ -1076,7 +1009,6 @@
     ;; This is recommended since Dabbrev can be used globally (M-/).
     ;; See also `corfu-excluded-modes'.
     :config
-    (message "[INFO] es/completion engine CORFU")
     (setq lsp-completion-provider :none)
     (defun corfu-move-to-minibuffer ()
       (interactive)
@@ -1117,6 +1049,7 @@
     :disabled
     :requires auto-complete)
 #+END_SRC
+
 * Programming Languages
 ** C/C++
 #+BEGIN_SRC emacs-lisp
@@ -1127,7 +1060,6 @@
     :init
     (warn-if-executable-not-found "ccls" "snap install ccls")
     :config
-    (message "[INFO] es/use-package-ccls")
     (defvar ccls-executable "/snap/bin/ccls")
     (defvar lsp-prefer-flymake nil)
     (setq-default flycheck-disabled-checkers '(c/c++-clang c/c++-cppcheck c/c++-gcc))
@@ -1200,6 +1132,12 @@
     :hook haskell-mode)
 #+END_SRC
 
+** Solidity
+#+BEGIN_SRC emacs-lisp
+  (use-package solidity-mode)
+  (use-package solidity-flycheck)
+#+END_SRC
+
 ** Golang
 #+BEGIN_SRC emacs-lisp
   ;; GO LANG ;;
@@ -1240,7 +1178,6 @@
   (add-hook 'js2-mode-hook 'js2-mode-setup)
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
   (put 'downcase-region 'disabled nil)
-  (message "[INFO] es/legacy-lang-setup")
 #+END_SRC
 ** Python
 #+BEGIN_SRC emacs-lisp
@@ -1263,11 +1200,19 @@
     :mode ("\\.toml\\'" . toml-mode))
 #+END_SRC
 
+
+
+** ADOC
+#+BEGIN_SRC emacs-lisp
+  (use-package adoc-mode
+    :mode ("\\.adoc\\'" . adoc-mode))
+#+END_SRC
+
+
 * Text/PDF/Org
 ** ORG Mode
 #+BEGIN_SRC emacs-lisp
   (use-package org
-    :pin gnu
     :mode (("\\.org$" . org-mode))
     :hook
     (org-mode . org-superstar-mode)
@@ -1405,6 +1350,7 @@
         (or (cdr (assoc desc real-keyboard-keys))
             (read-kbd-macro desc))))
 #+END_SRC
+
 * File Experimental
 #+BEGIN_SRC emacs-lisp
   (use-package corfu-candidate-overlay
@@ -1420,38 +1366,28 @@
     ;; (keybing <iso-lefttab> may not work for your keyboard model)
     (global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point))
 
-  ;; (use-package rust-ts-mode
-  ;;   :disabled
-  ;;   :config
-  ;;   (setq compilation-error-regexp-alist-alist
-  ;;         (cons '(cargo "^\\([^ \n]+\\):\\([0-9]+\\):\\([0-9]+\\): \\([0-9]+\\):\\([0-9]+\\) \\(?:[Ee]rror\\|\\([Ww]arning\\)\\):" 1 (2 . 4) (3 . 5) (6))
-  ;;               compilation-error-regexp-alist-alist)))
+  (use-package savekill)
+  (use-package cargo)
 
-  ;; (use-package treesit-auto
-  ;;   :disabled
-  ;;   :custom
-  ;;   (treesit-auto-install 'prompt)
-  ;;   :config
-  ;;   (treesit-auto-add-to-auto-mode-alist 'all)
-  ;;   (global-treesit-auto-mode))
-
-  ;; (setq treesit-language-source-alist
-  ;;       '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-  ;;         (rust "https://github.com/tree-sitter/tree-sitter-rust")
-  ;;         (cmake "https://github.com/uyha/tree-sitter-cmake")
-  ;;         (css "https://github.com/tree-sitter/tree-sitter-css")
-  ;;         (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-  ;;         (go "https://github.com/tree-sitter/tree-sitter-go")
-  ;;         (html "https://github.com/tree-sitter/tree-sitter-html")
-  ;;         (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-  ;;         (json "https://github.com/tree-sitter/tree-sitter-json")
-  ;;         (make "https://github.com/alemuller/tree-sitter-make")
-  ;;         (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-  ;;         (python "https://github.com/tree-sitter/tree-sitter-python")
-  ;;         (toml "https://github.com/tree-sitter/tree-sitter-toml")
-  ;;         (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-  ;;         (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-  ;;         (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
+  (setq treesit-language-source-alist
+        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+          (c "https://github.com/tree-sitter/tree-sitter-c")
+          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+          (rust "https://github.com/tree-sitter/tree-sitter-rust")
+          (cmake "https://github.com/uyha/tree-sitter-cmake")
+          (css "https://github.com/tree-sitter/tree-sitter-css")
+          (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+          (go "https://github.com/tree-sitter/tree-sitter-go")
+          (html "https://github.com/tree-sitter/tree-sitter-html")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
+          (make "https://github.com/alemuller/tree-sitter-make")
+          (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+          (python "https://github.com/tree-sitter/tree-sitter-python")
+          (toml "https://github.com/tree-sitter/tree-sitter-toml")
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
   (if (functionp 'json-serialize)
       (message "Native JSON is available")
@@ -1460,12 +1396,14 @@
       (message "Native compilation is available")
     (message "WARN Native compliation is *not* available"))
 #+END_SRC
+
 * Emacs server
 #+BEGIN_SRC emacs-lisp
   (setq server-socket-dir "~/.emacs.d")
   (load "server")
   (unless (server-running-p) (server-start) (message "[INFO] !!!server started!!!"))
 #+END_SRC
+
 
 * Emacs Customs to<>from another file
 #+BEGIN_SRC emacs-lisp
@@ -1475,6 +1413,7 @@
   (setq custom-file "~/.eos/emacsdesktop/emacs/.emacs_custom.el")
   (load custom-file t)
 #+END_SRC
+
 
 * Emacs Load complete
 #+BEGIN_SRC emacs-lisp
