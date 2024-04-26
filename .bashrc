@@ -27,6 +27,7 @@ alias tsv="tmux split"
 alias tmuxa="tmux new -s MAIN -c $WRK || tmux attach"
 alias tmuxs="tmux new-session -c $WRK -d -s "
 alias tmuxfixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
+alias tmuxswap="tmux swap-window -t"
 export EDITOR=ec
 export HISTCONTROL=ignoredups
 export EOS=~/.eos
@@ -71,6 +72,16 @@ rustproj() {
 	cargo init $1
 	cd $1
 	$EDITOR ./src/main.rs
+}
+
+rust_jupyter_repl() {
+	#evcxr
+	jupyter-lab --notebook-dir=~/rustplay --no-browser
+}
+
+rustrepl_install() {
+	cargo install evcxr_jupyter
+	evcxr_jupyter --install
 }
 
 runtillfail() {
@@ -118,6 +129,10 @@ laptop_power_debug() {
 }
 
 [ -f ~/.python.rc ] && export PYTHONSTARTUP=~/.python.rc
+export PYENV_ROOT="$HOME/.pyenv"
+[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+export PATH="/home/faraz/.local/bin:$PATH"
 
 # Source rust and rust/cargo/nix
 #[ -f $HOME/.nix-profile/etc/profile.d/nix.sh ] && source $HOME/.nix-profile/etc/profile.d/nix.sh
@@ -165,3 +180,6 @@ eval "$(starship init bash)"
 [ -f "/home/faraz/.ghcup/env" ] && source "/home/faraz/.ghcup/env" # ghcup-env
 
 export PATH="$PATH:/home/faraz/.foundry/bin"
+
+#source credentials
+source ~/.bashrc.credentials

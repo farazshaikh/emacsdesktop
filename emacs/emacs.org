@@ -31,7 +31,7 @@
     (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
     ;; Comment/uncomment this line to enable MELPA Stable if desired.  See `package-archive-priorities`
     ;; and `package-pinned-packages`. Most users will not need or want to do this.
-    ;;(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+    (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
     ;;(add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/") t)
     ;;(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
     (setq package-archive-priorities
@@ -129,6 +129,8 @@
     :ensure t
     :config
     (editorconfig-mode 1))
+
+  (use-package savekill)
 #+END_SRC
 
 
@@ -246,8 +248,13 @@
 ** Theme
 #+BEGIN_SRC emacs-lisp
   (use-package modus-themes
+    :disabled
     :config
     (load-theme 'modus-vivendi t))
+
+  (use-package catppuccin-theme
+    :config
+    (load-theme 'catppuccin t))
 #+END_SRC
 ** Marginalia
 #+BEGIN_SRC emacs-lisp
@@ -729,6 +736,13 @@
 
 * Programming common
 #+BEGIN_SRC emacs-lisp
+  ;; Jupyter
+  (use-package jupyter
+    :custom-face
+    (jupyter-repl-traceback ((t nil)))
+    :bind (:map jupyter-repl-mode-map
+                ("M-RET" . newline)))
+
   ;; YAS
   (use-package yasnippet-snippets)
   (use-package yasnippet
@@ -738,6 +752,27 @@
     (:map yas-minor-mode-map
           ("C-c & t" . yas-describe-tables)
           ("C-c & &" . org-mark-ring-goto)))
+
+  ;; treesitter comes installed with emacs 29. Just augment the source for grammer
+  (setq treesit-language-source-alist
+        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+          (c "https://github.com/tree-sitter/tree-sitter-c")
+          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
+          (rust "https://github.com/tree-sitter/tree-sitter-rust")
+          (cmake "https://github.com/uyha/tree-sitter-cmake")
+          (css "https://github.com/tree-sitter/tree-sitter-css")
+          (elisp "https://github.com/Wilfred/tree-sitter-elisp")
+          (go "https://github.com/tree-sitter/tree-sitter-go")
+          (html "https://github.com/tree-sitter/tree-sitter-html")
+          (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
+          (json "https://github.com/tree-sitter/tree-sitter-json")
+          (make "https://github.com/alemuller/tree-sitter-make")
+          (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+          (python "https://github.com/tree-sitter/tree-sitter-python")
+          (toml "https://github.com/tree-sitter/tree-sitter-toml")
+          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
+          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
+          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 #+END_SRC
 
 
@@ -1037,6 +1072,19 @@
     :after corfu
     :config
     (corfu-prescient-mode))
+
+  (use-package corfu-candidate-overlay
+    :after corfu
+    :config
+    ;; enable corfu-candidate-overlay mode globally
+    ;; this relies on having corfu-auto set to nil
+    (setq corfu-auto nil)
+    (corfu-candidate-overlay-mode +1)
+    ;; bind Ctrl + TAB to trigger the completion popup of corfu
+    (global-set-key (kbd "C-<tab>") 'completion-at-point)
+    ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
+    ;; (keybing <iso-lefttab> may not work for your keyboard model)
+    (global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point))
 #+END_SRC
 ** Auto-complete
 #+BEGIN_SRC emacs-lisp
@@ -1098,6 +1146,7 @@
 #+END_SRC
 ** Rust
 #+BEGIN_SRC emacs-lisp
+  (use-package cargo)
   (use-package rust-mode
     :hook (rust-mode . lsp)
     :init
@@ -1240,6 +1289,8 @@
     :after org
     :config
     (toc-org-mode 1))
+  ;; used for smart template insertion like <s for code block
+  (use-package org-tempo)
 #+END_SRC
 ** Latex
 #+BEGIN_SRC emacs-lisp
@@ -1353,48 +1404,13 @@
 
 * File Experimental
 #+BEGIN_SRC emacs-lisp
-  (use-package corfu-candidate-overlay
-    :after corfu
-    :config
-    ;; enable corfu-candidate-overlay mode globally
-    ;; this relies on having corfu-auto set to nil
-    (setq corfu-auto nil)
-    (corfu-candidate-overlay-mode +1)
-    ;; bind Ctrl + TAB to trigger the completion popup of corfu
-    (global-set-key (kbd "C-<tab>") 'completion-at-point)
-    ;; bind Ctrl + Shift + Tab to trigger completion of the first candidate
-    ;; (keybing <iso-lefttab> may not work for your keyboard model)
-    (global-set-key (kbd "C-<iso-lefttab>") 'corfu-candidate-overlay-complete-at-point))
-
-  (use-package savekill)
-  (use-package cargo)
-
-  (setq treesit-language-source-alist
-        '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-          (c "https://github.com/tree-sitter/tree-sitter-c")
-          (cpp "https://github.com/tree-sitter/tree-sitter-cpp")
-          (rust "https://github.com/tree-sitter/tree-sitter-rust")
-          (cmake "https://github.com/uyha/tree-sitter-cmake")
-          (css "https://github.com/tree-sitter/tree-sitter-css")
-          (elisp "https://github.com/Wilfred/tree-sitter-elisp")
-          (go "https://github.com/tree-sitter/tree-sitter-go")
-          (html "https://github.com/tree-sitter/tree-sitter-html")
-          (javascript "https://github.com/tree-sitter/tree-sitter-javascript" "master" "src")
-          (json "https://github.com/tree-sitter/tree-sitter-json")
-          (make "https://github.com/alemuller/tree-sitter-make")
-          (markdown "https://github.com/ikatyang/tree-sitter-markdown")
-          (python "https://github.com/tree-sitter/tree-sitter-python")
-          (toml "https://github.com/tree-sitter/tree-sitter-toml")
-          (tsx "https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src")
-          (typescript "https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src")
-          (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
-
-  (if (functionp 'json-serialize)
-      (message "Native JSON is available")
-    (message "WARN Native JSON is *not* available"))
-  (if (functionp 'native-comp-available-p)
-      (message "Native compilation is available")
-    (message "WARN Native compliation is *not* available"))
+  (use-package ellama
+    :init
+    (setopt ellama-language "English")
+    (require 'llm-ollama)
+    (setopt ellama-provider
+                    (make-llm-ollama
+                     :chat-model "codellama" :embedding-model "codellama")))
 #+END_SRC
 
 * Emacs server
@@ -1417,6 +1433,12 @@
 
 * Emacs Load complete
 #+BEGIN_SRC emacs-lisp
+  (if (functionp 'json-serialize)
+      (message "Native JSON is available")
+    (message "WARN Native JSON is *not* available"))
+  (if (functionp 'native-comp-available-p)
+      (message "Native compilation is available")
+    (message "WARN Native compliation is *not* available"))
   (message "[INFO] !!!es/load-complete!!!")
   (provide '.emacs)
   ;;; .emacs ends here
