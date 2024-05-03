@@ -1,0 +1,28 @@
+import = [
+  "/home/faraz/.nvm/versions/node/v18.12.1/lib/node_modules/alacritty-themes/themes/modus-vivendi-tinted.toml"
+]
+
+[env]
+TERM = "xterm-256color"
+
+[font]
+size = 19.9
+
+  [font.bold]
+  family = "FiraCode Nerd Font"
+  style = "Ligth Bold"
+
+  [font.italic]
+  family = "FiraCode Nerd Font"
+  style = "Light Italic"
+
+  [font.normal]
+  family = "FiraCode Nerd Font"
+  style = "Light"
+
+[[keyboard.bindings]]
+action = "ToggleFullscreen"
+key = "F11"
+
+[window]
+startup_mode = "Fullscreen"

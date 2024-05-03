@@ -131,6 +131,10 @@
     (editorconfig-mode 1))
 
   (use-package savekill)
+  (use-package exec-path-from-shell
+    :init
+    (when (daemonp)
+      (exec-path-from-shell-initialize)))
 #+END_SRC
 
 
@@ -175,19 +179,7 @@
     (or (getenv "HOSTNAME") (getenv "COMPUTERNAME") "unknown")
     "hostname of this machine")
 
-  (defun set-exec-path-from-shell-PATH ()
-    "Set up Emacs' `exec-path' and PATH environment variable to match
-    that used by the user's shell."
-    (interactive)
-    (let ((path-from-shell (replace-regexp-in-string
-                            "[ \t\n]*$" "" (shell-command-to-string
-                                            "$SHELL --login -c 'echo $PATH'"
-                                            ))))
-      (setenv "PATH" path-from-shell)
-      (setq exec-path (split-string path-from-shell path-separator))))
-
   (defun custom/setup-font-faces ()
-    (set-exec-path-from-shell-PATH)
     ;; set default font in initial window and for any new window
     (when
         (string-equal system-type "gnu/linux") ; linux
@@ -248,11 +240,11 @@
 ** Theme
 #+BEGIN_SRC emacs-lisp
   (use-package modus-themes
-    :disabled
     :config
     (load-theme 'modus-vivendi t))
 
   (use-package catppuccin-theme
+    :disabled
     :config
     (load-theme 'catppuccin t))
 #+END_SRC
@@ -936,6 +928,16 @@
     (lsp-ui-imenu-enable t)
     (lsp-ui-flycheck-enable t)
 
+    ;; breadcrumb underlines
+    (set-face-underline 'lsp-headerline-breadcrumb-path-error-face nil)
+    (set-face-underline 'lsp-headerline-breadcrumb-path-warning-face nil)
+    (set-face-underline 'lsp-headerline-breadcrumb-path-info-face nil)
+    (set-face-underline 'lsp-headerline-breadcrumb-path-hint-face nil)
+    (set-face-underline 'lsp-headerline-breadcrumb-symbols-error-face nil)
+    (set-face-underline 'lsp-headerline-breadcrumb-symbols-warning-face nil)
+    (set-face-underline 'lsp-headerline-breadcrumb-symbols-info-face nil)
+    (set-face-underline 'lsp-headerline-breadcrumb-symbols-hint-face nil)
+
     :config
     (setf truncate-lines t))
 
@@ -943,12 +945,12 @@
 
   (defhydra hydra-lsp (:exit t :hint nil)
     "
-    Buffer^^               Server^^                   Symbol
-   -------------------------------------------------------------------------------------
-    [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
-    [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
-    [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature       [_c_] clear blacklist
-    [_e_] describe session"
+        Buffer^^               Server^^                   Symbol
+  -------------------------------------------------------------------------------------
+        [_f_] format           [_M-r_] restart            [_d_] declaration  [_i_] implementation  [_o_] documentation
+        [_m_] imenu            [_S_]   shutdown           [_D_] definition   [_t_] type            [_r_] rename
+        [_x_] execute action   [_M-s_] describe session   [_R_] references   [_s_] signature       [_c_] clear blacklist
+        [_e_] describe session"
     ("d" lsp-find-declaration)
     ("D" lsp-ui-peek-find-definitions)
     ("R" lsp-ui-peek-find-references)
@@ -1289,8 +1291,6 @@
     :after org
     :config
     (toc-org-mode 1))
-  ;; used for smart template insertion like <s for code block
-  (use-package org-tempo)
 #+END_SRC
 ** Latex
 #+BEGIN_SRC emacs-lisp
