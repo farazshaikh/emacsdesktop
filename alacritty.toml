@@ -1,24 +1,20 @@
-import = [
-  "/home/faraz/.nvm/versions/node/v18.12.1/lib/node_modules/alacritty-themes/themes/modus-vivendi-tinted.toml"
-]
-
 [env]
 TERM = "xterm-256color"
 
 [font]
 size = 19.9
 
-  [font.bold]
-  family = "FiraCode Nerd Font"
-  style = "Ligth Bold"
+[font.bold]
+family = "FiraCode Nerd Font"
+style = "Ligth Bold"
 
-  [font.italic]
-  family = "FiraCode Nerd Font"
-  style = "Light Italic"
+[font.italic]
+family = "FiraCode Nerd Font"
+style = "Light Italic"
 
-  [font.normal]
-  family = "FiraCode Nerd Font"
-  style = "Light"
+[font.normal]
+family = "FiraCode Nerd Font"
+style = "Light"
 
 [[keyboard.bindings]]
 action = "ToggleFullscreen"
@@ -26,3 +22,46 @@ key = "F11"
 
 [window]
 startup_mode = "Fullscreen"
+
+# Colors (Tomorrow Night Bright)
+# load the theme and then set these colors.
+# Color16 colors used by all app in the terminal, so be sure to not change the appearance of colors like black
+# Black is Black 0x000000
+[colors.bright]
+black = "0x666666"
+blue = "0x7aa6da"
+cyan = "0x54ced6"
+green = "0x9ec400"
+magenta = "0xb77ee0"
+red = "0xff3334"
+white = "0xffffff"
+yellow = "0xe7c547"
+
+[colors.cursor]
+cursor = "0xffffff"
+text = "0x000000"
+
+[colors.dim]
+black = "0x333333"
+blue = "0x6699cc"
+cyan = "0x66cccc"
+green = "0x99cc99"
+magenta = "0xcc99cc"
+red = "0xf2777a"
+white = "0xdddddd"
+yellow = "0xffcc66"
+
+[colors.normal]
+black = "0x000000"
+blue = "0x7aa6da"
+cyan = "0x70c0ba"
+green = "0xb9ca4a"
+magenta = "0xc397d8"
+red = "0xd54e53"
+white = "0xffffff"
+yellow = "0xe6c547"
+
+[colors.primary]
+background = "0x000000"
+foreground = "0xeaeaea"
+

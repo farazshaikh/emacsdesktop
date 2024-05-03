@@ -1,0 +1,72 @@
+key_bindings:
+  - { key: F11, action: ToggleFullscreen }
+
+env:
+  TERM: xterm-256color
+
+window:
+  startup_mode: Fullscreen
+
+font:
+  size: 19.9
+  normal:
+    family: FiraCode Nerd Font
+    style: Light
+
+  bold:
+    family: FiraCode Nerd Font
+    style: Ligth Bold
+
+  italic:
+    family: FiraCode Nerd Font
+    style: Light Italic
+
+# Colors (Tomorrow Night Bright)
+# load the theme and then set these colors.
+# Color16 colors used by all app in the terminal, so be sure to not change the appearance of colors like black
+# Black is Black 0x000000
+colors:
+  # Default colors
+  primary:
+    background: '0x000000'
+    foreground: '0xeaeaea'
+  cursor:
+    # If this is `false` the text cursor inverses
+    # the foreground and background colors.
+    custom_colors: false
+    # Text color when the cursor is above a character.
+    # Only used when `custom_colors` is `true`.
+    text: '0x000000'
+    # Cursor color.
+    # Only used when `custom_colors` is `true`.
+    cursor: '0xffffff'
+  # Normal colors
+  normal:
+    black:   '0x000000'
+    red:     '0xd54e53'
+    green:   '0xb9ca4a'
+    yellow:  '0xe6c547'
+    blue:    '0x7aa6da'
+    magenta: '0xc397d8'
+    cyan:    '0x70c0ba'
+    white:   '0xffffff'
+  # Bright colors
+  bright:
+    black:   '0x666666'
+    red:     '0xff3334'
+    green:   '0x9ec400'
+    yellow:  '0xe7c547'
+    blue:    '0x7aa6da'
+    magenta: '0xb77ee0'
+    cyan:    '0x54ced6'
+    white:   '0xffffff'
+  # Dim colors (Optional)
+  dim:
+    black:   '0x333333'
+    red:     '0xf2777a'
+    green:   '0x99cc99'
+    yellow:  '0xffcc66'
+    blue:    '0x6699cc'
+    magenta: '0xcc99cc'
+    cyan:    '0x66cccc'
+    white:   '0xdddddd'
