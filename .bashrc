@@ -9,6 +9,9 @@ case $- in
 esac
 
 set -o emacs
+export EDITOR=ec
+export HISTCONTROL=ignoredups
+export EOS=~/.eos
 export WRK="$HOME/wrk/lyn"
 alias ssh='ssh -o "StrictHostKeyChecking no" -A'
 alias ff="find . -name"
@@ -28,9 +31,6 @@ alias tmuxa="tmux new -s MAIN -c $WRK || tmux attach"
 alias tmuxs="tmux new-session -c $WRK -d -s "
 alias tmuxfixssh='eval $(tmux showenv -s SSH_AUTH_SOCK)'
 alias tmuxswap="tmux swap-window -t"
-export EDITOR=ec
-export HISTCONTROL=ignoredups
-export EOS=~/.eos
 alias scr="screen -DAR -h 10000"
 alias prodssh="source $EOS/emacsdesktop/.prodssh.rc"
 alias rcd='cd $(git rev-parse --show-cdup)'
@@ -175,8 +175,8 @@ fi
 #sh -c "$(curl -fsSL https://starship.rs/install.sh)"
 eval "$(starship init bash)"
 
-[ -f "/home/faraz/.foundry/" ] && export PATH="$PATH:/home/faraz/.foundry/bin"
-[ -f "/home/faraz/.ghcup/env" ] && source "/home/faraz/.ghcup/env" # ghcup-env
+[ -d "/home/faraz/.foundry/" ] && export PATH="$PATH:/home/faraz/.foundry/bin"
+[ -d "/home/faraz/.ghcup/env" ] && source "/home/faraz/.ghcup/env" # ghcup-env
 
 #source credentials
 source ~/.bashrc.credentials
