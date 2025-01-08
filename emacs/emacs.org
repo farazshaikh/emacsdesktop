@@ -1047,16 +1047,19 @@
     ;; See also `corfu-excluded-modes'.
     :config
     (setq lsp-completion-provider :none)
+
     (defun corfu-move-to-minibuffer ()
       (interactive)
-      (let ((completion-extra-properties corfu--extra)
-            completion-cycle-threshold completion-cycling)
-        (apply #'consult-completion-in-region completion-in-region--data)))
+      (pcase completion-in-region--data
+        (`(,beg ,end ,table ,pred ,extras)
+         (let ((completion-extra-properties extras)
+               completion-cycle-threshold completion-cycling)
+  	 (consult-completion-in-region beg end table pred)))))
 
     :bind (:map corfu-map
                 ("M-RET" . corfu-info-documentation)
                 ("M-SPC" . corfu-insert-separator)
-                ("M-d" . corfu-doc-toggle)
+                ("M-d" . corfu-popupinfo-toggle)
                 ("M-m" . corfu-move-to-minibuffer))
 
     :init
