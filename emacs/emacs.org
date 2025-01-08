@@ -1270,8 +1270,6 @@
     :mode (("\\.org$" . org-mode))
     :hook
     (org-mode . org-superstar-mode)
-    (org-mode . toc-org)
-    (org-mode . org-bullets)
     :config
     (setq org-startup-folded t)
     (setq org-startup-indented t)
@@ -1286,14 +1284,6 @@
     :after org
     :config
     (org-superstar-mode 1))
-  (use-package org-bullets
-    :after org
-    :config
-    (org-bullets-mode 1))
-  (use-package toc-org
-    :after org
-    :config
-    (toc-org-mode 1))
 #+END_SRC
 ** Latex
 #+BEGIN_SRC emacs-lisp
@@ -1407,13 +1397,6 @@
 
 * File Experimental
 #+BEGIN_SRC emacs-lisp
-  (use-package ellama
-    :init
-    (setopt ellama-language "English")
-    (require 'llm-ollama)
-    (setopt ellama-provider
-                    (make-llm-ollama
-                     :chat-model "codellama" :embedding-model "codellama")))
 #+END_SRC
 
 * Emacs server
