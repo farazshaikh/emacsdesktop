@@ -1,32 +1,6 @@
 [user]
 	email = faraz.shaikh@gmail.com
 	name = Faraz Shaikh
-[core]
-	editor = "emacsclient -s ~/.emacs.d/server "
-	excludesfile = ~/.gitignore
-[user]
-        name = faraz
-        email = faraz.shaikh@gmail.com
-
-[diff]
-        tool = edifftwin
-        guitool = edifftwin
-
-[difftool "edifftwin"]
-        cmd = emacsclient -s ~/.emacs.d/server --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
-[difftool "ediff"]
-        cmd = ~/ediff.sh $LOCAL $REMOTE  $MERGED
-
-[merge]
-        tool = ediff
-	conflictStyle = diff3
-
-[mergetool "ediff"]
-        cmd = ~/ediff.sh $LOCAL $REMOTE $MERGED $BASE
-        trustExitCode = true
-[commit]
-        template = ~/.gitmessage
-
 [alias]
     st = status
     ci = commit
@@ -50,3 +24,36 @@
 
 [format]
         outputdirectory=patches
+
+# Editor configs
+[core]
+	editor = code -w
+#        editor = "emacsclient -s ~/.emacs.d/server "
+	excludesfile = ~/.gitignore
+
+# diff
+[diff]
+	tool = vscode
+        guitool = vscode
+[difftool "vscode"]
+	cmd = code --wait --diff $LOCAL $REMOTE
+[difftool "ediff"]
+        cmd = ~/ediff.sh $LOCAL $REMOTE
+[difftool "edifftwin"]
+        cmd = emacsclient -s ~/.emacs.d/server --eval \"(ediff-files \\\"$LOCAL\\\" \\\"$REMOTE\\\")\"
+
+# merge
+[merge]
+	tool = vscode
+        guitool = vscode
+        conflictStyle = diff3
+[mergetool "vscode"]
+        cmd = code --wait --diff $LOCAL $REMOTE $MERGED
+        trustExitCode = true
+[mergetool "ediff"]
+        cmd = ~/ediff.sh $LOCAL $REMOTE $MERGED $BASE
+        trustExitCode = true
+
+# commit  template
+[commit]
+        template = ~/.gitmessage
