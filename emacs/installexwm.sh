@@ -34,34 +34,30 @@ linkup() {
 #EXWM Installation#
 ###################
 packageInstall() {
-     sudo apt-get install wget -y
-
-    ## ppa's
-    echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee -a /etc/apt/sources.list.d/google-chrome.list > /dev/null
-    wget https://dl.google.com/linux/linux_signing_key.pub
-    sudo apt-key add linux_signing_key.pub
-    sudo add-apt-repository ppa:kelleyk/emacs
     sudo apt-get update
+    sudo apt-get install wget -y
 
-    sudo apt-get install pasystray
-    sudo apt install emacs27 vim -y
+    sudo apt install nvim vim -y
     sudo apt-get install chromium-browser -y
     sudo apt-get install git curl openssh-server -y
     sudo apt-get install suckless-tools -y
     sudo apt-get install xsel xterm -y
     sudo apt-get install vlc feh -y
-    sudo apt-get install tmux screen -y
-    sudo apt-get install mame -y
+    sudo apt-get install tmux -y
     sudo apt-get install blueman cheese -y
-    sudo apt-get install gnome-flashback gnome-screensaver -y
     sudo apt-get install fonts-noto fonts-powerline -y
-
+    sudo apt-get install fzf -y
 
     sudo apt-get install pip -y
     sudo apt-get install python3-pip -y
 
     sudo snap install ripgrep --classic
+    sudo snap install emacs --classic
+    sudo snap install retroarch --classic
+    sudo snap install ghostty --classic
+    sudo snap install alacritty --classic
 
+    curl -sS https://starship.rs/install.sh | sh
     curl -L https://github.com/farazshaikh/top-programming-fonts/raw/master/install.sh | bash
 }
 
@@ -106,6 +102,7 @@ linkupFiles() {
     linkup ${ts} ~/i3/i3-wm-scripts ${gitRepoInstallLoc}/i3-wm-scripts
     linkup ${ts} ~/i3/.inputrc `pwd`/.inputrc
     linkup ${ts} ~/.config/rofi/config  `pwd`/.config/rofi/config
+    linkup ${ts} ~/.config/ghostty/config  `pwd`/.config/ghostty/config
 
     mkdir -p  ~/.config/powerline-shell
     linkup ${ts} ~/.config/powerline-shell/config.json `pwd`/emacs/config_powerline-shell_config.json
@@ -138,12 +135,6 @@ linkupFiles() {
     popd
 }
 
-disable_greeter() {
-    sudo systemctl set-default multi-user.target --force
-    sudo systemctl set-default multi-user.target
-    sudo systemctl set-default graphical.target
-}
-
 main() {
     installTime=`date | sed -e "s/ /_/g"`
     installLoc=${HOME}/.eos
@@ -165,24 +156,10 @@ main() {
     # /emacsdesktop
     checkoutCode ${installLoc} git@github.com:farazshaikh/emacsdesktop.git
     # /third_party_git_repos
-    checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/fzf.git
-    ${gitRepoInstallLoc}/fzf/install
-    #checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/powerline-shell.git
-    #sudo python3 ${gitRepoInstallLoc}/powerline-shell/setup.py install
-    sudo -H pip3 install powerline-shell
     checkoutCode ${gitRepoInstallLoc}  git@github.com:farazshaikh/Gogh.git
-    checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/i3-wm-scripts.git
-    checkoutCode ${gitRepoInstallLoc} git@github.com:farazshaikh/i3-gnome
-    cd i3-gnome
-    make
-    sudo make install
-    set -e
 
     # 3. Linkup the files from the git checkout
     linkupFiles ${installLoc} ${gitRepoInstallLoc} ${installTime}
-
-    # 4. Nop
-    disable_greeter
 }
 
 set -e

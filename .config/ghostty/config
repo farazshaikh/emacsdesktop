@@ -1,0 +1,86 @@
+# This is the configuration file for Ghostty.
+#
+# This template file has been automatically created at the following
+# path since Ghostty couldn't find any existing config files on your system:
+#
+#   /home/faraz/.config/ghostty/config
+#
+# The template does not set any default options, since Ghostty ships
+# with sensible defaults for all options. Users should only need to set
+# options that they want to change from the default.
+#
+# Run `ghostty +show-config --default --docs` to view a list of
+# all available config options and their default values.
+#
+# Additionally, each config option is also explained in detail
+# on Ghostty's website, at https://ghostty.org/docs/config.
+
+# Config syntax crash course
+# ==========================
+# # The config file consists of simple key-value pairs,
+# # separated by equals signs.
+# font-family = Iosevka
+# window-padding-x = 2
+#
+# # Spacing around the equals sign does not matter.
+# # All of these are identical:
+# key=value
+# key= value
+# key =value
+# key = value
+#
+# # Any line beginning with a # is a comment. It's not possible to put
+# # a comment after a config option, since it would be interpreted as a
+# # part of the value. For example, this will have a value of "#123abc":
+# background = #123abc
+#
+# # Empty values are used to reset config keys to default.
+# key =
+#
+# # Some config options have unique syntaxes for their value,
+# # which is explained in the docs for that config option.
+# # Just for example:
+# resize-overlay-duration = 4s 200ms
+
+# fullscreen
+#font-family = {{ terminal_font }}
+#font-family = "FiraCode Nerd Font"
+#font-family-bold = "FiraCode Nerd Font"
+#font-family-italic = "FiraCode Nerd Font"
+#font-family-bold-italic = "FiraCode Nerd Font"
+font-size = 19
+cursor-style = block
+
+#tmux
+keybind  = ctrl+shift+left=unbind
+keybind  = ctrl+shift+right=unbind
+keybind  = ctrl+shift+up=unbind
+keybind  = ctrl+shift+down=unbind
+keybind  = ctrl+enter=unbind
+keybind  = f11=toggle_fullscreen
+
+scrollback-limit = 10_000
+window-theme = ghostty
+shell-integration = bash
+
+
+# hide top toolbar
+#gtk-tabs-location = hidden
+#window-decoration = false
+
+#clipbpard allow 
+clipboard-read = allow
+clipboard-paste-protection = false
+mouse-hide-while-typing
+mouse-scroll-multiplier=0.25
+shell-integration=detect
+shell-integration-features=cursor, sudo, title
+term=xterm-256color
+
+
+# Transparency
+background-opacity = .9
+# background-blur-radius = 20
+
+#themes
+theme = tokyonight-storm
