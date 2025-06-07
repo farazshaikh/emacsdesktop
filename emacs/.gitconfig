@@ -27,8 +27,9 @@
 
 # Editor configs
 [core]
-	editor = code -w
-#        editor = "emacsclient -s ~/.emacs.d/server "
+  editor = cursor -w
+# editor = code -w
+# editor = "emacsclient -s ~/.emacs.d/server "
 	excludesfile = ~/.gitignore
 
 # diff
@@ -57,3 +58,5 @@
 # commit  template
 [commit]
         template = ~/.gitmessage
+[grep]
+	lineNumber = true

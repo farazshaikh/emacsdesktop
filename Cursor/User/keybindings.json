@@ -1,0 +1,313 @@
+// Place your key bindings in this file to override the defaults
+[
+    {
+        "key": "backspace",
+        "command": "-emacs-mcx.deleteBackwardChar",
+        "when": "editorTextFocus && emacs-mcx.prefixArgumentExists && !editorReadonly"
+    },
+    {
+        "key": "backspace",
+        "command": "-emacs.deleteLeft",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+shift+backspace",
+        "command": "-emacs.C-S_bs",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "alt+backspace",
+        "command": "-deleteWordLeft",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "alt+.",
+        "command": "editor.action.revealDefinition",
+        "when": "editorHasDefinitionProvider && editorTextFocus"
+    },
+    {
+        "key": "f12",
+        "command": "-editor.action.revealDefinition",
+        "when": "editorHasDefinitionProvider && editorTextFocus"
+    },
+    {
+        "key": "alt+,",
+        "command": "workbench.action.navigateBack",
+        "when": "canNavigateBack"
+    },
+    {
+        "key": "ctrl+alt+-",
+        "command": "-workbench.action.navigateBack",
+        "when": "canNavigateBack"
+    },
+    {
+        "key": "ctrl+v",
+        "command": "-emacs-mcx.scrollUpCommand",
+        "when": "editorTextFocus && !suggestWidgetVisible"
+    },
+    {
+        "key": "ctrl+j",
+        "command": "-emacs-mcx.isearchExit",
+        "when": "editorFocus && findWidgetVisible && !isComposing"
+    },
+    {
+        "key": "ctrl+j",
+        "command": "-emacs-mcx.newLine",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+b",
+        "command": "-emacs-mcx.backwardChar",
+        "when": "editorTextFocus"
+    },
+    {
+        "key": "ctrl+b",
+        "command": "-emacs-mcx.backwardChar",
+        "when": "terminalFocus"
+    },
+    {
+        "key": "ctrl+[ b",
+        "command": "-emacs-mcx.backwardWord",
+        "when": "config.emacs-mcx.useMetaPrefixCtrlLeftBracket && editorTextFocus"
+    },
+    {
+        "key": "ctrl+b",
+        "command": "-emacs-mcx.isearchExit",
+        "when": "editorFocus && findWidgetVisible && !config.emacs-mcx.cursorMoveOnFindWidget && !isComposing && !replaceInputFocussed"
+    },
+    {
+        "key": "ctrl+b",
+        "command": "-markdown.extension.editing.toggleBold",
+        "when": "editorTextFocus && !editorReadonly && editorLangId =~ /^markdown$|^rmd$|^quarto$/"
+    },
+    {
+        "key": "ctrl+alt+b",
+        "command": "-emacs-mcx.paredit.backwardSexp",
+        "when": "editorTextFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "ctrl+g ctrl+g",
+        "command": "workbench.action.minimizeOtherEditorsHideSidebar",
+        "when": "auxiliaryBarVisible || multipleEditorGroups || sideBarVisible"
+    },
+    {
+        "key": "ctrl+alt+space",
+        "command": "-workbench.action.toggleSidebarVisibility",
+        "when": "config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "ctrl+alt+space",
+        "command": "-workbench.action.toggleSidebarVisibility",
+        "when": "!config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "ctrl+m",
+        "command": "-emacs-mcx.isearchExit",
+        "when": "editorFocus && findWidgetVisible && !isComposing"
+    },
+    {
+        "key": "ctrl+m",
+        "command": "-emacs-mcx.newLine",
+        "when": "editorTextFocus && !editorReadonly"
+    },
+    {
+        "key": "ctrl+i",
+        "command": "composerMode.agent"
+    },
+    {
+        "key": "alt+left",
+        "command": "-codeBlocks.moveUp",
+        "when": "codeBlocks.blockMode && editorTextFocus"
+    },
+    {
+        "key": "alt+left",
+        "command": "-emacs-mcx.backwardWord",
+        "when": "editorTextFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+    },
+    {
+        "key": "alt+left",
+        "command": "-emacs-mcx.backwardWord",
+        "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorTextFocus"
+    },
+    {
+        "key": "alt+left",
+        "command": "-emacs-mcx.isearchExit",
+        "when": "editorFocus && findWidgetVisible && !config.emacs-mcx.cursorMoveOnFindWidget && !config.emacs-mcx.useMetaPrefixMacCmd && !isComposing && !replaceInputFocussed"
+    },
+    {
+        "key": "alt+left",
+        "command": "-emacs-mcx.isearchExit",
+        "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorFocus && findWidgetVisible && !config.emacs-mcx.cursorMoveOnFindWidget && !isComposing && !replaceInputFocussed"
+    },
+
+  // --- ALT + LEFT ---
+
+  {
+    "key": "alt+left",
+    "command": "workbench.action.focusPreviousGroup",
+    "when": "!sideBarFocus && !panelFocus"
+  },
+  {
+    "key": "alt+left",
+    "command": "workbench.action.focusSideBar",
+    "when": "activeEditorGroupIndex == 0 && !sideBarFocus"
+  },
+  {
+    "key": "alt+left",
+    "command": "workbench.action.focusPreviousPart",
+    "when": "sideBarFocus || panelFocus"
+  },
+
+  // --- ALT + RIGHT ---
+
+  {
+    "key": "alt+right",
+    "command": "workbench.action.focusNextGroup",
+    "when": "!sideBarFocus && !panelFocus"
+  },
+  {
+    "key": "alt+right",
+    "command": "workbench.action.focusNextPart",
+    "when": "activeEditorGroupIndex >= 2 || sideBarFocus || panelFocus"
+  },
+
+  // --- ALT + DOWN ---
+
+  {
+    "key": "alt+down",
+    "command": "workbench.action.focusPanel"
+  },
+
+  // --- ALT + UP ---
+
+  {
+    "key": "alt+up",
+    "command": "workbench.action.focusActiveEditorGroup",
+    "when": "panelFocus"
+},
+{
+    "key": "alt+e",
+    "command": "workbench.files.action.focusFilesExplorer"
+},
+{
+    "key": "alt+i",
+    "command": "aichat.newfollowupaction"
+},
+{
+    "key": "ctrl+y",
+    "command": "-aichat.newfollowupaction"
+},
+{
+    "key": "alt+j",
+    "command": "workbench.action.togglePanel"
+},
+{
+    "key": "alt+j",
+    "command": "workbench.action.focusPanel",
+    "when": "!panelFocus"
+},
+{
+    "key": "alt+b",
+    "command": "-emacs-mcx.backwardWord",
+    "when": "editorTextFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+},
+{
+    "key": "alt+b",
+    "command": "-emacs-mcx.backwardWord",
+    "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorTextFocus"
+},
+{
+    "key": "alt+b",
+    "command": "-emacs-mcx.isearchExit",
+    "when": "editorFocus && findWidgetVisible && !config.emacs-mcx.cursorMoveOnFindWidget && !config.emacs-mcx.useMetaPrefixMacCmd && !isComposing && !replaceInputFocussed"
+},
+{
+    "key": "alt+b",
+    "command": "-emacs-mcx.isearchExit",
+    "when": "config.emacs-mcx.useMetaPrefixMacCmd && editorFocus && findWidgetVisible && !config.emacs-mcx.cursorMoveOnFindWidget && !isComposing && !replaceInputFocussed"
+},
+{
+    "key": "ctrl+alt+b",
+    "command": "-emacs-mcx.paredit.backwardSexp",
+    "when": "editorTextFocus && !config.emacs-mcx.useMetaPrefixMacCmd"
+},
+{
+    "key": "alt+b",
+    "command": "workbench.action.toggleSidebarVisibility",
+    "when": "sideBarVisible"
+},
+{
+    "key": "alt+b",
+    "command": "workbench.action.toggleSidebarVisibility",
+    "when": "!sideBarVisible"
+},
+{
+    "key": "alt+b",
+    "command": "workbench.action.focusSideBar",
+    "when": "!sideBarVisible"
+},
+{
+    "key": "alt+i",
+    "command": "workbench.action.toggleAuxiliaryBar",
+    "when": "auxiliaryBarVisible"
+},
+{
+    "key": "alt+i",
+    "command": "workbench.action.toggleAuxiliaryBar",
+    "when": "!auxiliaryBarVisible"
+},
+{
+    "key": "alt+i",
+    "command": "workbench.action.focusAuxiliaryBar",
+    "when": "!auxiliaryBarVisible"
+},
+{
+    "key": "alt+e",
+    "command": "-default",
+    "when": "inputFocus"
+},
+{
+    "key": "alt+b",
+    "command": "-default",
+    "when": "inputFocus"
+},
+{
+    "key": "alt+e",
+    "command": "workbench.action.showEditorsInActiveGroup"
+},
+{
+    "key": "down",
+    "command": "list.focusDown",
+    "when": "listFocus"
+},
+{
+    "key": "up",
+    "command": "list.focusUp",
+    "when": "listFocus"
+},
+{
+    "key": "alt+x",
+    "command": "workbench.action.showCommands",
+    "when": "!inQuickOpen"
+},
+{
+    "key": "alt+x",
+    "command": "workbench.action.closeQuickOpen",
+    "when": "inQuickOpen"
+},
+{
+    "key": "alt+enter",
+    "command": "workbench.action.openToSide",
+    "when": "inQuickOpen"
+},
+{
+    "key": "up",
+    "command": "editor.action.previousMatchFindAction",
+    "when": "findInputFocussed"
+},
+{
+    "key": "down",
+    "command": "editor.action.nextMatchFindAction",
+    "when": "findInputFocussed"
+}
+]

@@ -37,6 +37,8 @@ alias ipython="python -c 'import IPython; IPython.terminal.ipapp.launch_new_inst
 # Define the alias for code
 alias co="code -r"
 alias cw="code -w"
+alias cu="cursor -r"
+alias cuw="cursor -w"
 
 # Autocompletion function for the alias
 _co_autocomplete() {
@@ -75,6 +77,30 @@ _tsync_autocomplete() {
   return 0
 }
 complete -F _tsync_autocomplete tsync
+
+# watch file and perform action
+fwatch() {
+  if [ $# -lt 2 ]; then
+    echo "Usage: fwatch <file> <command>"
+    echo "Example: fwatch myfile.txt 'clear && cat myfile.txt'"
+    return 1
+  fi
+  local file="$1"
+  shift
+  local cmd="$@"
+  while inotifywait -q -e close_write "$file"; do
+    eval "$cmd"
+  done
+}
+
+_fwatch_autocomplete() {
+  local cur
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  COMPREPLY=($(compgen -f -- "${cur}"))
+  return 0
+}
+complete -F _fwatch_autocomplete fwatch
 
 alias fixsound="pactl list short sinks | pactl set-default-sink alsa_output.pci-0000_06_00.1.hdmi-stereo;\
        pactl list short sources | pactl set-default-source alsa_output.usb-Blue_Microphones_Yeti_X_2046SG003K88_888-000313110306-00.iec958-stereo.monitor"
@@ -168,6 +194,26 @@ laptop_power_debug() {
   sudo powertop
 }
 
+# Disable built-in Trackpad and TrackPoint (psmouse)
+disable_psmouse() {
+  echo "Disabling internal mouse (Trackpad + TrackPoint)..."
+  if lsmod | grep -q psmouse; then
+    sudo modprobe -r psmouse && echo "psmouse module unloaded."
+  else
+    echo "psmouse module already unloaded."
+  fi
+}
+
+# Enable built-in Trackpad and TrackPoint (psmouse)
+enable_psmouse() {
+  echo "Enabling internal mouse (Trackpad + TrackPoint)..."
+  if ! lsmod | grep -q psmouse; then
+    sudo modprobe psmouse && echo "psmouse module loaded."
+  else
+    echo "psmouse module already loaded."
+  fi
+}
+
 [ -f ~/.python.rc ] && export PYTHONSTARTUP=~/.python.rc
 export PYENV_ROOT="$HOME/.pyenv"
 [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
@@ -175,7 +221,6 @@ eval "$(pyenv init -)"
 export PATH="/home/faraz/.local/bin:$PATH"
 
 # Source rust and rust/cargo/nix
-[ -f $HOME/.nix-profile/etc/profile.d/nix.sh ] && source $HOME/.nix-profile/etc/profile.d/nix.sh
 [ -f $HOME/.cargo/env ] && source $HOME/.cargo/env
 [ -f /usr/share/bash-completion/completions/git ] && source /usr/share/bash-completion/completions/git
 
@@ -193,7 +238,6 @@ fi
 shopt -s histappend
 PROMPT_COMMAND="history -a;$PROMPT_COMMAND"
 eval "$(direnv hook bash)"
-. "$HOME/.cargo/env"
 
 # >>>> Vagrant command completion (start)
 GEM_COMPLETION=/opt/vagrant/embedded/gems/2.2.16/gems/vagrant-2.2.16/contrib/bash/completion.sh
@@ -221,3 +265,8 @@ eval "$(starship init bash)"
 #source credentials
 source ~/.bashrc.credentials
 [ -f $HOME/.deno/env ] && source "$HOME/.deno/env"
+. "$HOME/.cargo/env"
+
+# This alias runs the Cursor Setup Wizard, simplifying installation and configuration.
+# For more details, visit: https://github.com/jorcelinojunior/cursor-setup-wizard
+alias cursor-setup="/home/faraz/cursor-setup-wizard/cursor_setup.sh"

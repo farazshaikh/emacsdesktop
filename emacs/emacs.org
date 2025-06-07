@@ -242,6 +242,7 @@
   (use-package all-the-icons)
   (use-package doom-themes
     :ensure t
+    :disabled
     :config
     ;; Global settings (defaults)
     (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
@@ -259,7 +260,6 @@
     (load-theme 'doom-tokyo-night t))
 
   (use-package modus-themes
-    :disabled
     :config
     (load-theme 'modus-vivendi t))
 
@@ -1421,6 +1421,7 @@
 
 * File Experimental
 #+BEGIN_SRC emacs-lisp
+
 #+END_SRC
 
 * Emacs server
