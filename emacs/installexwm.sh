@@ -85,6 +85,23 @@ checkoutCode() {
 }
 
 
+# Creates symbolic links from repository configuration files to their expected system locations
+# This function sets up an Emacs-based desktop environment by linking dotfiles and configs
+#
+# Parameters:
+#   $1 (installLoc): Base installation directory where the repository is cloned
+#   $2 (gitRepoInstallLoc): Location of third-party git repositories
+#   $3 (ts): Timestamp used for backup files when creating links
+#
+# Links created:
+#   - Shell configurations (.bashrc, .screenrc, .tmux.conf, etc.)
+#   - Development tools (.gdbinit, .gitconfig, .gitignore)
+#   - Emacs configuration (.emacs, .emacs_custom.el, themes)
+#   - Window manager configs (i3, rofi, ghostty)
+#   - Display settings (.Xresources, .xinitrc)
+#   - System integration files (X11 configs, desktop entries - requires sudo)
+#
+# Note: Uses the linkup() helper function to handle actual symlinking with backup support
 linkupFiles() {
     pushd `pwd`
     local installLoc=${1}
@@ -147,7 +164,7 @@ linkOnlyMode() {
     fi
 
     echo "Link-only mode: InstallID ${installTime}"
-    
+
     # Only run the linkup step
     linkupFiles ${installLoc} ${gitRepoInstallLoc} ${installTime}
 }
