@@ -1421,7 +1421,10 @@
 
 * File Experimental
 #+BEGIN_SRC emacs-lisp
-
+(use-package claude-code :ensure t
+  :vc (:url "https://github.com/stevemolitor/claude-code.el" :rev :newest)
+  :config (claude-code-mode)
+  :bind-keymap ("C-c c" . claude-code-command-map)) ;; or your preferred key
 #+END_SRC
 
 * Emacs server
