@@ -8,3 +8,4 @@ frz_local_notes/
 emacs/.emacs_custom.el
 bashrc.credentials
 emacs/emacs.el
+.aider*

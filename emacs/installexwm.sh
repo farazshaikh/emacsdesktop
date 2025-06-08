@@ -135,7 +135,30 @@ linkupFiles() {
     popd
 }
 
+linkOnlyMode() {
+    installTime=`date | sed -e "s/ /_/g"`
+    installLoc=${HOME}/.eos
+    gitRepoInstallLoc=${installLoc}/third_party_git_repos
+
+    # Check if repo exists
+    if [ ! -d "${installLoc}/emacsdesktop" ]; then
+        echo "Error: ${installLoc}/emacsdesktop does not exist. Run full install first."
+        exit 1
+    fi
+
+    echo "Link-only mode: InstallID ${installTime}"
+    
+    # Only run the linkup step
+    linkupFiles ${installLoc} ${gitRepoInstallLoc} ${installTime}
+}
+
 main() {
+    # Check for --link-only option
+    if [ "$1" = "--link-only" ]; then
+        linkOnlyMode
+        return
+    fi
+
     installTime=`date | sed -e "s/ /_/g"`
     installLoc=${HOME}/.eos
     gitRepoInstallLoc=${installLoc}/third_party_git_repos
@@ -163,4 +186,4 @@ main() {
 }
 
 set -e
-main
+main "$@"
